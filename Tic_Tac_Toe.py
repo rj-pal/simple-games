@@ -183,27 +183,6 @@ class Game:
                     print("Winner winner chicken dinner")
                     print(oh_winner, winning_line)
                     return True
-                
-                        
-            
-          
-        ### Counts the columns TOO EARLY -> doesn't work using sets here
-        
-#         if len(down_one) == 1:
-#             print("Winner in column 1 ")
-#             return True
-        
-#         elif len(down_two) == 1:
-#             print("Winner in column 2 ")
-#             return True
-        
-#         elif len(down_three) == 1:
-#             print("Winner in column 3 ")
-#             return True
-        
-#         else:
-#             return False    
-
         
     def take_turn(self, player) -> tuple:  
         row, column = self.enter_square()
