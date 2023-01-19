@@ -137,6 +137,7 @@ class Game:
         self.squares = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         self.player_1 = None
         self.player_2 = None
+        self.go_first = True # when True, player 1 goes first and when False, player 2 goes first
 #         self.game_board = Board()
 
     
@@ -174,6 +175,9 @@ class Game:
         '''Checks if a row has all the same markers to see if the game has been won. Returns boolean.'''
         # takes the 3-element array and counts the marker number - a count of 3 means there is a winner
         return line.count(ex_or_oh) == 3
+        
+#     def check_row(self, row: int, line: list) -> bool:
+#         if self.check_line(line)
         
     def check_for_winner(self) -> bool:
         '''Checks if the game has been won in a row, column or diagonal. Returns boolean.'''
@@ -254,6 +258,7 @@ class Game:
         
     def take_turn(self, player) -> tuple([int, int, int]):
         '''Gets the row and column from the current player and updates the board tracker, and returns the indexed row and colmn and marker for the board class. Returns tuple of integers.'''
+        print(f"\nIt is {player.name}'s turn.\n")
         row, column = self.enter_square()
         ex_or_oh = player.marker
         
@@ -324,21 +329,29 @@ class Game:
         '''Starts the game and creates two players from user input. Returns None.'''
         self.welcome_box()   
         self.player_1, self.player_2 = self.create_players()
+        
     
+#     def make_move(self, player):
+#         print(f"\nIt is {player.name}'s turn.\n")
+#         row, column, marker = g.take_turn(player)
+        
+#         return row, column, marker
     
     def play_game(self) -> None:
         '''Main method for playing the game that terminates after all nine sqaures have been filled or a winner has been delcared. Returns None.'''
         
         for i in range(9):
+            
             if i % 2 == 0:
-                print(f"\nIt is {self.player_1.name}'s turn.\n")
-                row, column, marker = g.take_turn(self.player_1)
-                last_played = f"\n{self.player_1.name} played the square in row {row + 1} and column {column + 1}."
+                if self.go_first:
+                    row, column, marker = self.take_turn(self.player_1)
+                else:
+                    row, column, marker = self.take_turn(self.player_2)
             else:
-                print(f"\nIt is {self.player_2.name}'s turn.\n")
-                row, column, marker = g.take_turn(self.player_2)
-                last_played = f"\n{self.player_2.name} played the square in row {row + 1} and column {column + 1}."
-
+                if self.go_first:
+                    row, column, marker = self.take_turn(self.player_2)
+                else:
+                    row, column, marker = self.take_turn(self.player_1)
 
             b.update_row(row, column, marker)
             b.print_board()
@@ -350,8 +363,14 @@ class Game:
             elif i == 8:
                 print("CATS GAME. There was no winner so there will be no chicken dinner.\n")
                 break
+                
+            if self.go_first:
+                last_played = f"\n{self.player_1.name} played the sqaure in "
+            else:
+                 last_played = f"\n{self.player_2.name} played the sqaure in "
+               
 
-            print(last_played, "Who's Next?")    
+            print(f"{last_played} row {row + 1} and column {column + 1}. Who's Next?")    
         
             
     def welcome_box(self) -> None:
@@ -375,6 +394,10 @@ if __name__ == '__main__':
             if play_again == 'yes' or play_again == 'y':
                 g.reset_squares()
                 b.reset_board()
+                if g.go_first:
+                    g.go_first = False
+                else:
+                    g.go_first = True
                 g.player_scoreboard()
                 g.play_game()
             elif play_again == 'no' or play_again == 'n':
