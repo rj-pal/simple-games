@@ -266,7 +266,7 @@ class Game:
 
         return False
 
-    def take_turn(self, player) -> tuple[int, int]:
+    def take_turn(self, player) -> tuple[[int, int]]:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column. Returns tuple of integers. """
         print(f"It is {player.name}'s turn.")
@@ -277,7 +277,7 @@ class Game:
 
         return row, column
 
-    def enter_square(self) -> tuple[int, int]:
+    def enter_square(self) -> tuple[[int, int]]:
         """Validates and formats the user inputted row and column to update the square position to Ex or Oh and
         checks if the inputted position is occupied. Return tuple of integers. """
         valid_input = {1, 2, 3}
@@ -315,7 +315,7 @@ class Game:
 
         return row, column
 
-    def create_players(self) -> tuple[Player, Player]:
+    def create_players(self) -> tuple[[Player, Player]]:
         """Creates two players of the Player class for game play. Returns a tuple of two Players."""
 
         name = input("Enter the name of player one: ")
