@@ -7,20 +7,17 @@ BOLD_START = '\033[1m'
 BOLD_END = '\033[0m'
 
 vertical = ["*", "*", "*", "*", "*", "*", "*"]
-<<<<<<< HEAD
-blank = ["              ", "              ", "              ", "              ",
-         "              "]
-oh = ["     *  *     ", "   *      *   ", "  *        *  ", "   *      *   ", "     *  *     "
-      ]
-ex = ["   *       *  ", "     *   *    ", "       *      ", "     *   *    ", "   *       *  "
-      ]
-line = "* * * * * * * * * * * * * * * * * * * * * * * * *"
-=======
+# blank = ["              ", "              ", "              ", "              ", "              "]
+# oh = ["     *  *     ", "   *      *   ", "  *        *  ", "   *      *   ", "     *  *     "
+#       ]
+# ex = ["   *       *  ", "     *   *    ", "       *      ", "     *   *    ", "   *       *  "
+#       ]
+# line = "* * * * * * * * * * * * * * * * * * * * * * * * *"
+
 blank = ["            ", "            ", "            ", "            ", "            "]
 oh = ["    *  *    ", "  *      *  ", " *        * ", "  *      *  ", "    *  *    "]
 ex = ["  *       * ", "    *   *   ", "      *     ", "    *   *   ", "  *       * "]
 line = "* * * * * * * * * * * * * * * * * * * * *"
->>>>>>> tmp
 
 # Compact Board Trial
 # blank = ["        ", "        ", "        "]
@@ -266,18 +263,14 @@ class Game:
                 self.update_player(1)
                 return True
             elif self.check_line(line, 2):
-                print("Winner winner chicken dinner")
-                print(oh_winner, winning_line + ".")
+                print(f"Winner winner chicken dinner. {oh_winner} {winning_line}.")
                 self.update_player(2)
                 return True
 
         return False
 
-<<<<<<< HEAD
-    def take_turn(self, player) -> tuple[[int, int]]:
-=======
     def take_turn(self, player) -> tuple([int, int]):
->>>>>>> tmp
+
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column. Returns tuple of integers. """
         print(f"It is {player.name}'s turn.")
@@ -285,17 +278,11 @@ class Game:
         ex_or_oh = player.marker
 
         self.update_board(row, column, ex_or_oh)
-<<<<<<< HEAD
-
-        return row, column
-
-    def enter_square(self) -> tuple[[int, int]]:
-=======
 
         return row, column
 
     def enter_square(self) -> tuple([int, int]):
->>>>>>> tmp
+
         """Validates and formats the user inputted row and column to update the square position to Ex or Oh and
         checks if the inputted position is occupied. Return tuple of integers. """
         valid_input = {1, 2, 3}
@@ -333,11 +320,8 @@ class Game:
 
         return row, column
 
-<<<<<<< HEAD
-    def create_players(self) -> tuple[[Player, Player]]:
-=======
     def create_players(self) -> tuple([Player(str, int), Player(str, int)]):
->>>>>>> tmp
+
         """Creates two players of the Player class for game play. Returns a tuple of two Players."""
 
         name = input("Enter the name of player one: ")
