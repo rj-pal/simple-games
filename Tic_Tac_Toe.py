@@ -157,15 +157,21 @@ class Game:
         self.go_first = True  # when True, player 1 goes first and when False, player 2 goes first
         self.game_board = Board()
 
-    def is_free(self, row: int, column: int) -> bool:
-        """Checks if a square on the board is free or occupied. Returns boolean."""
-        return self.squares[row][column] == 0
-
-    def reset_squares(self) -> None:
-        """Sets all the values in the board tracker to blank or zero. Returns None."""
-        for row in range(3):
-            for square in range(3):
-                self.squares[row][square] = 0
+    def welcome_box(self) -> None:
+        """Prints the "Welcome to Tic Tac Toe" box"""
+        print()
+        for line in welcome:
+            print(line)
+        print()
+    
+    def player_scoreboard(self) -> None:
+        """Shows the player statistics for the game. Returns None."""
+        print(
+            f"{self.player_1.name}\nWin: {self.player_1.win_count}, Loss: "
+            f"{self.player_1.games_played - self.player_1.win_count}")
+        print(
+            f"{self.player_2.name}\nWin: {self.player_2.win_count}, Loss: "
+            f"{self.player_2.games_played - self.player_2.win_count}\n")
 
     def update_player(self, marker) -> None:
         """Updates the game statistics on the two players. Returns None."""
@@ -176,18 +182,24 @@ class Game:
         else:
             self.player_2.win_count += 1
 
-    def player_scoreboard(self) -> None:
-        """Shows the player statistics for the game. Returns None."""
-        print(
-            f"{self.player_1.name}\nWin: {self.player_1.win_count}, Loss: "
-            f"{self.player_1.games_played - self.player_1.win_count}")
-        print(
-            f"{self.player_2.name}\nWin: {self.player_2.win_count}, Loss: "
-            f"{self.player_2.games_played - self.player_2.win_count}\n")
+    def is_free(self, row: int, column: int) -> bool:
+        """Checks if a square on the board is free or occupied. Returns boolean."""
+        return self.squares[row][column] == 0
 
+    def reset_squares(self) -> None:
+        """Sets all the values in the board tracker to blank or zero. Returns None."""
+        for row in range(3):
+            for square in range(3):
+                self.squares[row][square] = 0
+    
     def update_square(self, row: int, column: int, marker: int) -> None:
         """Updates the board tracker to Ex, Oh, or Blank. Returns None."""
-        self.squares[row][column] = marker
+        self.squares[row][column] = marker       
+        
+    def update_board(self, row: int, column: int, marker: int) -> None:
+        """Updates the board with the last played square for printing and keeping track of the winner. Returns None. """
+        self.update_square(row, column, marker)
+        self.game_board.update_row(row, column, marker)
 
     def check_line(self, line: list, ex_or_oh: int) -> bool:
         """Checks if a row has all the same markers to see if the game has been won. Returns boolean."""
@@ -273,18 +285,17 @@ class Game:
 
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column. Returns tuple of integers. """
-        print(f"It is {player.name}'s turn.")
-        row, column = self.enter_square()
+        row, column = self.enter_square(player) # validated in the enter_square function
         ex_or_oh = player.marker
 
         self.update_board(row, column, ex_or_oh)
 
         return row, column
 
-    def enter_square(self) -> tuple([int, int]):
-
+    def enter_square(self, player) -> tuple([int, int]):
         """Validates and formats the user inputted row and column to update the square position to Ex or Oh and
         checks if the inputted position is occupied. Return tuple of integers. """
+        print(f"\nIt is {player.name}'s turn. Select a row and column\n")
         valid_input = {1, 2, 3}
         row, column = 0, 0
         while True:
@@ -321,9 +332,7 @@ class Game:
         return row, column
 
     def create_players(self) -> tuple([Player(str, int), Player(str, int)]):
-
         """Creates two players of the Player class for game play. Returns a tuple of two Players."""
-
         name = input("Enter the name of player one: ")
 
         # Player one is Ex by default
@@ -333,6 +342,8 @@ class Game:
 
         # Player two is Oh by default
         player_2 = Player.construct_player(name, 2)
+        print()
+
 
         return player_1, player_2
 
@@ -340,20 +351,16 @@ class Game:
         """Starts the game and creates two players from user input. Returns None."""
         self.welcome_box()
         self.player_1, self.player_2 = self.create_players()
+        self.game_board.print_board()
 
     def reset_game(self) -> None:
         """Resets the squares to zero array and board to blank squares. Returns None."""
         self.reset_squares()
         self.game_board.reset_board()
 
-    def update_board(self, row: int, column: int, marker: int) -> None:
-        """Updates the board with the last played square for printing and keeping track of the winner. Returns None. """
-        self.update_square(row, column, marker)
-        self.game_board.update_row(row, column, marker)
-
     def last_move(self, player: Player, row: int, column: int) -> str:
         """Returns a string for printing the last played square on the board by the current player."""
-        last_move = f"\n{player.name} played the square in row {row + 1} and column {column + 1}."
+        last_move = f"\n{player.name} played the square in row {row + 1} and column {column + 1}.\n"
 
         return last_move
 
@@ -387,13 +394,6 @@ class Game:
                 break
 
             print(last_played, end=' ')
-
-    def welcome_box(self) -> None:
-        """Prints the "Welcome to Tic Tac Toe" box"""
-        print()
-        for line in welcome:
-            print(line)
-        print()
 
 
 def run_games():
