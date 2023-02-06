@@ -1,23 +1,18 @@
+# NOTES ON PRINTING THE BOARD
 # Each row is printed one at at a time by zipping 5 lists: 3 squares and 2 vertical lines
 # Each row is labelled positions and will be updated using the update
 # Each square is 12 spaces wide and 8 spaces long
 # Default square is blank and can be updated to an ex or oh depending on the move
 
-BOLD_START = '\033[1m'
-BOLD_END = '\033[0m'
+# For Bolding
+# BOLD_START = '\033[1m'
+# BOLD_END = '\033[0m'
 
 vertical = ["*", "*", "*", "*", "*", "*", "*"]
-# blank = ["              ", "              ", "              ", "              ", "              "]
-# oh = ["     *  *     ", "   *      *   ", "  *        *  ", "   *      *   ", "     *  *     "
-#       ]
-# ex = ["   *       *  ", "     *   *    ", "       *      ", "     *   *    ", "   *       *  "
-#       ]
-# line = "* * * * * * * * * * * * * * * * * * * * * * * * *"
-
 blank = ["            ", "            ", "            ", "            ", "            "]
 oh = ["    *  *    ", "  *      *  ", " *        * ", "  *      *  ", "    *  *    "]
 ex = ["  *       * ", "    *   *   ", "      *     ", "    *   *   ", "  *       * "]
-line = "* * * * * * * * * * * * * * * * * * * * *"
+horizontal = "* * * * * * * * * * * * * * * * * * * * *"
 
 # Compact Board Trial
 # blank = ["        ", "        ", "        "]
@@ -83,10 +78,11 @@ class Board:
         """Prints a row of the board from a list of the current position. Returns None."""
         squares = list(zip(*positions))
         for square in squares:
+            print(square[0], square[1], square[2], square[3], square[4])
+
+            # Bolded version
             # print(BOLD_START + square[0] + BOLD_END, square[1], BOLD_START + square[2] + BOLD_END, square[3],
             # BOLD_START + square[4] + BOLD_END)
-            # Non-bolded Ex and Ohs
-            print(square[0], square[1], square[2], square[3], square[4])
 
     def print_board(self) -> None:
         """Prints the board row by row by from the positions list of current positions for each row. Returns None."""
@@ -95,7 +91,7 @@ class Board:
 
             # for printing the horizontal lines on the board
             if index != 2:
-                print(line)
+                print(horizontal)
 
     def reset_board(self) -> None:
         """Sets each square in the board to a blank. Returns None."""
@@ -103,13 +99,13 @@ class Board:
             for j in range(3):
                 self.update_row(i, j, 0)
 
-
 # Alternative algorithm for resetting the board
 #         for row in self.positions:
 #             for i in range(0, 5, 2):
 #                 row[i] = blank
 
 
+# NOTE FOR PLAYER AND GAME CLASS ABOUT MEANING OF INTEGERS IN COMMUNICATING INFORMATION
 # 0 is empty, 1 is ex, and 2 is oh
 
 class Player:
@@ -122,7 +118,7 @@ class Player:
         self.games_played = 0
 
     def get_marker_type(self) -> str:
-        """Returns a string for the game play maerk 'X' or 'O'"""
+        """Returns a string for the game play mark 'X' or 'O'"""
         if self.marker == 1:
             return "'X'"
         elif self.marker == 2:
@@ -133,7 +129,6 @@ class Player:
     @classmethod
     def construct_player(cls, name: str, marker: int):
         """Class Method to initiate a Player Object that has a default name built in for empty strings."""
-
         if type(name) is not str:
             print("Error in Player Name")
             return
@@ -151,7 +146,7 @@ class Player:
 class Game:
 
     def __init__(self):
-        self.squares = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        self.squares = [[0, 0, 0], [0, 0, 0], [0, 0, 0]] # 2D array for each row and column on the board
         self.player_1 = None
         self.player_2 = None
         self.go_first = True  # when True, player 1 goes first and when False, player 2 goes first
@@ -163,7 +158,7 @@ class Game:
         for line in welcome:
             print(line)
         print()
-    
+
     def player_scoreboard(self) -> None:
         """Shows the player statistics for the game. Returns None."""
         print(
@@ -191,11 +186,11 @@ class Game:
         for row in range(3):
             for square in range(3):
                 self.squares[row][square] = 0
-    
+
     def update_square(self, row: int, column: int, marker: int) -> None:
         """Updates the board tracker to Ex, Oh, or Blank. Returns None."""
-        self.squares[row][column] = marker       
-        
+        self.squares[row][column] = marker
+
     def update_board(self, row: int, column: int, marker: int) -> None:
         """Updates the board with the last played square for printing and keeping track of the winner. Returns None. """
         self.update_square(row, column, marker)
@@ -282,10 +277,9 @@ class Game:
         return False
 
     def take_turn(self, player) -> tuple([int, int]):
-
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column. Returns tuple of integers. """
-        row, column = self.enter_square(player) # validated in the enter_square function
+        row, column = self.enter_square(player)  # validated in the enter_square function
         ex_or_oh = player.marker
 
         self.update_board(row, column, ex_or_oh)
@@ -343,7 +337,6 @@ class Game:
         # Player two is Oh by default
         player_2 = Player.construct_player(name, 2)
         print()
-
 
         return player_1, player_2
 
