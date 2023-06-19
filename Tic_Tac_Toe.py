@@ -76,9 +76,11 @@ class Board:
 
     def print_line(self, positions: list) -> None:
         """Prints a row of the board from a list of the current position. Returns None."""
-        squares = list(zip(*positions))
-        for square in squares:
-            print(square[0], square[1], square[2], square[3], square[4])
+        print("\n".join(["".join(line) for line in zip(*positions)]))
+        # squares = list(zip(*positions))
+        # for square in squares:
+        #     print(*square)
+            # print(square[0], square[1], square[2], square[3], square[4])
 
             # Bolded version
             # print(BOLD_START + square[0] + BOLD_END, square[1], BOLD_START + square[2] + BOLD_END, square[3],
