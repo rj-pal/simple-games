@@ -3,7 +3,13 @@ from enum import Enum
 from typing import Union
 from collections import Counter
 from random import randint
+from time import sleep
  
+
+# For Bolding
+# BOLD_START = '\033[1m'
+# BOLD_END = '\033[0m'    
+    
 WELCOME = """
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *                                                                         *
@@ -29,7 +35,6 @@ WELCOME = """
 class Square(Enum):
     """Blank square or marker on the board used by the two players. Square is one of Blank, Ex, or Oh."""
     
-#     vertical = ["*", "*", "*", "*", "*", "*", "*"]
     BLANK = [
         "            ",
         "            ",
@@ -53,9 +58,8 @@ class Square(Enum):
         "    *   *   ",
         "  *       * "
     ]
+
     
-#     horizontal = "* * * * * * * * * * * * * * * * * * * * *"
- 
 class Board:
  
     def __init__(self):
@@ -67,8 +71,11 @@ class Board:
  
     @staticmethod
     def get_horizontal() -> str:
-#         return "* " * 19
         return "* " * 18 + "*"
+    
+    @staticmethod
+    def get_vertical() -> str:
+        return BOLD_START + "*" + BOLD_END
  
     def square_is_occupied(self, row: int, column: int) -> bool:
         return self.board[row][column] != Square.BLANK
@@ -81,11 +88,7 @@ class Board:
         """Prints a row of the board from a list of the current position. Returns str."""
         
         return "\n".join(["*".join(line).center(os.get_terminal_size().columns-1) for line in zip(*row)])
-#         """Prints a row of the board."""
-#         # Experiment with center for the board.
-#         return "\n".join(
-#             ["*".join(col).center(os.get_terminal_size().columns-1) for col in zip(*row)]
-#         )
+
  
     def print_board(self) -> None:
         """Prints the board row by row."""
@@ -105,22 +108,16 @@ class Board:
 class Player:
     def __init__(self, name: str, marker: Square, is_computer: bool = False):
         self.marker = marker
-        self.name = name if name else f"Anonymous_{self.get_marker_type()}"
+        self.name = name if name else f"Anonymous_{self.marker.name}"
         self.is_computer = is_computer
         self.win_count = 0
         self.lost_count = 0
         self.games_played = 0
  
     
-    def get_marker_type(self) -> str:
-        """Returns a string for the game play mark 'X' or 'O'"""
-        return self.marker.name
-#         if self.marker.X:
-#             return self.marker.name
-#         elif self.marker.O:
-#             return "'O'"
-#         else:
-#             return "Unknown marker for tic-tac-toe" # this error message should not be triggered
+#     def get_marker_type(self) -> str:
+#         """Returns a string for the game play mark 'X' or 'O'"""
+#         return self.marker.name
  
     def get_draw_count(self) -> int:
         return self.games_played - (self.win_count + self.lost_count)
@@ -135,7 +132,7 @@ class Player:
         self.win_count += 1    
     
     def print_score(self) ->  None:
-        print(f"{self.name}\nWin: {self.win_count}, Loss: {self.lost_count}, Draw: {self.get_draw_count()}")
+        print(f"\n{self.name}\nWin: {self.win_count}, Loss: {self.lost_count}, Draw: {self.get_draw_count()}")
  
  
 class Game:
@@ -144,6 +141,9 @@ class Game:
         self.players: Player = []
         self.go_first = True  # when True, player 1 goes first and when False, player 2 goes first
         self.game_board = Board()
+        self.winner = None
+        self.win_index = 0
+        self.win_type = 'None'
  
     def welcome_box(self) -> None:
         """Prints the "Welcome to Tic Tac Toe" box"""
@@ -161,7 +161,7 @@ class Game:
         if len(self.players) < 2:
             self.players.append(player)
  
-    def update_player(self, winner: Player) -> None:
+    def update_players(self, winner: Player) -> None:
         """Updates the game statistics on the two players."""
         for player in self.players:
             player.game_played()
@@ -174,102 +174,75 @@ class Game:
         """Updates the board with the last played square."""
         self.game_board.update_square(row, column, marker)
  
-    def _check_win(self, index: int, squares: list[Square]) -> (int, Square):
+    def _check_win(self, squares: list[Square]) -> (int, Square):
         """Checks if a line has all the same markers to see if the game has been won."""
-        print(Counter(squares).most_common()[0][0].name)
-        input("Press Enter to continue.")
-#         marker, count = Counter(squares).most_common(1)[0]
+        marker, count = Counter(squares).most_common(1)[0]
 
-#         if count == len(lst) and marker is not Marker.BLANK:
-#             return marker
-        
-        
-        win_index, win_marker = 0, None
-        array_count = Counter(squares)
-        if array_count[Square.X] == 3:
-            win_index, win_marker = index + 1, Square.X
-            print("WIN")
-        elif array_count[Square.O] == 3:
-            win_index, win_marker = index + 1, Square.O
-            print("WIN")
-        
-        return win_index, win_marker
+        if count == len(squares) and marker is not Square.BLANK:
+            return marker
+   
  
+    def _get_winner_info(self):
+        winner_string = f"\nWinner winner chicken dinner. {self.winner.name} is the winner.\n{self.winner.marker.name} wins in"
+        win_type_dict = {
+            "row": f"row {self.win_index}.",
+            "col": f"column {self.win_index}.",
+            "right_diag": "the right diagonal.",
+            "left_diag": "the left diagonal."
+        }
+
+        print(f"{winner_string} {win_type_dict[self.win_type]}")
+    
+    
     def _check_rows(self) -> (Square, str, int):
-        win_row, win_marker, win_type = None, 0, ""
         for r, row in enumerate(self.game_board.board):
-            print(f'Now checking row {r + 1}')
-            if marker := self._check_win(r, row):
-                print(marker)
-                if marker[1] is not None:
-                    win_row, win_marker = marker
-                    win_type = 'row'
-                    break
-        
-        return win_row, win_marker, win_type
+            if winner := self._check_win(row):
+                self._update_winner_info(winner, "row", r)
+                return winner   
  
     def _check_columns(self) -> (Square, str, int):
-        win_col, win_marker, win_type = None, 0, ""
-        for i, column in enumerate(zip(*self.game_board.board)):
-            print(f'Now checking column {i + 1}')
-            col, marker = self._check_win(i, column)
-            if marker:
-                win_col, win_marker, win_type = col, marker, 'col'
-                break
-        
-        return win_col, win_marker, win_type
+        for c, column in enumerate(zip(*self.game_board.board)):
+            if winner := self._check_win(column):
+                self._update_winner_info(winner, "col", c)
+                return winner
+    
+    def _check_diagonals(self):
+        right_diagonal = [self.game_board.board[i][i] for i in range(len(self.game_board.board))]
+        if winner := self._check_win(right_diagonal):
+            self._update_winner_info(winner, "right_diag")
+            return winner
+        left_diagonal = [self.game_board.board[i][-(i + 1)] for i in range(len(self.game_board.board))]
+        if winner := self._check_win(left_diagonal):
+            self._update_winner_info(winner, "left_diag")
+            return winner
+           
  
     def _get_winner_with_marker(self, win_marker: Square) -> Player:
         for player in self.players:
             if player.marker == win_marker:
                 return player
+            
+    def _update_winner_info(self, win_marker: str, win_type: str, win_index: int = 0):
+        self.win_index = win_index + 1
+        self.win_type = win_type
+    
  
     def check_for_winner(self) -> bool:
         """Checks if the game has been won in a row, column or diagonal. Returns boolean."""
-        # Strings for winner printing
-        win_index, winner_marker, win_type = 0, None, ""
  
-        # Check lines
-        win_index, winner_marker, win_type = self._check_rows()
-        
-        # Check column
-        if not winner_marker:
-            win_index, winner_marker, win_type = self._check_columns()
- 
-        # Check right diagonal
-        if not winner_marker:
-            right_diagonal = [self.game_board.board[i][i] for i in range(len(self.game_board.board))]
-            win, winner_marker = self._check_win(0, right_diagonal)
-            if win:
-                win_type = "right_diag"
-                
- 
-        # Check left diagonal
-        if not winner_marker:
-            left_diagonal = [self.game_board.board[i][-(i + 1)] for i in range(len(self.game_board.board))]
-            win, win_marker = self._check_win(0, left_diagonal)
-            if win:
-                win_type = "left_diag"
- 
-        if winner_marker:
- 
-            winner = self._get_winner_with_marker(winner_marker)
- 
-            if winner:
-                winner_string = f"Winner winner chicken dinner. {winner.name} is the winner.\n{winner.get_marker_type()} wins in"
-                win_type_dict = {
-                    "row": f"row {win_index}.",
-                    "col": f"column {win_index}.",
-                    "right_diag": "the right diagonal.",
-                    "left_diag": "the left diagonal."
-                }
- 
-                print(f"{winner_string} {win_type_dict[win_type]}")
-                self.update_player(winner)
+        check_funcs = (
+            self._check_rows,
+            self._check_columns,
+            self._check_diagonals
+        )
+        for f in check_funcs:
+            if winner := f():
+                self.winner = self._get_winner_with_marker(winner)
                 return True
- 
+                
         return False
- 
+        
+  
     def take_turn(self, player: Player) -> None:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column. Returns tuple of integers. """
@@ -297,10 +270,12 @@ class Game:
     
     def _get_ints(self) -> tuple([int, int]):
         print("\nComputer is now thinking.")
+        sleep(2.5)
         row = randint(0, 2)
         column = randint(0, 2)
         while self.game_board.square_is_occupied(row, column):
             print("Still thinking.")
+            sleep(2.5)
             row = randint(0, 2)
             column = randint(0, 2)
         return row, column
@@ -328,13 +303,21 @@ class Game:
         while True:
             one_player = input("\nHow many players? One or two: ").lower()
             if one_player in valid_input:
-                if one_player in ['1', 'one']:
-                    return True
-                else:
-                    return False
+                return one_player in ['1', 'one']
             else:
-                print('Only one or two players are allowed.')
+                print('\nOnly one or two players are allowed.')
+      
+    def player_order(self):
+        print('\n')
+        for player in self.players:
+            print(f'{player.name} is playing {player.marker.name}.')
+            
+        if self.go_first:
+            print(f'{self.players[0].name} plays first.')
+        else:
+            print(f'{self.players[1].name} plays first.')
         
+        input('\nPress Enter to start the game.')
     
     def create_players(self) -> tuple[Player]:
         """Creates two players of the Player class for game play. Returns a tuple of two Players."""
@@ -350,20 +333,21 @@ class Game:
             return
         name = input("\nPlayer two please enter the name of the player for O: ")
         self.add_player(Player(name, Square.O))
+        
  
     def start_game(self) -> None:
         """Starts the game and creates two players from user input. Returns None."""
         self.welcome_box()
         self.create_players()
+        self.player_order()
         self.print_board()
-        for player in self.players:
-            print(player.marker, player.marker.name)
  
     def next_game(self) -> None:
         """Resets the squares to zero array and board to blank squares. Returns None."""
         self.print_scoreboard()
         self.game_board.reset_board()
         self.go_first = not self.go_first
+        self.player_order()
         self.print_board()
         self.play_game()
  
@@ -382,28 +366,28 @@ class Game:
  
             # will start checking for winner after the fourth turn
             if i > 3 and self.check_for_winner():
-                print("GAME OVER\n")
-                break
-            elif i == 8:
-                print("CATS GAME. There was no winner so there will be no chicken dinner.\n")
-                for player in self.players:
-                    player.games_played += 1
-                break
+                self.update_players(self.winner)
+                self._get_winner_info()
+                return
+           
+        print("\nCATS GAME. There was no winner so there will be no chicken dinner.")
+        for player in self.players:
+            player.games_played += 1
 
                 
 def run_games():
     games = Game()
     games.start_game()
     games.play_game()
-    message = "\nYou must enter 'Yes' or 'No' only.\n"
+    message = "\nYou must enter 'Yes' or 'No' only."
     while True:
         try:
-            play_again = input("Would you like to play again? Enter yes or no: ").lower()
+            play_again = input("\nWould you like to play again? Enter yes or no: ").lower()
             if play_again in ['yes', 'y']:
                 games.next_game()
             elif play_again in ['no', 'n']:
                 games.print_scoreboard()
-                print("Thanks for playing tic-tac-toe. See you again soon.")
+                print("\nGAME OVER\nThanks for playing tic-tac-toe. See you again soon.\n")
                 break
             else:
                 print(message)
