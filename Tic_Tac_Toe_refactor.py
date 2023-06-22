@@ -270,12 +270,12 @@ class Game:
     
     def _get_ints(self) -> tuple([int, int]):
         print("\nComputer is now thinking.")
-        sleep(2.5)
+        sleep(2.25)
         row = randint(0, 2)
         column = randint(0, 2)
         while self.game_board.square_is_occupied(row, column):
             print("Still thinking.")
-            sleep(2.5)
+            sleep(1.25)
             row = randint(0, 2)
             column = randint(0, 2)
         return row, column
