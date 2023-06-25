@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 from typing import Union
-from collections import Counter
+from collections import Counter, namedtuple
 from random import randint
 from time import sleep
  
@@ -58,7 +58,12 @@ class Square(Enum):
         "    *   *   ",
         "  *       * "
     ]
-
+    
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return f'Name: {self.name}\nValue: {self.value}'
     
 class Board:
  
@@ -68,56 +73,59 @@ class Board:
             [Square.BLANK] * 3, 
             [Square.BLANK] * 3
          ]
- 
-    @staticmethod
-    def get_horizontal() -> str:
-        return "* " * 18 + "*"
+        
+        self.horizontal_line = "* " * 18 + "*"
+
+        
+#     def get_horizontal(self) -> str:
+#         return "* " * 18 + "*"
     
-    @staticmethod
-    def get_vertical() -> str:
-        return BOLD_START + "*" + BOLD_END
+#     @staticmethod
+#     def get_vertical() -> str:
+#         return BOLD_START + "*" + BOLD_END
  
     def square_is_occupied(self, row: int, column: int) -> bool:
+        """Checks if a square is occupied by an Ex or Oh. Returns bool."""
         return self.board[row][column] != Square.BLANK
  
     def update_square(self, row: int, column: int, square: Square) -> None:
-        """Updates the square on the board to Ex, Oh, or Blank"""
-        self.board[row][column] = square
- 
-    def print_row(self, row: list[list[str]]) -> str:
-        """Prints a row of the board from a list of the current position. Returns str."""
+        """Updates the square on the board to Ex, Oh, or Blank from the Square class."""
+        self.board[row][column] = square     
         
-        return "\n".join(["*".join(line).center(os.get_terminal_size().columns-1) for line in zip(*row)])
-
- 
-    def print_board(self) -> None:
-        """Prints the board row by row."""
-        # Experiment with center for the board.
-        print("\n\n")
-        print(f"\n{self.get_horizontal().center(os.get_terminal_size().columns-1)}\n".join(
-            [self.print_row([square.value for square in row]) for row in self.board])
-        )
- 
     def reset_board(self) -> None:
         """Sets each square in the board to a blank."""
         for r, row in enumerate(self.board):
             for c in range(len(row)):
                 self.board[r][c] = Square.BLANK
  
- 
+    def create_row(self, row: list[list[str]]) -> str:
+        """Returns a string of a row of the board from current state of the board. Returns str."""
+        return "\n".join(["*".join(line).center(os.get_terminal_size().columns-1) for line in zip(*row)])
+
+    def create_board(self) -> str:
+        """Returns a strong of the complete board created row by row for printing."""
+        return f"\n{self.horizontal_line.center(os.get_terminal_size().columns-1)}\n".join(
+            [self.create_row([square.value for square in row]) for row in self.board])
+               
+    def __str__(self):
+        """Returns full string representation of the board"""
+        return self.create_board()
+#         return f"\n{self.horizontal.center(os.get_terminal_size().columns-1)}\n".join(
+#             [self.print_row([square.value for square in row]) for row in self.board])
+    
+    def __repr__(self):
+        """Returns board information on current attributes"""
+        return f'Board:\n{str(self.board)}\nHorizontal line:\n{self.horizontal_line}'
+
+    
 class Player:
     def __init__(self, name: str, marker: Square, is_computer: bool = False):
         self.marker = marker
-        self.name = name if name else f"Anonymous_{self.marker.name}"
+        self.name = name if name else f"Anonymous {self.marker}"
         self.is_computer = is_computer
         self.win_count = 0
         self.lost_count = 0
         self.games_played = 0
- 
-    
-#     def get_marker_type(self) -> str:
-#         """Returns a string for the game play mark 'X' or 'O'"""
-#         return self.marker.name
  
     def get_draw_count(self) -> int:
         return self.games_played - (self.win_count + self.lost_count)
@@ -131,8 +139,22 @@ class Player:
     def won(self) -> None:
         self.win_count += 1    
     
-    def print_score(self) ->  None:
-        print(f"\n{self.name}\nWin: {self.win_count}, Loss: {self.lost_count}, Draw: {self.get_draw_count()}")
+    def __str__(self):
+        return f"\n{self.name} is playing {self.marker}.\nWin: {self.win_count}, Loss: {self.lost_count}, Draw: {self.get_draw_count()}"
+          
+    def __repr__(self):
+        """This isn't really necessary"""
+        PlayerRepr = namedtuple("Player", ["name", "marker", "win", "lost", "played", "is_computer"])
+
+        player_info = PlayerRepr(
+            self.name,
+            self.marker.name,
+            self.win_count,
+            self.lost_count,
+            self.games_played,
+            self.is_computer
+        )
+        return str(player_info)
  
  
 class Game:
@@ -152,20 +174,20 @@ class Game:
     def print_scoreboard(self) -> None:
         """Shows the player statistics for the game. Returns None."""
         for player in self.players:
-            player.print_score()
+            print(player)
  
     def print_board(self) -> None:
-        self.game_board.print_board()
+        print(self.game_board)
  
     def add_player(self, player: Player) -> None:
         if len(self.players) < 2:
             self.players.append(player)
  
-    def update_players(self, winner: Player) -> None:
+    def update_players(self) -> None:
         """Updates the game statistics on the two players."""
         for player in self.players:
             player.game_played()
-            if player == winner:
+            if player == self.winner:
                 player.won()
             else:
                 player.lost()
@@ -183,7 +205,7 @@ class Game:
    
  
     def _get_winner_info(self):
-        winner_string = f"\nWinner winner chicken dinner. {self.winner.name} is the winner.\n{self.winner.marker.name} wins in"
+        winner_string = f"\nWinner winner chicken dinner. {self.winner.name} is the winner.\n{self.winner.marker} wins in"
         win_type_dict = {
             "row": f"row {self.win_index}.",
             "col": f"column {self.win_index}.",
@@ -198,23 +220,23 @@ class Game:
         for r, row in enumerate(self.game_board.board):
             if winner := self._check_win(row):
                 self._update_winner_info(winner, "row", r)
-                return winner   
+                return True   
  
     def _check_columns(self) -> (Square, str, int):
         for c, column in enumerate(zip(*self.game_board.board)):
             if winner := self._check_win(column):
                 self._update_winner_info(winner, "col", c)
-                return winner
+                return True
     
     def _check_diagonals(self):
         right_diagonal = [self.game_board.board[i][i] for i in range(len(self.game_board.board))]
         if winner := self._check_win(right_diagonal):
             self._update_winner_info(winner, "right_diag")
-            return winner
+            return True
         left_diagonal = [self.game_board.board[i][-(i + 1)] for i in range(len(self.game_board.board))]
         if winner := self._check_win(left_diagonal):
             self._update_winner_info(winner, "left_diag")
-            return winner
+            return True
            
  
     def _get_winner_with_marker(self, win_marker: Square) -> Player:
@@ -222,7 +244,8 @@ class Game:
             if player.marker == win_marker:
                 return player
             
-    def _update_winner_info(self, win_marker: str, win_type: str, win_index: int = 0):
+    def _update_winner_info(self, win_marker: str = 'None', win_type: str = 'None', win_index: int = 0):
+        self.winner = self._get_winner_with_marker(win_marker)
         self.win_index = win_index + 1
         self.win_type = win_type
     
@@ -237,10 +260,10 @@ class Game:
         )
         for f in check_funcs:
             if winner := f():
-                self.winner = self._get_winner_with_marker(winner)
-                return True
+#                 self.winner = self._get_winner_with_marker(winner)
+                return winner
                 
-        return False
+#         return False
         
   
     def take_turn(self, player: Player) -> None:
@@ -270,7 +293,71 @@ class Game:
     
     def _get_ints(self) -> tuple([int, int]):
         print("\nComputer is now thinking.")
-        sleep(2.25)
+        sleep(1.25)
+        
+        block_positions = []
+              
+        rows = self.game_board.board
+        columns = zip(*self.game_board.board)
+
+        
+        straight_lines = [rows, columns]
+
+        
+        for indicator, line in enumerate(straight_lines):
+            for index_1, squares in enumerate(line):
+                marker, count = Counter(squares).most_common(1)[0]
+                if count == (len(squares) - 1) and marker is not Square.BLANK:
+                    for index_2, square in enumerate(squares):
+                        if indicator == 0:
+                            if not self.game_board.square_is_occupied(index_1, index_2):
+                                print(index_1, index_2)
+                                sleep(2)
+                                if marker is not Square.O:
+                                    block_positions.append([index_1, index_2])
+                                else:
+                                    return index_1, index_2
+                        else:
+                            if not self.game_board.square_is_occupied(index_2, index_1):
+                                print(index_2, index_1)
+                                sleep(2)
+                                if marker is not Square.O:
+                                    block_positions.append([index_2, index_1])
+                                else:
+                                    return index_2, index_1
+        
+        
+        right_diagonal = [self.game_board.board[i][i] for i in range(len(self.game_board.board))]
+
+        left_diagonal = [self.game_board.board[i][-(i + 1)] for i in range(len(self.game_board.board))]
+        diagonal_lines = [right_diagonal, left_diagonal]
+        for indicator, squares in enumerate(diagonal_lines):
+            
+            marker, count = Counter(squares).most_common(1)[0]
+            if count == (len(squares) - 1) and marker is not Square.BLANK:
+                for index, square in enumerate(squares):
+                    if indicator == 0:
+                       
+                        if not self.game_board.square_is_occupied(index, index):
+                           
+                            if marker is not Square.O:
+                                block_positions.append([index, index])
+                            else:
+                                return index, index
+                    else:
+                        if not self.game_board.square_is_occupied(index, 2 - index):
+                           
+                            if marker is not Square.O:
+                                block_positions.append([index, 2 - index])
+                            else:
+                                return index, 2 - index
+                            
+            
+        
+        
+        if block_positions:
+            return block_positions[randint(0, len(block_positions) - 1)]
+        
         row = randint(0, 2)
         column = randint(0, 2)
         while self.game_board.square_is_occupied(row, column):
@@ -366,13 +453,15 @@ class Game:
  
             # will start checking for winner after the fourth turn
             if i > 3 and self.check_for_winner():
-                self.update_players(self.winner)
+                self.update_players()
                 self._get_winner_info()
                 return
            
         print("\nCATS GAME. There was no winner so there will be no chicken dinner.")
-        for player in self.players:
-            player.games_played += 1
+        self._update_winner_info()
+        self.update_players()
+#         for player in self.players:
+#             player.game_played()
 
                 
 def run_games():
