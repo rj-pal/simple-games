@@ -1,10 +1,10 @@
 import os
+from itertools import chain
 from enum import Enum
-from typing import Union
+from typing import Union, Optional
 from collections import Counter, namedtuple
 from random import randint
 from time import sleep
-
 
 WELCOME = """
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -27,6 +27,35 @@ WELCOME = """
 *                                                                         *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
+
+INTRO = """
+This is an online version of the classic game. Play multiple games per session.
+X starts the game. Have fun!
+"""
+
+def delay_effect(strings: list[str], delay: float = 0.025):
+    for string in strings:
+        for char in string:
+            print(char, end='', flush=True)
+            sleep(delay)
+        print()
+        sleep(delay)
+        
+def surround(strings: list[str], symbol: str, offset: int=0) -> str:
+    string_list = list(chain.from_iterable(
+        string.split("\n") if "\n" in string
+        else [string]
+        for string in strings
+        ))
+
+    border = symbol * ( len(max(string_list, key=len)) + 2*offset)
+    output_list = [
+        border,
+        *[string.center(len(border))for string in string_list],
+        border
+    ]
+
+    return ["\n" + "\n".join([symbol + string + symbol for string in output_list]) + "\n"]
 
 
 class Square(Enum):
@@ -84,7 +113,7 @@ class Board:
         self.horizontal_line = "* " * 18 + "*"
 
     def square_is_occupied(self, row: int, column: int) -> bool:
-        """Checks if a square is occupied by an Ex or Oh. Returns bool."""
+        """Checks if a square is occupied by an Ex or Oh."""
         return self.board[row][column] != Square.BLANK
 
     def update_square(self, row: int, column: int, square: Square) -> None:
@@ -142,8 +171,10 @@ class Player:
 
     def __str__(self) -> str:
         """Returns a string of key information on the player statistics used for printing in the Game Class."""
-        return f"\n{self.name} is playing {self.marker}.\nWin: {self.win_count}, Loss: {self.lost_count}, " \
-               f"Draw: {self.get_draw_count()}"
+        player_string = f"\n{self.name} is playing {self.marker}.\nWin: {self.win_count}, Loss: {self.lost_count}, " \
+               f"Draw: {self.get_draw_count()}\n"
+        return player_string
+    
 
     def __repr__(self) -> str:
         """Returns a string of information on current attributes of the player for information purposes only. Stored
@@ -175,15 +206,17 @@ class Game:
     def welcome_box(self) -> None:
         """Prints the "Welcome to Tic Tac Toe" box."""
         print(WELCOME)
+        
+    def intro(self) -> None:
+        delay_effect([INTRO])
 
     def print_scoreboard(self) -> None:
-        """Shows the player statistics for the game. Returns None."""
-        for player in self.players:
-            print(player)
+        """Shows the player statistics for the game."""
+        delay_effect(surround([player.__str__() for player in self.players], "#", 20), 0.0025)
 
     def print_board(self) -> None:
         """Prints the current state of the game board."""
-        print(self.game_board)
+        delay_effect([self.game_board.__str__()], 0.00075)
 
     def add_player(self, player: Player) -> None:
         """Adds a player to the player list. Maximum of two players for each game session."""
@@ -214,15 +247,14 @@ class Game:
 
     def _get_right_diagonal(self) -> list[Square]:
         """Returns a list of the right diagonal of Square objects. It is a sliced list of the game Board object."""
-        return [self.game_board.board[i][i] for i in range(len(self.game_board.board))]
+        return list(self.game_board.board[i][i] for i in range(len(self.game_board.board)))
 
     def _get_left_diagonal(self) -> list[Square]:
         """Returns a list of the left diagonal of Square objects. It is a sliced list of the game Board object."""
-        return [self.game_board.board[i][-(i + 1)] for i in range(len(self.game_board.board))]
+        return list(self.game_board.board[i][-(i + 1)] for i in range(len(self.game_board.board)))
 
-    def _check_win(self, squares: list[Square]) -> Square:
-        """Checks if a line has all the same markers to see if the game has been won. Returns a Square object
-        for updating statistics."""
+    def _check_win(self, squares: list[Square]) -> Optional[Square]:
+        """Checks if a line has all the same markers to see if the game has been won."""
         marker, count = Counter(squares).most_common(1)[0]
         if count == len(squares) and marker is not Square.BLANK:
             return marker
@@ -276,7 +308,7 @@ class Game:
             "right_diag": "the right diagonal.",
             "left_diag": "the left diagonal."
         }
-        print(f"{winner_string} {win_type_dict[self.win_type]}")
+        delay_effect([f"{winner_string} {win_type_dict[self.win_type]}"], 0.025)
 
     def check_for_winner(self) -> bool:
         """Checks if the game has been won in a row, column or diagonal. Returns boolean."""
@@ -371,8 +403,6 @@ class Game:
         row = randint(0, 2)
         column = randint(0, 2)
         while self.game_board.square_is_occupied(row, column):
-            print("Still thinking.")
-            sleep(0.5)
             row = randint(0, 2)
             column = randint(0, 2)
         return row, column
@@ -382,7 +412,7 @@ class Game:
         if player.is_computer:
             return self._get_ints()
 
-        print(f"\nIt is {player.name}'s turn. Select a row and column\n")
+        delay_effect([f"\nIt is {player.name}'s turn. Select a row and column\n"])
 
         row = self._prompt_int('row')
         column = self._prompt_int('column')
@@ -397,7 +427,7 @@ class Game:
     def _one_player(self) -> bool:
         valid_input = {'1', '2', 'one', 'two'}
         while True:
-            one_player = input("\nHow many players? One or two: ").lower()
+            one_player = input("How many players? One or two: ").lower()
             if one_player in valid_input:
                 return one_player in ['1', 'one']
             else:
@@ -410,25 +440,17 @@ class Game:
             level_of_difficulty = input("\nSelect the level of difficult, Easy or Hard: ").lower()
             if level_of_difficulty in valid_input[:2]:
                 self.hard_mode = False
-                print("\nYou are playing against the computer in easy mode.")
+                delay_effect(["\nYou are playing against the computer in easy mode."])
                 return
             elif level_of_difficulty in valid_input[2:]:
-                print("\nYou are playing against the computer in hard mode.")
+                delay_effect(["\nYou are playing against the computer in hard mode."])
                 return
             else:
                 print(f"\nThere is only easy or hard mode. Please select '1' for easy and '2' for hard.")
 
-    def player_order(self):
+    def player_order(self) -> None:
         """Prints who is playing what marker and who plays first."""
-        print('\n')
-        for player in self.players:
-            print(f'{player.name} is playing {player.marker.name}.')
-
-        if self.go_first:
-            print(f'{self.players[0].name} plays first.')
-        else:
-            print(f'{self.players[1].name} plays first.')
-
+        delay_effect([f'\n{self.players[-int(self.go_first) + 1].name} plays first.'])
         input('\nPress Enter to start the game.')
 
     def create_players(self) -> None:
@@ -450,6 +472,7 @@ class Game:
     def start_game(self) -> None:
         """Starts the game and creates two players from user input."""
         self.welcome_box()
+        self.intro()
         self.create_players()
         self.player_order()
         self.print_board()
@@ -465,7 +488,7 @@ class Game:
 
     def print_move(self, player: Player, row: int, column: int) -> None:
         """Returns a string for printing the last played square on the board by the current player."""
-        print(f"\n{player.name} played the square in row {row + 1} and column {column + 1}.\n")
+        delay_effect([f"\n{player.name} played the square in row {row + 1} and column {column + 1}.\n"])
 
     def play_game(self) -> None:
         """Main method for playing the game that terminates after all nine squares have been filled or a winner
@@ -482,7 +505,7 @@ class Game:
                 self.get_winner_info()
                 return
 
-        print("\nCATS GAME. There was no winner so there will be no chicken dinner.")
+        delay_effect(["\nCATS GAME. There was no winner so there will be no chicken dinner."], 0.025)
         self._update_winner_info()
         self.update_players()
 
@@ -500,7 +523,7 @@ def run_games():
                 games.next_game()
             elif play_again in ['no', 'n']:
                 games.print_scoreboard()
-                print("\nGAME OVER\nThanks for playing tic-tac-toe. See you again soon.\n")
+                delay_effect(["\nGAME OVER\nThanks for playing tic-tac-toe. See you again soon.\n"])
                 break
             else:
                 print(message)
