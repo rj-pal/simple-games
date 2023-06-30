@@ -33,7 +33,10 @@ This is an online version of the classic game. Play multiple games per session.
 X starts the game. Have fun!
 """
 
+
 def delay_effect(strings: list[str], delay: float = 0.025):
+#     if delay != 0:
+#         delay = 0
     for string in strings:
         for char in string:
             print(char, end='', flush=True)
@@ -171,7 +174,7 @@ class Player:
 
     def __str__(self) -> str:
         """Returns a string of key information on the player statistics used for printing in the Game Class."""
-        player_string = f"\n{self.name} is playing {self.marker}.\nWin: {self.win_count}, Loss: {self.lost_count}, " \
+        player_string = f"\n{self.marker}: {self.name}\nWin: {self.win_count}, Loss: {self.lost_count}, " \
                f"Draw: {self.get_draw_count()}\n"
         return player_string
     
@@ -209,10 +212,19 @@ class Game:
         
     def intro(self) -> None:
         delay_effect([INTRO])
+        
+    def game_over(self) -> None:
+        game_over = "GAME OVER"
+        print()
+        for _ in range(5):
+            print(game_over.center(os.get_terminal_size().columns - 1), end='\r')
+            sleep(0.5)
+            print(' '*len(game_over.center(os.get_terminal_size().columns - 1)), end='\r')
+            sleep(0.5)
 
     def print_scoreboard(self) -> None:
         """Shows the player statistics for the game."""
-        delay_effect(surround([player.__str__() for player in self.players], "#", 20), 0.0025)
+        delay_effect(surround([player.__str__() for player in self.players], "#", 25), 0.0025)
 
     def print_board(self) -> None:
         """Prints the current state of the game board."""
@@ -266,6 +278,7 @@ class Game:
             if winner := self._check_win(row):
                 self._update_winner_info(winner, "row", r)
                 return True
+        return False
 
     def _check_columns(self) -> bool:
         """Checks for winner in columns. Uses returned Square object to update winner attributes. False if no Square
@@ -274,6 +287,7 @@ class Game:
             if winner := self._check_win(column):
                 self._update_winner_info(winner, "col", c)
                 return True
+        return False
 
     def _check_diagonals(self) -> bool:
         """Checks for winner in diagonals. Uses returned Square object to update winner attributes. False if no
@@ -284,6 +298,7 @@ class Game:
         if winner := self._check_win(self._get_left_diagonal()):
             self._update_winner_info(winner, "left_diag")
             return True
+        return False
 
     def _get_winner_with_marker(self, win_square: Square) -> Player:
         """Returns the winning player from the player list attribute using the player marker attribute."""
@@ -308,7 +323,7 @@ class Game:
             "right_diag": "the right diagonal.",
             "left_diag": "the left diagonal."
         }
-        delay_effect([f"{winner_string} {win_type_dict[self.win_type]}"], 0.025)
+        delay_effect([f"{winner_string} {win_type_dict[self.win_type]}"])
 
     def check_for_winner(self) -> bool:
         """Checks if the game has been won in a row, column or diagonal. Returns boolean."""
@@ -320,6 +335,7 @@ class Game:
         for f in check_winner_funcs:
             if winner_found := f():
                 return winner_found
+        return False
 
     def take_turn(self, player: Player) -> None:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
@@ -500,14 +516,18 @@ class Game:
                 self.take_turn(self.players[i % 2 - 1])
 
             # will start checking for winner after the fourth turn
-            if i > 3 and self.check_for_winner():
+            if i < 4:
+                continue
+            elif self.check_for_winner():
+                self.game_over()
                 self.update_players()
                 self.get_winner_info()
-                return
+                break
 
-        delay_effect(["\nCATS GAME. There was no winner so there will be no chicken dinner."], 0.025)
-        self._update_winner_info()
-        self.update_players()
+        else:
+            delay_effect(["\nCATS GAME. There was no winner so there will be no chicken dinner."])
+            self._update_winner_info()
+            self.update_players()
 
 
 def run_games():
@@ -523,7 +543,7 @@ def run_games():
                 games.next_game()
             elif play_again in ['no', 'n']:
                 games.print_scoreboard()
-                delay_effect(["\nGAME OVER\nThanks for playing tic-tac-toe. See you again soon.\n"])
+                delay_effect(["\nGame session complete.\nThanks for playing Tic-Tac-Toe. See you in the next session.\n"])
                 break
             else:
                 print(message)
