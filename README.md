@@ -1,5 +1,7 @@
-# Tic_Tac_Toe
+# Tic Tac Toe
 Tic-Tac-Toe Game for Command Line written in Python
+
+* Updated with refactoring and computer player capabilities.
 
 This is simple Tic-Tac-Toe game with algorithms for game play, keeping track of squares, and checking for winner all created by me. The ascii art 
 and game board are also original work by me. 
