@@ -3,7 +3,7 @@ from itertools import chain
 from enum import Enum
 from typing import Union, Optional
 from collections import Counter, namedtuple
-from random import randint
+from random import randint, choice
 from time import sleep
 
 # Constant string used in Game class
@@ -157,7 +157,7 @@ class Board:
 
 
 class Player:
-    def __init__(self, name: str, marker: Square, is_computer: bool = False):
+    def __init__(self, name: str, marker: Square): #, is_computer: bool = False):
         """
         Player Class stores all the information on a player. It has marker attribute that must be a Square 
         Ex or Oh object. It also has a name attribute with default settings if no name is passed. It has 3 
@@ -166,7 +166,7 @@ class Player:
         """
         self.marker = marker
         self.name = name if name else f"Anonymous {self.marker}"
-        self.is_computer = is_computer
+#         self.is_computer = is_computer
         self.win_count = 0
         self.lost_count = 0
         self.games_played = 0
@@ -196,17 +196,217 @@ class Player:
     def __repr__(self) -> str:
         """Returns a string of information on current attributes of the player for information purposes only. Stored
         as a named tuple. """
-        PlayerRepr = namedtuple("Player", ["name", "marker", "win", "lost", "played", "is_computer"])
+        PlayerRepr = namedtuple("Player", ["name", "marker", "win", "lost", "played"])
 
         player_info = PlayerRepr(
             self.name,
             self.marker.name,
             self.win_count,
             self.lost_count,
-            self.games_played,
-            self.is_computer
+            self.games_played
+#             self.is_computer
         )
         return str(player_info)
+    
+class AIPlayer(Player):
+    def __init__(self, name: str = 'Computer', marker: Square = Square.O, difficulty: bool = False):
+        super().__init__(name, marker)
+        self.difficulty = difficulty
+    
+     
+    def random_ints(self):
+        row = randint(0, 2)
+        column = randint(0, 2)
+        while self.game_board.square_is_occupied(row, column):
+            row = randint(0, 2)
+            column = randint(0, 2)
+        print("Played Random move")
+        sleep(2)
+        self.round_count += 2
+        return row, column
+       
+    def test_mode(self):
+        corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
+        starts = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
+        insides = [(0,1), (1,0), (1,2), (2,1)]
+        print(corners)
+        print(self.round_count)
+        print(self.move_list)
+
+        sleep(3)
+        if self.go_first:
+            return self.check_fork()
+        else:
+            if self.round_count == 1:
+                self.round_count += 2
+#                 return 1, 1
+                return choice(starts)
+            elif self.round_count == 3:
+                print(self.move_list[1])
+#                 print(self.move_list[1] in corners)
+                r, c = self.move_list[0]
+                if r == c == 1:
+                    if self.move_list[1] not in corners:
+                        self.round_count += 2
+                        print("Centre Stratgy called")
+                        return choice(corners)
+                    else:
+                        r, c = self.move_list[1]
+                        self.round_count += 2
+                        print("Centre Stratgy Corner called")
+                        return (r + 2) % 4, (c + 2) % 4
+                    
+                elif self.move_list[1] in corners:
+#                     r
+                    for move in corners:
+                        if self.game_board.square_is_occupied(*move):
+                            pass
+                        else:
+                            self.round_count += 2
+                            return move
+#                 Y = self.move_list[1] in insides
+#                 print(Y)
+                elif self.move_list[1] in insides:
+                    r, c = self.move_list[0]
+                    print("Im INSDIE")
+                    for i in range(3):
+                        print(r - i)
+                        if self._get_rows()[r - i].count(Square.X) == 1:
+                            self.round_count += 2
+                            return ((r + 2) % 4), c
+                        elif self._get_columns()[c].count(Square.X) == 1:
+                            self.round_count += 2
+                            return r, ((c + 2) % 4)
+                else:
+                    print("CENTRE")
+                    r, c = self.move_list[0]
+                    self.round_count += 2
+                    return (r + 2) % 4, c
+                        
+            elif self.round_count == 5:
+                r, c = self.move_list[0]
+                if r == c == 1:
+                    self.round_count += 2
+                    print("Centre Stratgy called")
+                    r, c = self.move_list[3]
+                    if (r, c) in insides:
+                        adjacents = {(0, 1): (1, 2), (1, 2): (0, 1), (1, 0): (2, 1), (2, 1): (1, 0)}
+                        return adjacents[(r, c)]
+                        """FROM HERE IN THE STUPID MOVE CASE"""
+                        
+                    for i in range(0, 3, 2):
+                        if self._get_columns()[i].count(Square.O) == 1:
+                            if self._get_columns()[i].count(Square.BLANK) == 2:
+                                return r, i
+                        elif self._get_rows()[i].count(Square.O) == 1:
+                            if self._get_rows()[i].count(Square.BLANK) == 2:
+                                return i, c
+               
+                elif self.move_list[1] in corners:
+                    print("CORNERS")
+                    for move in corners:
+                        if self.game_board.square_is_occupied(*move):
+                            pass
+                        else:
+                            self.round_count += 2
+                            return move
+                else:
+                    print("NOT CORNERS")
+                    self.round_count += 2
+                    return 1, 1   
+                    
+            else:
+                return self.random_ints()    
+    
+    
+    def _get_ints(self) -> Union[tuple[int, int], list[int]]:
+        if self.difficulty is None:
+            return self.random_ints()
+        print("\nComputer is now thinking.")
+#         sleep(1.75)
+
+#         if move := self.test_mode():
+#             print("Played TEST MODE")
+#             print(move)
+#             sleep(2)
+# #                 self.move_list.append(move)
+#             return move
+
+        block_positions = []  # Makes a list of all possible blocking points on the board of the opponent
+
+        # Checks rows, columns, and diagonals for any block positions against the opponent winning,
+        # or for winning moves the computer has.prioritizes the win as soon as a winning move is found.
+        # Logic for control flow depends on the position of each check: rows are in the 0 index position,
+        # columns in 1, right diagonal in 2 and left diagonal in 3. Diagonals needed to be double wrapped in
+        # lists because rows and columns are lists of lists of Square Objects, which are also lists. This trip
+
+        lines = [self._get_rows(),
+                 self._get_columns(),
+                 list([self._get_right_diagonal()]),
+                 list([self._get_left_diagonal()])
+                 ]
+        for indicator, line in enumerate(lines):
+
+            for index_1, squares in enumerate(line):
+                marker, count = Counter(squares).most_common(1)[0]
+                if count == (len(squares) - 1) and marker is not Square.BLANK:
+                    for index_2, square in enumerate(squares):
+                        if indicator == 0:
+                            if not self.game_board.square_is_occupied(index_1, index_2):
+                                if marker is not Square.O:
+                                    block_positions.append([index_1, index_2])
+                                else:
+                                    return index_1, index_2
+                        elif indicator == 1:
+                            if not self.game_board.square_is_occupied(index_2, index_1):
+                                if marker is not Square.O:
+                                    block_positions.append([index_2, index_1])
+                                else:
+                                    return index_2, index_1
+                        elif indicator == 2:
+                            if not self.game_board.square_is_occupied(index_2, index_2):
+                                if marker is not Square.O:
+                                    block_positions.append([index_2, index_2])
+                                    print(index_2, index_2)
+                                else:
+                                    return index_2, index_2
+                        else:
+                            if not self.game_board.square_is_occupied(index_2, 2 - index_2):
+                                if marker is not Square.O:
+                                    block_positions.append([index_2, 2 - index_2])
+                                    print(index_2, 2 - index_2)
+
+                                else:
+                                    return index_2, 2 - index_2
+        if block_positions:
+            # Use randomly selected block position from max of three for variety sake
+            print("Played Block Move")
+            sleep(2)
+            self.round_count += 2
+            return block_positions[randint(0, len(block_positions) - 1)]
+        
+        if self.difficulty:
+#             return self.check_fork()
+            return self.test_mode()
+        else:
+            return self.random_ints()
+
+        # All moves in easy mode are randomly selected,or on hard mode when there is no blocking or winning move
+#         row = randint(0, 2)
+#         column = randint(0, 2)
+#         while self.game_board.square_is_occupied(row, column):
+#             row = randint(0, 2)
+#             column = randint(0, 2)
+#         print("Played Random move")
+#         sleep(2)
+#         self.round_count += 2
+#         return row, column
+    
+    
+    def play(self):
+        # Implement AI player's play logic here
+        pass
+    
 
 
 class Game:
@@ -223,13 +423,20 @@ class Game:
     """
 
     def __init__(self):
-        self.players: [Player] = []
-        self.go_first = True  # When True, player 1 goes first and when False, player 2 goes first.
         self.game_board = Board()  # Direct instance of a Board Class object to keep track of game information.
-        self.hard_mode = True  # Used to keep on basic block or win strategy for the computer player.
+        self.players: [Player] = []
+        self.go_first = False # When True, player 1 goes first and when False, player 2 goes first.
+        
+        
         self.winner = None  # The winner attributes with default settings reset when no winner
         self.win_index = 0  # these are updated when there is a winner.
         self.win_type = 'None'
+        
+#         self.hard_mode = None  ############ Used to keep on basic block or win strategy for the computer player.
+        
+        self.round_count = 1
+        self.move_list = []
+        self.corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
 
     def print_welcome_box(self) -> None:
         """Prints the "Welcome to Tic Tac Toe" box."""
@@ -305,6 +512,65 @@ class Game:
         marker, count = Counter(squares).most_common(1)[0]
         if count == len(squares) and marker is not Square.BLANK:
             return marker
+        
+    def get_fork_index(self, lines):
+        for index, line in enumerate(lines):
+            fork = Counter(line)
+            print("NO Hit")
+            print(fork.most_common())
+            if fork[Square.O] == 1 and fork[Square.BLANK] == 2:
+                print("HIT !")
+                print(fork.most_common())
+                return index
+        
+    def check_fork(self):
+        diagonals = [self._get_right_diagonal(), self._get_left_diagonal()]
+        fork_row_index = None
+        fork_column_index = None
+        fork_diagonal_index = None
+        
+        
+        fork_row_index = self.get_fork_index(self._get_rows())
+        print("RRRR")
+        print(f"ROW Index {fork_row_index}")
+        fork_column_index = self.get_fork_index(self._get_columns())
+        print("CCCC")
+        print(f"Column Index {fork_column_index}")
+#         for index, line in enumerate(self._get_columns()):
+#             if line.count(Square.O) == 1:
+#                 fork_positions = index
+
+
+        fork_diagonal_index = self.get_fork_index(diagonals)
+#         if self._get_right_diagonal().count(Square.O) == 1 and self._get_right_diagonal().count(Square.BLANK) == 2:
+#             fork_diagonal_index = 0
+        
+    
+#         for index, f in enumerate(diag_funcs):
+#             if f().count(Square.O) == 1:
+#                 fork_diagonal_index = index
+        
+        if fork_row_index is not None:
+            print("Called ROW")
+            print(fork_row_index)
+            if fork_column_index is not None:
+                print("Called COL")
+                print(fork_column_index)
+                if not self.game_board.square_is_occupied(fork_row_index, fork_column_index):
+                    return fork_row_index, fork_column_index
+            elif fork_diagonal_index is not None:
+                print("Called DIAG")
+                print(fork_diagonal_index)
+                if fork_diagonal_index == 0:
+                    if not self.game_board.square_is_occupied(fork_row_index, fork_row_index):
+                        return fork_row_index, fork_row_index
+                else:
+                    if not self.game_board.square_is_occupied(fork_row_index, 2 - fork_row_index):
+                        return fork_row_index, 2 - fork_row_index
+        
+        print("Playing Random play")
+        return self.random_ints()
+                    
 
     def _check_rows(self) -> Optional[bool]:
         """Checks for winner in rows. Uses returned Square object to update the winner attributes. False if no Square
@@ -373,15 +639,20 @@ class Game:
         Returns the indexed row and column. Returns tuple of integers. """
 
         row, column = self._prompt_move(player)  # Validated in the prompt_move function.
-        os.system('clear||cls')
+#         os.system('clear||cls')
         self.update_board(row, column, player.marker)
         self.print_move(player, row, column)
+        self.move_list.append((row, column))
         self.print_board()
 
     def _prompt_move(self, player: Player) -> Union[tuple[int, int], list[int]]:
         """Validates and formats the user inputted row and column. Checks if the inputted position is occupied."""
-        if player.is_computer:
+        
+        if isinstance(player, AIPlayer):
             return self._get_ints()
+        
+#         if player.is_computer:
+#             return self._get_ints()
 
         delay_effect([f"\nIt is {player.name}'s turn. Select a row and column\n"])
 
@@ -408,68 +679,212 @@ class Game:
             except ValueError:
                 print("\nYou must enter a number. Try again.\n")
 
-    def _get_ints(self) -> Union[tuple[int, int], list[int]]:
-        print("\nComputer is now thinking.")
-        sleep(1.75)
+    def corner_checker(self):
+        corners = []
+        
+        for i in range(0, 3, 2):
+            corners.append(self.game_board.board[i][i])
+        corners.append(self.game_board.board[0][2])
+        corners.append(self.game_board.board[2][0])
+        
 
-        if self.hard_mode:
-            block_positions = []  # Makes a list of all possible blocking points on the board of the opponent
+        return corners
+    
+    def find_X(self):
+        for row_index, row in enumerate(self.game_board.board):
+            for column_index, column in enumerate(row):
+                if self.game_board.board[row_index][column_index] == Square.X:
+                    return row_index, column_index
+    
+#     def test_mode(self):
+#         corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
+#         starts = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
+#         insides = [(0,1), (1,0), (1,2), (2,1)]
+#         print(corners)
+#         print(self.round_count)
+#         print(self.move_list)
 
-            # Checks rows, columns, and diagonals for any block positions against the opponent winning,
-            # or for winning moves the computer has.prioritizes the win as soon as a winning move is found.
-            # Logic for control flow depends on the position of each check: rows are in the 0 index position,
-            # columns in 1, right diagonal in 2 and left diagonal in 3. Diagonals needed to be double wrapped in
-            # lists because rows and columns are lists of lists of Square Objects, which are also lists. This trip
+#         sleep(3)
+#         if self.go_first:
+#             return self.check_fork()
+#         else:
+#             if self.round_count == 1:
+#                 self.round_count += 2
+# #                 return 1, 1
+#                 return choice(starts)
+#             elif self.round_count == 3:
+#                 print(self.move_list[1])
+# #                 print(self.move_list[1] in corners)
+#                 r, c = self.move_list[0]
+#                 if r == c == 1:
+#                     if self.move_list[1] not in corners:
+#                         self.round_count += 2
+#                         print("Centre Stratgy called")
+#                         return choice(corners)
+#                     else:
+#                         r, c = self.move_list[1]
+#                         self.round_count += 2
+#                         print("Centre Stratgy Corner called")
+#                         return (r + 2) % 4, (c + 2) % 4
+                    
+#                 elif self.move_list[1] in corners:
+#                     r
+#                     for move in corners:
+#                         if self.game_board.square_is_occupied(*move):
+#                             pass
+#                         else:
+#                             self.round_count += 2
+#                             return move
+# #                 Y = self.move_list[1] in insides
+# #                 print(Y)
+#                 elif self.move_list[1] in insides:
+#                     r, c = self.move_list[0]
+#                     print("Im INSDIE")
+#                     for i in range(3):
+#                         print(r - i)
+#                         if self._get_rows()[r - i].count(Square.X) == 1:
+#                             self.round_count += 2
+#                             return ((r + 2) % 4), c
+#                         elif self._get_columns()[c].count(Square.X) == 1:
+#                             self.round_count += 2
+#                             return r, ((c + 2) % 4)
+#                 else:
+#                     print("CENTRE")
+#                     r, c = self.move_list[0]
+#                     self.round_count += 2
+#                     return (r + 2) % 4, c
+                        
+#             elif self.round_count == 5:
+#                 r, c = self.move_list[0]
+#                 if r == c == 1:
+#                     self.round_count += 2
+#                     print("Centre Stratgy called")
+#                     r, c = self.move_list[3]
+#                     if (r, c) in insides:
+#                         adjacents = {(0, 1): (1, 2), (1, 2): (0, 1), (1, 0): (2, 1), (2, 1): (1, 0)}
+#                         return adjacents[(r, c)]
+#                         """FROM HERE IN THE STUPID MOVE CASE"""
+                        
+#                     for i in range(0, 3, 2):
+#                         if self._get_columns()[i].count(Square.O) == 1:
+#                             if self._get_columns()[i].count(Square.BLANK) == 2:
+#                                 return r, i
+#                         elif self._get_rows()[i].count(Square.O) == 1:
+#                             if self._get_rows()[i].count(Square.BLANK) == 2:
+#                                 return i, c
+               
+#                 elif self.move_list[1] in corners:
+#                     print("CORNERS")
+#                     for move in corners:
+#                         if self.game_board.square_is_occupied(*move):
+#                             pass
+#                         else:
+#                             self.round_count += 2
+#                             return move
+#                 else:
+#                     print("NOT CORNERS")
+#                     self.round_count += 2
+#                     return 1, 1   
+                    
+#             else:
+#                 return self.random_ints()
+#         else:
+#             pass
+    
+    
+#     def random_ints(self):
+#         row = randint(0, 2)
+#         column = randint(0, 2)
+#         while self.game_board.square_is_occupied(row, column):
+#             row = randint(0, 2)
+#             column = randint(0, 2)
+#         print("Played Random move")
+#         sleep(2)
+#         self.round_count += 2
+#         return row, column
+        
+#     def _get_ints(self) -> Union[tuple[int, int], list[int]]:
+#         if self.hard_mode is None:
+#             return self.random_ints()
+#         print("\nComputer is now thinking.")
+# #         sleep(1.75)
 
-            lines = [self._get_rows(),
-                     self._get_columns(),
-                     list([self._get_right_diagonal()]),
-                     list([self._get_left_diagonal()])
-                     ]
-            for indicator, line in enumerate(lines):
+# #         if move := self.test_mode():
+# #             print("Played TEST MODE")
+# #             print(move)
+# #             sleep(2)
+# # #                 self.move_list.append(move)
+# #             return move
 
-                for index_1, squares in enumerate(line):
-                    marker, count = Counter(squares).most_common(1)[0]
-                    if count == (len(squares) - 1) and marker is not Square.BLANK:
-                        for index_2, square in enumerate(squares):
-                            if indicator == 0:
-                                if not self.game_board.square_is_occupied(index_1, index_2):
-                                    if marker is not Square.O:
-                                        block_positions.append([index_1, index_2])
-                                    else:
-                                        return index_1, index_2
-                            elif indicator == 1:
-                                if not self.game_board.square_is_occupied(index_2, index_1):
-                                    if marker is not Square.O:
-                                        block_positions.append([index_2, index_1])
-                                    else:
-                                        return index_2, index_1
-                            elif indicator == 2:
-                                if not self.game_board.square_is_occupied(index_2, index_2):
-                                    if marker is not Square.O:
-                                        block_positions.append([index_2, index_2])
-                                        print(index_2, index_2)
-                                    else:
-                                        return index_2, index_2
-                            else:
-                                if not self.game_board.square_is_occupied(index_2, 2 - index_2):
-                                    if marker is not Square.O:
-                                        block_positions.append([index_2, 2 - index_2])
-                                        print(index_2, 2 - index_2)
+#         block_positions = []  # Makes a list of all possible blocking points on the board of the opponent
 
-                                    else:
-                                        return index_2, 2 - index_2
-            if block_positions:
-                # Use randomly selected block position from max of three for variety sake
-                return block_positions[randint(0, len(block_positions) - 1)]
+#         # Checks rows, columns, and diagonals for any block positions against the opponent winning,
+#         # or for winning moves the computer has.prioritizes the win as soon as a winning move is found.
+#         # Logic for control flow depends on the position of each check: rows are in the 0 index position,
+#         # columns in 1, right diagonal in 2 and left diagonal in 3. Diagonals needed to be double wrapped in
+#         # lists because rows and columns are lists of lists of Square Objects, which are also lists. This trip
 
-        # All moves in easy mode are randomly selected,or on hard mode when there is no blocking or winning move
-        row = randint(0, 2)
-        column = randint(0, 2)
-        while self.game_board.square_is_occupied(row, column):
-            row = randint(0, 2)
-            column = randint(0, 2)
-        return row, column
+#         lines = [self._get_rows(),
+#                  self._get_columns(),
+#                  list([self._get_right_diagonal()]),
+#                  list([self._get_left_diagonal()])
+#                  ]
+#         for indicator, line in enumerate(lines):
+
+#             for index_1, squares in enumerate(line):
+#                 marker, count = Counter(squares).most_common(1)[0]
+#                 if count == (len(squares) - 1) and marker is not Square.BLANK:
+#                     for index_2, square in enumerate(squares):
+#                         if indicator == 0:
+#                             if not self.game_board.square_is_occupied(index_1, index_2):
+#                                 if marker is not Square.O:
+#                                     block_positions.append([index_1, index_2])
+#                                 else:
+#                                     return index_1, index_2
+#                         elif indicator == 1:
+#                             if not self.game_board.square_is_occupied(index_2, index_1):
+#                                 if marker is not Square.O:
+#                                     block_positions.append([index_2, index_1])
+#                                 else:
+#                                     return index_2, index_1
+#                         elif indicator == 2:
+#                             if not self.game_board.square_is_occupied(index_2, index_2):
+#                                 if marker is not Square.O:
+#                                     block_positions.append([index_2, index_2])
+#                                     print(index_2, index_2)
+#                                 else:
+#                                     return index_2, index_2
+#                         else:
+#                             if not self.game_board.square_is_occupied(index_2, 2 - index_2):
+#                                 if marker is not Square.O:
+#                                     block_positions.append([index_2, 2 - index_2])
+#                                     print(index_2, 2 - index_2)
+
+#                                 else:
+#                                     return index_2, 2 - index_2
+#         if block_positions:
+#             # Use randomly selected block position from max of three for variety sake
+#             print("Played Block Move")
+#             sleep(2)
+#             self.round_count += 2
+#             return block_positions[randint(0, len(block_positions) - 1)]
+        
+#         if self.hard_mode:
+# #             return self.check_fork()
+#             return self.test_mode()
+#         else:
+#             return self.random_ints()
+
+#         # All moves in easy mode are randomly selected,or on hard mode when there is no blocking or winning move
+# #         row = randint(0, 2)
+# #         column = randint(0, 2)
+# #         while self.game_board.square_is_occupied(row, column):
+# #             row = randint(0, 2)
+# #             column = randint(0, 2)
+# #         print("Played Random move")
+# #         sleep(2)
+# #         self.round_count += 2
+# #         return row, column
 
     def _one_player(self) -> bool:
         valid_input = {'1', '2', 'one', 'two'}
@@ -482,18 +897,23 @@ class Game:
 
     def _select_difficulty_level(self) -> None:
         """Updates the difficulty level boolean when playing against the computer."""
-        valid_input = ['1', 'easy', '2', 'hard']
+        valid_input = ['1', 'easy', '2', 'medium', '3', 'hard']
         while True:
-            level_of_difficulty = input("\nSelect the level of difficult, Easy or Hard: ").lower()
+            level_of_difficulty = input("\nSelect the level of difficult, Easy, Medium or Hard: ").lower()
             if level_of_difficulty in valid_input[:2]:
-                self.hard_mode = False
+#                 self.hard_mode = False
                 delay_effect(["\nYou are playing against the computer in easy mode."])
-                return
-            elif level_of_difficulty in valid_input[2:]:
+                return None
+            elif level_of_difficulty in valid_input[2:4]:
+#                 self.hard_mode = False
+                delay_effect(["\nYou are playing against the computer in medium mode."])
+                return False
+            elif level_of_difficulty in valid_input[4:]:
+#                 self.hard_mode = True
                 delay_effect(["\nYou are playing against the computer in hard mode."])
-                return
+                return True
             else:
-                print(f"\nThere is only easy or hard mode. Please select '1' for easy and '2' for hard.")
+                print(f"\nThere is only easy or hard mode. Please select '1' for easy, '2' for medium or '3' for hard.")
 
     def create_players(self) -> None:
         """Creates two players of the Player class for game play and add the players to the player attribute."""
@@ -505,8 +925,8 @@ class Game:
         self.add_player(Player(name, Square.X))
 
         if one_player:
-            self.add_player(Player('Computer', Square.O, True))
-            self._select_difficulty_level()
+            difficulty = self._select_difficulty_level()
+            self.add_player(AIPlayer(difficulty=difficulty))
             return
 
         name = input("\nPlayer two please enter the name of the player for O: ")
@@ -523,6 +943,8 @@ class Game:
     def next_game(self) -> None:
         """Resets the board to blank squares, changes the the order of players, and starts a new game."""
         self.print_scoreboard()
+        self.round_count = 1
+        self.move_list.clear()
         self.game_board.reset_board()
         self.go_first = not self.go_first
         self.print_first_player()
