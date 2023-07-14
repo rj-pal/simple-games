@@ -6,55 +6,69 @@ from collections import Counter, namedtuple
 from random import randint, choice
 from time import sleep
 
+os.system("mode con cols=200 lines=50")
+
 # Constant string used in Game class
 WELCOME = """
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-*                                                                         *
-*                                                                         *
-*     *       *   * * *   *       * * *    *  *      *   *     * * *      *
-*      *  *  *    * *     *      *        *    *    *  *  *    * *        *
-*       *   *     * * *   * * *   * * *    *  *    *       *   * * *      *
-*                                                                         *
-*                                                                         *
-*      * * *   *  *                                                       *
-*        *    *    *                                                      *
-*        *     *  *                                                       *
-*                                                                         *
-*                                                                         *
-*      * * *   *    * *     * * *    *     * *     * * *   * *   * * *    *
-*        *     *   *          *     * *   *          *    *   *  * *      *
-*        *     *    * *       *    *   *   * *       *     * *   * * *    *
-*                                                                         *
-*                                                                         *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   *                                                                         *
+   *                                                                         *
+   *     *       *   * * *   *       * * *    *  *      *   *     * * *      *
+   *      *  *  *    * *     *      *        *    *    *  *  *    * *        *
+   *       *   *     * * *   * * *   * * *    *  *    *       *   * * *      *
+   *                                                                         *
+   *                                                                         *
+   *      * * *   *  *                                                       *
+   *        *    *    *                                                      *
+   *        *     *  *                                                       *
+   *                                                                         *
+   *                                                                         *
+   *      * * *   *    * *     * * *    *     * *     * * *   * *   * * *    *
+   *        *     *   *          *     * *   *          *    *   *  * *      *
+   *        *     *    * *       *    *   *   * *       *     * *   * * *    *
+   *                                                                         *
+   *                                                                         *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
+# WELCOME = [
+#     '*       *   * * *   *       * * *    *  *      *   *     * * *',
+#     ' *  *  *    * *     *      *        *    *    *  *  *    * *  ',
+#     '  *   *     * * *   * * *   * * *    *  *    *       *   * * *'
+#     ]
+   
+
+
 INTRO = """
-This is an online version of the classic game. Play multiple games per session.
-X starts the game.
+This is an online version of the classic game. Play multiple games per session
+against and opponent or the computer. X starts the game.
 """
 
 WON = "GAME OVER"
 
-GO = """
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-*                                                                         *
-*                                                                         *
-*         * * *        **        *       *    * * * *        *
-*        *            *  *       * *   * *    *              *
-*        *   * *     *    *      *   *   *    * * *          * 
-*        *     *    *      *     *       *    *              *
-*         * * *    *        *    *       *    * * * *        *
-*                                                                         *
-*                                                                         *
-*       *  *     *   *  * * *                                             *
-*      *    *     * *   **                                             *
-*       *  *       *    * * *   
-*                                                                         *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+GAMEOVER = """
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   *                                                                         *
+   *                                                                         *
+   *               * * *        **        *       *    * * * *               *
+   *              *            *  *       * *   * *    *                     *
+   *              *   * *     *    *      *   *   *    * * *                 * 
+   *              *     *    *      *     *       *    *                     *
+   *               * * *    *        *    *       *    * * * *               *
+   *                                                                         *
+   *                                                                         *
+   *                *  *     *       *    * * * *     *  *  *                *
+   *              *      *    *     *     *           *      *               *
+   *              *      *     *   *      * * *       *  *  *                *
+   *              *      *      * *       *           *      *               *
+   *                *  *         *        * * * *     *       *              *
+   *                                                                         *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
 # Printing functions for creating computer output effect and border box
+
+
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
     """Creates the effect of the words or characters printed one letter or line at a time. 
     word_flush True delays each character. False delays each complete line in a list. """
@@ -413,7 +427,6 @@ class AIPlayer(Player):
         
         
     
-    
     def test_mode(self, board):
         corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
         starts = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
@@ -575,6 +588,7 @@ class AIPlayer(Player):
     
     def move(self, board: Board) -> Union[tuple[int, int], list[int]]:
         print("\nComputer is now thinking.")
+        sleep(1.5)
 
         if self.difficulty is None:
             return self.random_ints(board)
@@ -588,11 +602,6 @@ class AIPlayer(Player):
         else:
             return self.random_ints(board)
 
-    
-    def play(self):
-        # Implement AI player's play logic here
-        pass
-    
 
 
 class Game:
@@ -630,11 +639,15 @@ class Game:
     def print_game_over(self) -> None:
         """Prints a flashing "Game Over" when a winner has been declared"""
         print()
-        for _ in range(4):
-            print(WON.center(os.get_terminal_size().columns - 1), end='\r')
+        os.system('clear||cls')
+        for _ in range(5):
+            print(GAMEOVER.center(os.get_terminal_size().columns - 1), end='\r')
+            sleep(0.75)
+            os.system('clear||cls')
+#             print(' ' * len(GAMEOVER.center(os.get_terminal_size().columns - 1)), end='\r')
             sleep(0.5)
-            print(' ' * len(WON.center(os.get_terminal_size().columns - 1)), end='\r')
-            sleep(0.5)
+        print()
+        self.print_board()
 
     def print_board(self) -> None:
         """Prints the current state of the game board. Printed line by line."""
@@ -677,64 +690,6 @@ class Game:
         marker, count = Counter(squares).most_common(1)[0]
         if count == len(squares) and marker is not Square.BLANK:
             return marker
-        
-#     def get_fork_index(self, lines):
-#         for index, line in enumerate(lines):
-#             fork = Counter(line)
-#             print("NO Hit")
-#             print(fork.most_common())
-#             if fork[Square.O] == 1 and fork[Square.BLANK] == 2:
-#                 print("HIT !")
-#                 print(fork.most_common())
-#                 return index
-        
-#     def check_fork(self):
-#         diagonals = [self.get_right_diagonal(), self.get_left_diagonal()]
-#         fork_row_index = None
-#         fork_column_index = None
-#         fork_diagonal_index = None
-        
-        
-#         fork_row_index = self.get_fork_index(self.get_rows())
-#         print("RRRR")
-#         print(f"ROW Index {fork_row_index}")
-#         fork_column_index = self.get_fork_index(self.get_columns())
-#         print("CCCC")
-#         print(f"Column Index {fork_column_index}")
-# #         for index, line in enumerate(self.get_columns()):
-# #             if line.count(Square.O) == 1:
-# #                 fork_positions = index
-
-
-#         fork_diagonal_index = self.get_fork_index(diagonals)
-# #         if self.get_right_diagonal().count(Square.O) == 1 and self.get_right_diagonal().count(Square.BLANK) == 2:
-# #             fork_diagonal_index = 0
-        
-    
-# #         for index, f in enumerate(diag_funcs):
-# #             if f().count(Square.O) == 1:
-# #                 fork_diagonal_index = index
-        
-#         if fork_row_index is not None:
-#             print("Called ROW")
-#             print(fork_row_index)
-#             if fork_column_index is not None:
-#                 print("Called COL")
-#                 print(fork_column_index)
-#                 if not self.game_board.square_is_occupied(fork_row_index, fork_column_index):
-#                     return fork_row_index, fork_column_index
-#             elif fork_diagonal_index is not None:
-#                 print("Called DIAG")
-#                 print(fork_diagonal_index)
-#                 if fork_diagonal_index == 0:
-#                     if not self.game_board.square_is_occupied(fork_row_index, fork_row_index):
-#                         return fork_row_index, fork_row_index
-#                 else:
-#                     if not self.game_board.square_is_occupied(fork_row_index, 2 - fork_row_index):
-#                         return fork_row_index, 2 - fork_row_index
-        
-#         print("Playing Random play")
-#         return self.random_ints()
                     
 
     def _check_rows(self) -> Optional[bool]:
@@ -812,7 +767,7 @@ class Game:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column. Returns tuple of integers. """
         row, column = self.get_move(player)
-#         os.system('clear||cls')
+        os.system('clear||cls')
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
         self.print_move(player, row, column)
@@ -846,212 +801,6 @@ class Game:
             except ValueError:
                 print("\nYou must enter a number. Try again.\n")
 
-    def corner_checker(self):
-        corners = []
-        
-        for i in range(0, 3, 2):
-            corners.append(self.game_board.board[i][i])
-        corners.append(self.game_board.board[0][2])
-        corners.append(self.game_board.board[2][0])
-        
-
-        return corners
-    
-    def find_X(self):
-        for row_index, row in enumerate(self.game_board.board):
-            for column_index, column in enumerate(row):
-                if self.game_board.board[row_index][column_index] == Square.X:
-                    return row_index, column_index
-    
-#     def test_mode(self):
-#         corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
-#         starts = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
-#         insides = [(0,1), (1,0), (1,2), (2,1)]
-#         print(corners)
-#         print(self.round_count)
-#         print(self.move_list)
-
-#         sleep(3)
-#         if self.go_first:
-#             return self.check_fork()
-#         else:
-#             if self.round_count == 1:
-#                 self.round_count += 2
-# #                 return 1, 1
-#                 return choice(starts)
-#             elif self.round_count == 3:
-#                 print(self.move_list[1])
-# #                 print(self.move_list[1] in corners)
-#                 r, c = self.move_list[0]
-#                 if r == c == 1:
-#                     if self.move_list[1] not in corners:
-#                         self.round_count += 2
-#                         print("Centre Stratgy called")
-#                         return choice(corners)
-#                     else:
-#                         r, c = self.move_list[1]
-#                         self.round_count += 2
-#                         print("Centre Stratgy Corner called")
-#                         return (r + 2) % 4, (c + 2) % 4
-                    
-#                 elif self.move_list[1] in corners:
-#                     r
-#                     for move in corners:
-#                         if self.game_board.square_is_occupied(*move):
-#                             pass
-#                         else:
-#                             self.round_count += 2
-#                             return move
-# #                 Y = self.move_list[1] in insides
-# #                 print(Y)
-#                 elif self.move_list[1] in insides:
-#                     r, c = self.move_list[0]
-#                     print("Im INSDIE")
-#                     for i in range(3):
-#                         print(r - i)
-#                         if self.get_rows()[r - i].count(Square.X) == 1:
-#                             self.round_count += 2
-#                             return ((r + 2) % 4), c
-#                         elif self.get_columns()[c].count(Square.X) == 1:
-#                             self.round_count += 2
-#                             return r, ((c + 2) % 4)
-#                 else:
-#                     print("CENTRE")
-#                     r, c = self.move_list[0]
-#                     self.round_count += 2
-#                     return (r + 2) % 4, c
-                        
-#             elif self.round_count == 5:
-#                 r, c = self.move_list[0]
-#                 if r == c == 1:
-#                     self.round_count += 2
-#                     print("Centre Stratgy called")
-#                     r, c = self.move_list[3]
-#                     if (r, c) in insides:
-#                         adjacents = {(0, 1): (1, 2), (1, 2): (0, 1), (1, 0): (2, 1), (2, 1): (1, 0)}
-#                         return adjacents[(r, c)]
-#                         """FROM HERE IN THE STUPID MOVE CASE"""
-                        
-#                     for i in range(0, 3, 2):
-#                         if self.get_columns()[i].count(Square.O) == 1:
-#                             if self.get_columns()[i].count(Square.BLANK) == 2:
-#                                 return r, i
-#                         elif self.get_rows()[i].count(Square.O) == 1:
-#                             if self.get_rows()[i].count(Square.BLANK) == 2:
-#                                 return i, c
-               
-#                 elif self.move_list[1] in corners:
-#                     print("CORNERS")
-#                     for move in corners:
-#                         if self.game_board.square_is_occupied(*move):
-#                             pass
-#                         else:
-#                             self.round_count += 2
-#                             return move
-#                 else:
-#                     print("NOT CORNERS")
-#                     self.round_count += 2
-#                     return 1, 1   
-                    
-#             else:
-#                 return self.random_ints()
-#         else:
-#             pass
-    
-    
-#     def random_ints(self):
-#         row = randint(0, 2)
-#         column = randint(0, 2)
-#         while self.game_board.square_is_occupied(row, column):
-#             row = randint(0, 2)
-#             column = randint(0, 2)
-#         print("Played Random move")
-#         sleep(2)
-#         self.round_count += 2
-#         return row, column
-        
-#     def _get_ints(self) -> Union[tuple[int, int], list[int]]:
-#         if self.hard_mode is None:
-#             return self.random_ints()
-#         print("\nComputer is now thinking.")
-# #         sleep(1.75)
-
-# #         if move := self.test_mode():
-# #             print("Played TEST MODE")
-# #             print(move)
-# #             sleep(2)
-# # #                 self.move_list.append(move)
-# #             return move
-
-#         block_positions = []  # Makes a list of all possible blocking points on the board of the opponent
-
-#         # Checks rows, columns, and diagonals for any block positions against the opponent winning,
-#         # or for winning moves the computer has.prioritizes the win as soon as a winning move is found.
-#         # Logic for control flow depends on the position of each check: rows are in the 0 index position,
-#         # columns in 1, right diagonal in 2 and left diagonal in 3. Diagonals needed to be double wrapped in
-#         # lists because rows and columns are lists of lists of Square Objects, which are also lists. This trip
-
-#         lines = [self.get_rows(),
-#                  self.get_columns(),
-#                  list([self.get_right_diagonal()]),
-#                  list([self.get_left_diagonal()])
-#                  ]
-#         for indicator, line in enumerate(lines):
-
-#             for index_1, squares in enumerate(line):
-#                 marker, count = Counter(squares).most_common(1)[0]
-#                 if count == (len(squares) - 1) and marker is not Square.BLANK:
-#                     for index_2, square in enumerate(squares):
-#                         if indicator == 0:
-#                             if not self.game_board.square_is_occupied(index_1, index_2):
-#                                 if marker is not Square.O:
-#                                     block_positions.append([index_1, index_2])
-#                                 else:
-#                                     return index_1, index_2
-#                         elif indicator == 1:
-#                             if not self.game_board.square_is_occupied(index_2, index_1):
-#                                 if marker is not Square.O:
-#                                     block_positions.append([index_2, index_1])
-#                                 else:
-#                                     return index_2, index_1
-#                         elif indicator == 2:
-#                             if not self.game_board.square_is_occupied(index_2, index_2):
-#                                 if marker is not Square.O:
-#                                     block_positions.append([index_2, index_2])
-#                                     print(index_2, index_2)
-#                                 else:
-#                                     return index_2, index_2
-#                         else:
-#                             if not self.game_board.square_is_occupied(index_2, 2 - index_2):
-#                                 if marker is not Square.O:
-#                                     block_positions.append([index_2, 2 - index_2])
-#                                     print(index_2, 2 - index_2)
-
-#                                 else:
-#                                     return index_2, 2 - index_2
-#         if block_positions:
-#             # Use randomly selected block position from max of three for variety sake
-#             print("Played Block Move")
-#             sleep(2)
-#             self.round_count += 2
-#             return block_positions[randint(0, len(block_positions) - 1)]
-        
-#         if self.hard_mode:
-# #             return self.check_fork()
-#             return self.test_mode()
-#         else:
-#             return self.random_ints()
-
-#         # All moves in easy mode are randomly selected,or on hard mode when there is no blocking or winning move
-# #         row = randint(0, 2)
-# #         column = randint(0, 2)
-# #         while self.game_board.square_is_occupied(row, column):
-# #             row = randint(0, 2)
-# #             column = randint(0, 2)
-# #         print("Played Random move")
-# #         sleep(2)
-# #         self.round_count += 2
-# #         return row, column
 
     def _one_player(self) -> bool:
         valid_input = {'1', '2', 'one', 'two'}
@@ -1140,6 +889,17 @@ class Game:
             self._update_winner_info()
             self.update_players()
 
+# Two static methods for setting up the game and command line window
+            
+def set_console_window_size(width, height):
+    # Check the platform (Windows or Unix-based)
+    os.system('cls||clear')
+    if os.name == 'nt':
+        # Windows platform
+        os.system(f'mode con: cols={width} lines={height}')
+    else:
+        # Unix-based platforms (Linux, macOS)
+        os.system(f'printf "\033[8;{height};{width}t"')
 
 def run_games():
     """
@@ -1168,4 +928,5 @@ def run_games():
 
 
 if __name__ == '__main__':
+    set_console_window_size(80, 28)
     run_games()
