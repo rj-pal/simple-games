@@ -6,8 +6,6 @@ from collections import Counter, namedtuple
 from random import randint, choice
 from time import sleep
 
-os.system("mode con cols=200 lines=50")
-
 # Constant string used in Game class
 WELCOME = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -72,8 +70,8 @@ GAMEOVER = """
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
     """Creates the effect of the words or characters printed one letter or line at a time. 
     word_flush True delays each character. False delays each complete line in a list. """
-    if delay != 0:
-        delay = 0
+#     if delay != 0:
+#         delay = 0
     for string in strings:
         for char in string:
             print(char, end='', flush=word_flush)
@@ -259,25 +257,21 @@ class AIPlayer(Player):
     def __init__(self, name: str = 'Computer', marker: Square = Square.O, difficulty: bool = False):
         super().__init__(name, marker)
         self.difficulty = difficulty
-#         self.round_count = 1
-#         self.move_list = []
-#         self.go_first = False
+        self.corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
+        self.insides = [(0,1), (1,0), (1,2), (2,1)]
  
         
     def get_fork_index(self, lines):
         for index, line in enumerate(lines):
             fork = Counter(line)
-            print("NO Hit")
-            print(fork.most_common())
+            
             if fork[Square.O] == 1 and fork[Square.BLANK] == 2:
-                print("HIT !")
-                print(fork.most_common())
+                
                 if len(lines) == 1:
                     return True
                 else:
                     return index
             
-    ####### The fork has issues when both diagonals have the fork index NOTE #########       
             
         
     def check_fork(self, board):
@@ -292,22 +286,17 @@ class AIPlayer(Player):
         
         
         fork_row_index = self.get_fork_index(rows)
-        print("RRRR")
-        print(f"ROW Index {fork_row_index}")
+        
         fork_column_index = self.get_fork_index(columns)
-        print("CCCC")
-        print(f"Column Index {fork_column_index}")
-
+        
         fork_diagonal_index = self.get_fork_index(diagonals)
         fork_diagonal_right = self.get_fork_index([board.get_right_diagonal()])
         fork_diagonal_left = self.get_fork_index([board.get_left_diagonal()])
         
         if fork_row_index is not None:
-            print("Called ROW")
-            print(fork_row_index)
+            
             if fork_column_index is not None:
-                print("Called COL")
-                print(fork_column_index)
+                
                 if not board.square_is_occupied(fork_row_index, fork_column_index):
                     return fork_row_index, fork_column_index
             if fork_diagonal_right:
@@ -317,17 +306,8 @@ class AIPlayer(Player):
                 if not board.square_is_occupied(fork_row_index, 2 - fork_row_index):
                         return fork_row_index, 2 - fork_row_index
             
-#             elif fork_diagonal_index is not None:
-#                 print("Called DIAG")
-#                 print(fork_diagonal_index)
-#                 if fork_diagonal_index == 0:
-#                     if not board.square_is_occupied(fork_row_index, fork_row_index):
-#                         return fork_row_index, fork_row_index
-#                 else:
-#                     if not board.square_is_occupied(fork_row_index, 2 - fork_row_index):
-#                         return fork_row_index, 2 - fork_row_index
+
         elif fork_column_index is not None:
-            print("Called COL 2")
             print(fork_column_index)
             
             if fork_diagonal_right:
@@ -337,20 +317,44 @@ class AIPlayer(Player):
                 if not board.square_is_occupied(fork_column_index, 2 - fork_column_index):
                     return fork_column_index, 2 - fork_column_index
             
-#             if fork_diagonal_index == 0:
-#                 if not board.square_is_occupied(fork_column_index, fork_column_index):
-#                     return fork_column_index, fork_column_index
-#             else:
-#                 if not board.square_is_occupied(fork_column_index, 2 - fork_column_index):
-#                     return fork_column_index, 2 - fork_column_index
+
         elif fork_diagonal_right and fork_diagonal_left:
             return 1, 1
     
-    
-        print("Playing Random play")
-        
-        return self.random_ints(board)
 
+    def two_blanks(self, board):
+        
+        rows = board.get_rows()
+        columns = board.get_columns()
+        diagonals = [board.get_right_diagonal(), board.get_left_diagonal()]
+        for index, row in enumerate(rows):
+            if row.count(Square.BLANK) == 2 and row.count(Square.O) == 1:
+                for col in range(2):
+                    if board.square_is_occupied(index, col):
+                        continue
+                    else:
+                        return index, col
+        for index, col in enumerate(columns):
+            if col.count(Square.BLANK) == 2 and col.count(Square.O) == 1:
+                for row in range(2):
+                    if board.square_is_occupied(row, index):
+                        continue
+                    else:
+                        return row, index
+        for index, diag in enumerate(diagonals):
+            if diag.count(Square.BLANK) == 2 and diag.count(Square.O) == 1:
+                if index == 0:
+                    for move_index in range(2):
+                        if board.square_is_occupied(move_index, move_index):
+                            continue
+                        else:
+                            return move_index, move_index
+                elif index == 1:
+                    for move_index in range(2):
+                        if board.square_is_occupied(move_index, 2 - move_index):
+                            continue
+                        else:
+                            return move_index, 2 - move_index
      
     def random_ints(self, board):
         row = randint(0, 2)
@@ -358,179 +362,150 @@ class AIPlayer(Player):
         while board.square_is_occupied(row, column):
             row = randint(0, 2)
             column = randint(0, 2)
-        print("Played Random move")
-        sleep(2)
+        
         Game.round_count += 2
         return row, column
        
-    ### ONLY FOR FIRST PLAYER CORNER STRATEGY
     def defence_mode(self, board):
-        corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
-        starts = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
-        insides = [(0,1), (1,0), (1,2), (2,1)]
+        
         if Game.round_count == 1:
             Game.round_count += 2
             r, c = Game.move_list[0]
-            if r == c == 1:
-                return choice(corners)
-            elif Game.move_list[0] in corners:
-                return 1, 1
-            elif Game.move_list[0] in insides:
+            if (r, c) == (1, 1):
+                move = choice(self.corners)
+            elif (r, c) in self.corners:
+                move = 1, 1
+            elif (r, c) in self.insides:
                 if r == 1:    
-                    return choice([0, 2]), (c + 2) % 4
+                    move = choice([0, 2]), (c + 2) % 4
                 else:
-                    return (r + 2) % 4, choice([0, 2])
+                    move = (r + 2) % 4, choice([0, 2])
+            return move
         
         elif Game.round_count == 3:
             Game.round_count += 2
             r, c = Game.move_list[0]
-            if r == c == 1:
-                 for corner in corners:
+            if (r, c) == (1, 1):
+                # Only triggered when opposite corners were played by player X
+                for corner in self.corners:
                     if not board.square_is_occupied(*corner):
-                        return corner               
+                        move = corner               
             
-            if Game.move_list[0] in corners:
-                r, c = Game.move_list[0]
+            elif (r, c) in self.corners:
                 if not board.square_is_occupied((r + 2) % 4, (c + 2) % 4):
-                    return (r + 2) % 4, (c + 2) % 4
+                    move = (r + 2) % 4, (c + 2) % 4
                 else:
-                    return choice(insides)
-            # SIDE STRATEGY with the second move on the insides or same column/row as the first move
-#             if Game.move_list[2] in insides:
-            r, c = Game.move_list[1]
-            if board.get_rows()[r].count(Square.BLANK) == 2:
-                return r, (c + 2) % 4
-            else:
-                return (r + 2) % 4, c
+                    move = choice(self.insides)
+            # SIDE STRATEGY with the second move on the self.insides or same column/row as the first move
+            elif (r, c) in self.insides:
+                r, c = Game.move_list[1]
+                if board.get_rows()[r].count(Square.BLANK) == 2:
+                    move = r, (c + 2) % 4
+                else:
+                    move = (r + 2) % 4, c
+            
+            return move
         
         elif Game.round_count == 5:
             Game.round_count += 2
             r, c = Game.move_list[0]
-            if r == c == 1:
-                return self.random_ints(board)
-#             if (move := self.check_fork(board)):
-#                 return move
-            if Game.move_list[0] in corners:
-    
-                for corner in corners:
+            if (r, c) == (1, 1):
+                r, c = Game.move_list[4]
+                if board.get_rows()[r].count(Square.BLANK) == 1:
+                    move =  r, (c + 2) % 4
+                elif board.get_columns[c].count(Square.BLANK) == 1:
+                    move = (r + 2) % 4, c
+                    
+
+            elif (r, c) in self.corners:
+        
+                for corner in self.corners:
                     if not board.square_is_occupied(*corner):
-                        return corner
+                        move = corner
             
-            # SIDE STRATEGY with the second move on the insides or same column/row as the first move        
-            return 1, 1
-#             if Game.move_list[0] in insides:
-#                 if (move := self.check_fork(board)):
-#                     return move
+            # SIDE STRATEGY with the second move on the insides or same column/row as the first move                   
+            elif (r, c) in self.insides:
+                if (move := self.check_fork(board)):
+                    return move
+                
+                else:
+                    move = 1, 1
+            
+            return move
                 
         else:
+            if (move := self.two_blanks(board)):
+                return move
             return self.random_ints(board)
         
         
     
-    def test_mode(self, board):
-        corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
-        starts = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
-        insides = [(0,1), (1,0), (1,2), (2,1)]
-        print(corners)
-        print(Game.round_count)
-        print(Game.move_list)
+    def offence_mode(self, board):
+        
 
-        sleep(3)
-        if Game.go_first:
-            return self.defence_mode(board)
+        if Game.round_count == 1:
+            Game.round_count += 2
+            starts = self.corners + [(1,1)]
+            return choice(starts)
+        
+        elif Game.round_count == 3:
+            Game.round_count += 2
+            r, c = Game.move_list[0]
+            if (r, c) == (1, 1):
+                if Game.move_list[1] not in self.corners:
+               
+                    move = choice(self.corners)
+                else:
+                    r, c = Game.move_list[1]
+                    move = (r + 2) % 4, (c + 2) % 4
             
-#             return self.check_fork(board)
-        else:
-            if Game.round_count == 1:
-                Game.round_count += 2
-#                 return 2, 2
-                return 1, 1
-#                 return choice(corners)
-            elif Game.round_count == 3:
-                print(Game.move_list[1])
-#                 print(Game.move_list[1] in corners)
-                r, c = Game.move_list[0]
-                if r == c == 1:
-                    if Game.move_list[1] not in corners:
-                        Game.round_count += 2
-                        print("Centre Stratgy called")
-                        return choice(corners)
-#                         return 2, 2
-                    else:
-                        r, c = Game.move_list[1]
-                        Game.round_count += 2
-                        print("Centre Stratgy Corner called")
-                        return (r + 2) % 4, (c + 2) % 4
+            elif (r, c) in self.corners:
+                if Game.move_list[1] == (1, 1): 
                     
-                elif Game.move_list[1] in corners:
-#                     r
-                    for move in corners:
-                        if board.square_is_occupied(*move):
+                    move = (r + 2) % 4, c
+                    
+                elif Game.move_list[1] in self.corners:
+                    for corner in self.corners:
+                        if board.square_is_occupied(*corner):
                             pass
                         else:
-                            Game.round_count += 2
-                            return move
-#                 Y = Game.move_list[1] in insides
-#                 print(Y)
-                elif Game.move_list[1] in insides:
+                            move = corner
+
+                elif Game.move_list[1] in self.insides:
                     r, c = Game.move_list[0]
-                    print("Im INSDIE")
                     for i in range(3):
                         print(r - i)
                         if board.get_rows()[r - i].count(Square.X) == 1:
-                            Game.round_count += 2
-                            return ((r + 2) % 4), c
+                            move = ((r + 2) % 4), c
                         elif board.get_columns()[c].count(Square.X) == 1:
-                            Game.round_count += 2
-                            return r, ((c + 2) % 4)
-                else:
-                    print("CENTRE")
-                    r, c = Game.move_list[0]
-                    Game.round_count += 2
-                    return (r + 2) % 4, c
-                        
-            elif Game.round_count == 5:
-                r, c = Game.move_list[0]
-                if r == c == 1:
-                    Game.round_count += 2
-                    print("Centre Stratgy called")
-                    
-                    return self.check_fork(board)
-#                     r, c = Game.move_list[3]
-#                     if (r, c) in insides:
-#                         return self.check_fork(board)
+                            move = r, ((c + 2) % 4)
+            
+            return move
 
-#                         return adjacents[(r, c)]
-#                         """FROM HERE IN THE STUPID MOVE CASE"""
-#                     print("MADE IT")    
-#                     for i in range(0, 3, 2):
-#                         if board.get_columns()[i].count(Square.O) == 1:
-#                             if board.get_columns()[i].count(Square.BLANK) == 2:
-#                                 return r, i
-#                         elif board.get_rows()[i].count(Square.O) == 1:
-#                             if board.get_rows()[i].count(Square.BLANK) == 2:
-#                                 return i, c
-               
-                elif Game.move_list[1] in corners:
-                    print("CORNERS")
-                    for move in corners:
-                        if board.square_is_occupied(*move):
-                            pass
-                        else:
-                            Game.round_count += 2
-                            return move
-                else:
-                    print("NOT CORNERS")
-                    Game.round_count += 2
-                    return self.check_fork(board)
-#                     for move in Game.move_list:
-#                         if move in corners:
-#                             corners.remove(move)
-#                     return choice(corners)
-#                     return 1, 1   
-                    
+        elif Game.round_count == 5:
+            Game.round_count += 2
+
+            if (move := self.check_fork(board)):
+                return move
+            
+            elif Game.move_list[1] in self.corners:
+                for move in self.corners:
+                    if board.square_is_occupied(*move):
+                        pass
+                    else:
+                        return move
+            elif (move := self.two_blanks(board)):
+                return move
+            
             else:
-                return self.random_ints(board)    
+                return self.random_ints(board)
+
+                    
+        else:
+            if (move := self.two_blanks(board)):
+                return move
+            
+            return self.random_ints(board)    
     
     def win_or_block(self, board: Board):
         block_positions = []  # Makes a list of all possible blocking points on the board of the opponent
@@ -565,21 +540,20 @@ class AIPlayer(Player):
                             if not board.square_is_occupied(index_2, index_2):
                                 if marker is not Square.O:
                                     block_positions.append([index_2, index_2])
-                                    print(index_2, index_2)
+                                    
                                 else:
                                     return index_2, index_2
                         else:
                             if not board.square_is_occupied(index_2, 2 - index_2):
                                 if marker is not Square.O:
                                     block_positions.append([index_2, 2 - index_2])
-                                    print(index_2, 2 - index_2)
+                                   
 
                                 else:
                                     return index_2, 2 - index_2
         if block_positions:
             # Use randomly selected block position from max of three for variety sake
-            print("Played Block Move")
-            sleep(2)
+            
             Game.round_count += 2
             return block_positions[randint(0, len(block_positions) - 1)]
         else:
@@ -597,9 +571,17 @@ class AIPlayer(Player):
             return move
         
         if self.difficulty:
-            return self.test_mode(board)
+            if Game.go_first:
+                return self.defence_mode(board)
+            else:
+                return self.offence_mode(board)
         
         else:
+            if Game.round_count > 3:
+                if (move := self.check_fork(board)):
+                    return move
+                if (move := self.two_blanks(board)):
+                    return move
             return self.random_ints(board)
 
 
@@ -644,7 +626,6 @@ class Game:
             print(GAMEOVER.center(os.get_terminal_size().columns - 1), end='\r')
             sleep(0.75)
             os.system('clear||cls')
-#             print(' ' * len(GAMEOVER.center(os.get_terminal_size().columns - 1)), end='\r')
             sleep(0.5)
         print()
         self.print_board()
@@ -741,7 +722,8 @@ class Game:
             "right_diag": "the right diagonal.",
             "left_diag": "the left diagonal."
         }
-        delay_effect([f"{winner_string} {win_type_dict[self.win_type]}"])
+        winner_string = f"{winner_string} {win_type_dict[self.win_type]}\n"
+        delay_effect(surround([winner_string], "#", 9), 0.00075, False)
 
     def check_for_winner(self) -> Optional[bool]:
         """Checks if the game has been won in a row, column or diagonal. Returns boolean."""
@@ -813,20 +795,20 @@ class Game:
 
     def _select_difficulty_level(self) -> Optional[bool]:
         """Updates the difficulty level boolean when playing against the computer."""
-        valid_input = ['1', 'easy', '2', 'medium', '3', 'hard']
+        valid_input = ['1', 'easy', '2', 'intermediate', '3', 'hard']
         while True:
-            level_of_difficulty = input("\nSelect the level of difficult, Easy, Medium or Hard: ").lower()
+            level_of_difficulty = input("\nSelect the level of difficult, Easy, intermediate or Hard: ").lower()
             if level_of_difficulty in valid_input[:2]:
                 delay_effect(["\nYou are playing against the computer in easy mode."])
                 return None
             elif level_of_difficulty in valid_input[2:4]:
-                delay_effect(["\nYou are playing against the computer in medium mode."])
+                delay_effect(["\nYou are playing against the computer in intermediate mode."])
                 return False
             elif level_of_difficulty in valid_input[4:]:
                 delay_effect(["\nYou are playing against the computer in hard mode."])
                 return True
             else:
-                print(f"\nThere is only easy or hard mode. Please select '1' for easy, '2' for medium or '3' for hard.")
+                print(f"\nThere is only easy, intermediate or hard mode.\nPlease select '1' for easy, '2' for intermediate or '3' for hard.")
 
     def create_players(self) -> None:
         """Creates two players of the Player class for game play and add the players to the player attribute."""
@@ -879,13 +861,15 @@ class Game:
             if i < 4:
                 continue
             elif self.check_for_winner():
+                sleep(0.25)
                 self.print_game_over()
                 self.update_players()
                 self.get_winner_info()
                 break
 
         else:
-            delay_effect(["\nCATS GAME. There was no winner so there will be no chicken dinner."])
+            draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
+            delay_effect(surround([draw_string], "#", 9), 0.00075, False)
             self._update_winner_info()
             self.update_players()
 
@@ -928,5 +912,6 @@ def run_games():
 
 
 if __name__ == '__main__':
-    set_console_window_size(80, 28)
+#     set_console_window_size(80, 28)
+    set_console_window_size(85, 30)
     run_games()
