@@ -29,20 +29,11 @@ WELCOME = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
-# WELCOME = [
-#     '*       *   * * *   *       * * *    *  *      *   *     * * *',
-#     ' *  *  *    * *     *      *        *    *    *  *  *    * *  ',
-#     '  *   *     * * *   * * *   * * *    *  *    *       *   * * *'
-#     ]
-   
-
 
 INTRO = """
 This is an online version of the classic game. Play multiple games per session
 against and opponent or the computer. X starts the game.
 """
-
-WON = "GAME OVER"
 
 GAMEOVER = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -61,17 +52,17 @@ GAMEOVER = """
    *              *      *      * *       *           *      *               *
    *                *  *         *        * * * *     *       *              *
    *                                                                         *
+   *                                                                         *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
 # Printing functions for creating computer output effect and border box
 
-
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
     """Creates the effect of the words or characters printed one letter or line at a time. 
-    word_flush True delays each character. False delays each complete line in a list. """
-#     if delay != 0:
-#         delay = 0
+    Word_flush True delays each character. False delays each complete line in a list. """
+    if delay != 0:
+        delay = 0
     for string in strings:
         for char in string:
             print(char, end='', flush=word_flush)
@@ -80,7 +71,7 @@ def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = Tr
         sleep(delay)
 
 
-def surround(strings: list[str], symbol: str, offset: int = 0) -> list[str]:
+def surround_string(strings: list[str], symbol: str, offset: int = 0) -> list[str]:
     """Creates a border around any group of sentences. Used to create the scoreboard for the players."""
     string_list = list(chain.from_iterable(
         string.split("\n") if "\n" in string
@@ -97,11 +88,11 @@ def surround(strings: list[str], symbol: str, offset: int = 0) -> list[str]:
 
     return ["\n" + "\n".join([symbol + string + symbol for string in output_list]) + "\n"]
 
+# Enum class of each Square as a list of strings for printing one line at a time on a board
 
 class Square(Enum):
-    """Square Enum class are constants stored as a list to be printed line by line on a game board. A Square Enum is
-    Blank, or a player marker Ex or Oh. """
-
+    """A Square is Blank, X or O. Each represents one square on the board. Each square is printed one line or list element at a time. 
+    Name of the square will be printed when called directly for printing."""
     BLANK = [
         "            ",
         "            ",
@@ -255,75 +246,78 @@ class Player:
     
 class AIPlayer(Player):
     def __init__(self, name: str = 'Computer', marker: Square = Square.O, difficulty: bool = False):
+        """AIPlayer is a child class of Player and contains all the functionality for a one-player game
+        against the computer. The computer player has three modes: easy, intermediate and hard.
+        The computer is defaulted to name 'Computer' and marker 'O'"""
         super().__init__(name, marker)
-        self.difficulty = difficulty
+        self.difficulty = difficulty # None is easy mode, False is intermediate mode, True is hard mode
         self.corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
         self.insides = [(0,1), (1,0), (1,2), (2,1)]
  
         
-    def get_fork_index(self, lines):
+    def get_fork_index(self, lines: list[[Square]])-> Optional[Union[int, bool]]:
+        """Finds the position of a branch of a fork. Returns an integer of the row or column index
+        if there is a column or row with a branch of a fork. Returns True if there is a diagonal fork 
+        branch position. Returns None if no fork branch is found."""
         for index, line in enumerate(lines):
-            fork = Counter(line)
-            
-            if fork[Square.O] == 1 and fork[Square.BLANK] == 2:
-                
-                if len(lines) == 1:
+            fork = Counter(line)      
+            if fork[Square.O] == 1 and fork[Square.BLANK] == 2:      
+                if len(lines) == 1: # this is for the two diagonals which are just a 1x3 matrix
                     return True
                 else:
-                    return index
-            
-            
-        
-    def check_fork(self, board):
-        rows = board.get_rows()
-        columns = board.get_columns()
-        diagonals = [board.get_right_diagonal(), board.get_left_diagonal()]
+                    return index        
+     
+    
+    def check_fork(self, board: Board) -> Optional[tuple[int, int]]:
+        """Checks for forks on the board that allows the computer to make a move where it will have 
+        a winning position in two or more lines. The function searches the board for any fork branches.
+        If there is an intersection of two branches, the fork is added to a list, and randomly selects a fork.
+        Returns the row and column position of the selected fork, or else return None if there are no forks."""
         fork_row_index = None
         fork_column_index = None
-        fork_diagonal_index = None
         fork_diagonal_right = None
         fork_diagonal_left = None
+        fork_positions = []
         
-        
+        rows = board.get_rows()
+        columns = board.get_columns()
         fork_row_index = self.get_fork_index(rows)
-        
-        fork_column_index = self.get_fork_index(columns)
-        
-        fork_diagonal_index = self.get_fork_index(diagonals)
-        fork_diagonal_right = self.get_fork_index([board.get_right_diagonal()])
+        fork_column_index = self.get_fork_index(columns)   
+        fork_diagonal_right = self.get_fork_index([board.get_right_diagonal()]) # get_fork_index only accepts a list of lines or 2D array
         fork_diagonal_left = self.get_fork_index([board.get_left_diagonal()])
         
-        if fork_row_index is not None:
-            
-            if fork_column_index is not None:
-                
+        # for any fork in a row and column intersection or a row and diagonal intersection
+        if fork_row_index is not None:  
+            if fork_column_index is not None:             
                 if not board.square_is_occupied(fork_row_index, fork_column_index):
-                    return fork_row_index, fork_column_index
+                    fork_positions.append([fork_row_index, fork_column_index])
             if fork_diagonal_right:
                 if not board.square_is_occupied(fork_row_index, fork_row_index):
-                        return fork_row_index, fork_row_index 
+                        fork_positions.append([fork_row_index, fork_row_index]) 
             if fork_diagonal_left:
                 if not board.square_is_occupied(fork_row_index, 2 - fork_row_index):
-                        return fork_row_index, 2 - fork_row_index
-            
-
-        elif fork_column_index is not None:
-            print(fork_column_index)
-            
+                        fork_positions.append([fork_row_index, 2 - fork_row_index])
+        # for any fork in a column and diagonal intersection    
+        if fork_column_index is not None:  
             if fork_diagonal_right:
                 if not board.square_is_occupied(fork_column_index, fork_column_index):
-                    return fork_column_index, fork_column_index
+                    fork_positions.append([fork_column_index, fork_column_index])
             if fork_diagonal_left:
-                if not board.square_is_occupied(fork_column_index, 2 - fork_column_index):
-                    return fork_column_index, 2 - fork_column_index
-            
-
-        elif fork_diagonal_right and fork_diagonal_left:
-            return 1, 1
+                if not board.square_is_occupied(2 - fork_column_index, fork_column_index):
+                    fork_positions.append([2 - fork_column_index, fork_column_index])
+        # for a fork in the diagonal intersection
+        if fork_diagonal_right and fork_diagonal_left:
+            fork_positions.append([1, 1])
+        
+        if fork_positions: # selects a random fork position if there is more than one or just the one
+            return fork_positions[randint(0, len(fork_positions) - 1)] 
+        else:
+            return # no forks were found
     
 
-    def two_blanks(self, board):
-        
+    def two_blanks(self, board) -> Optional[tuple[int, int]]:   
+        """Finds any line with two blanks and one 'O' marker. Used as alternative to random 
+        integers and allows for possiblity of victory. Returns row and column index else None."""
         rows = board.get_rows()
         columns = board.get_columns()
         diagonals = [board.get_right_diagonal(), board.get_left_diagonal()]
@@ -356,7 +350,8 @@ class AIPlayer(Player):
                         else:
                             return move_index, 2 - move_index
      
-    def random_ints(self, board):
+    def random_ints(self, board: Board) -> tuple[int, int]:
+        """Selects any open random positions on the board. Returns row and column index."""
         row = randint(0, 2)
         column = randint(0, 2)
         while board.square_is_occupied(row, column):
@@ -366,11 +361,12 @@ class AIPlayer(Player):
         Game.round_count += 2
         return row, column
        
-    def defence_mode(self, board):
-        
+    def defence_mode(self, board: Board) -> tuple[int, int]:
+        """AI strategy for when the computer plays second. Strategy is based on the first move
+        by the human player. The AI always optimizes for a win or draw. Returns optimal move."""
+        r, c = Game.move_list[0]
         if Game.round_count == 1:
             Game.round_count += 2
-            r, c = Game.move_list[0]
             if (r, c) == (1, 1):
                 move = choice(self.corners)
             elif (r, c) in self.corners:
@@ -384,19 +380,16 @@ class AIPlayer(Player):
         
         elif Game.round_count == 3:
             Game.round_count += 2
-            r, c = Game.move_list[0]
             if (r, c) == (1, 1):
-                # Only triggered when opposite corners were played by player X
+                # Only triggered when the opposite corner to the move in previous round was played by player X
                 for corner in self.corners:
-                    if not board.square_is_occupied(*corner):
-                        move = corner               
-            
+                    if not board.square_is_occupied(*corner): # randomly select one of the two free corners
+                        move = corner                     
             elif (r, c) in self.corners:
                 if not board.square_is_occupied((r + 2) % 4, (c + 2) % 4):
                     move = (r + 2) % 4, (c + 2) % 4
                 else:
                     move = choice(self.insides)
-            # SIDE STRATEGY with the second move on the self.insides or same column/row as the first move
             elif (r, c) in self.insides:
                 r, c = Game.move_list[1]
                 if board.get_rows()[r].count(Square.BLANK) == 2:
@@ -408,43 +401,42 @@ class AIPlayer(Player):
         
         elif Game.round_count == 5:
             Game.round_count += 2
-            r, c = Game.move_list[0]
             if (r, c) == (1, 1):
                 r, c = Game.move_list[4]
                 if board.get_rows()[r].count(Square.BLANK) == 1:
                     move =  r, (c + 2) % 4
-                elif board.get_columns[c].count(Square.BLANK) == 1:
+                elif board.get_columns()[c].count(Square.BLANK) == 1:
                     move = (r + 2) % 4, c
                     
 
             elif (r, c) in self.corners:
+                
+                if (move := self.two_blanks(board)):
+                    return move
         
                 for corner in self.corners:
                     if not board.square_is_occupied(*corner):
                         move = corner
             
-            # SIDE STRATEGY with the second move on the insides or same column/row as the first move                   
             elif (r, c) in self.insides:
-                if (move := self.check_fork(board)):
-                    return move
-                
-                else:
-                    move = 1, 1
+                move = 1, 1
             
             return move
                 
         else:
             if (move := self.two_blanks(board)):
                 return move
-            return self.random_ints(board)
-        
-        
+            else:
+                return self.random_ints(board)
+             
     
-    def offence_mode(self, board):
-        
-
+    def offence_mode(self, board: Board) -> tuple[int, int]:
+        """AI strategy for when the computer plays first. Strategy is based on the first move by the
+        computer and human player. The AI always optimizes for a win or draw. Returns optimal move."""
         if Game.round_count == 1:
             Game.round_count += 2
+#             # TESTING MOVE
+#             return 0, 2
             starts = self.corners + [(1,1)]
             return choice(starts)
         
@@ -472,11 +464,13 @@ class AIPlayer(Player):
                             move = corner
 
                 elif Game.move_list[1] in self.insides:
-                    r, c = Game.move_list[0]
+#                     r, c = Game.move_list[0]
                     for i in range(3):
-                        print(r - i)
                         if board.get_rows()[r - i].count(Square.X) == 1:
-                            move = ((r + 2) % 4), c
+                            if board.square_is_occupied(1, c):
+                                pass
+                            else:
+                                move = ((r + 2) % 4), c
                         elif board.get_columns()[c].count(Square.X) == 1:
                             move = r, ((c + 2) % 4)
             
@@ -499,17 +493,15 @@ class AIPlayer(Player):
             
             else:
                 return self.random_ints(board)
-
-                    
+         
         else:
             if (move := self.two_blanks(board)):
                 return move
             
             return self.random_ints(board)    
     
-    def win_or_block(self, board: Board):
+    def win_or_block(self, board: Board) -> Optional[tuple[int, int]]:
         block_positions = []  # Makes a list of all possible blocking points on the board of the opponent
-
 
         lines = [board.get_rows(),
                  board.get_columns(),
@@ -546,14 +538,12 @@ class AIPlayer(Player):
                         else:
                             if not board.square_is_occupied(index_2, 2 - index_2):
                                 if marker is not Square.O:
-                                    block_positions.append([index_2, 2 - index_2])
-                                   
+                                    block_positions.append([index_2, 2 - index_2])     
 
                                 else:
                                     return index_2, 2 - index_2
         if block_positions:
             # Use randomly selected block position from max of three for variety sake
-            
             Game.round_count += 2
             return block_positions[randint(0, len(block_positions) - 1)]
         else:
@@ -583,8 +573,6 @@ class AIPlayer(Player):
                 if (move := self.two_blanks(board)):
                     return move
             return self.random_ints(board)
-
-
 
 class Game:
     """
@@ -636,7 +624,7 @@ class Game:
 
     def print_scoreboard(self) -> None:
         """Shows the player statistics for the game. Printed line by line."""
-        delay_effect(surround([player.__str__() for player in self.players], "#", 25), 0.00075, False)
+        delay_effect(surround_string([player.__str__() for player in self.players], "#", 25), 0.00075, False)
 
     def print_move(self, player: Player, row: int, column: int) -> None:
         """Returns a string for printing the last played square on the board by the current player."""
@@ -670,8 +658,7 @@ class Game:
         """Checks if a line has all the same markers to see if the game has been won."""
         marker, count = Counter(squares).most_common(1)[0]
         if count == len(squares) and marker is not Square.BLANK:
-            return marker
-                    
+            return marker                  
 
     def _check_rows(self) -> Optional[bool]:
         """Checks for winner in rows. Uses returned Square object to update the winner attributes. False if no Square
@@ -723,7 +710,7 @@ class Game:
             "left_diag": "the left diagonal."
         }
         winner_string = f"{winner_string} {win_type_dict[self.win_type]}\n"
-        delay_effect(surround([winner_string], "#", 9), 0.00075, False)
+        delay_effect(surround_string([winner_string], "#", 9), 0.00075, False) # customize the size of the box and speed of delay
 
     def check_for_winner(self) -> Optional[bool]:
         """Checks if the game has been won in a row, column or diagonal. Returns boolean."""
@@ -749,7 +736,7 @@ class Game:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column. Returns tuple of integers. """
         row, column = self.get_move(player)
-        os.system('clear||cls')
+#         os.system('clear||cls')
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
         self.print_move(player, row, column)
@@ -822,10 +809,9 @@ class Game:
         if one_player:
             difficulty = self._select_difficulty_level()
             self.add_player(AIPlayer(difficulty=difficulty))
-            return
-
-        name = input("\nPlayer two please enter the name of the player for O: ")
-        self.add_player(Player(name, Square.O))
+        else:
+            name = input("\nPlayer two please enter the name of the player for O: ")
+            self.add_player(Player(name, Square.O))
 
     def start_game(self) -> None:
         """Starts the game and creates two players from user input."""
@@ -869,7 +855,7 @@ class Game:
 
         else:
             draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
-            delay_effect(surround([draw_string], "#", 9), 0.00075, False)
+            delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
             self._update_winner_info()
             self.update_players()
 
