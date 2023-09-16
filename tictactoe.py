@@ -277,39 +277,48 @@ class AIPlayer(Player):
         fork_column_index = None
         fork_diagonal_right = None
         fork_diagonal_left = None
+        # list of all potential forks on a board after a given move by a human player
         fork_positions = []
         
         rows = board.get_rows()
         columns = board.get_columns()
+        
+        # check rows, columns and two diagonals to get an index of any fork position for row/col, or T/F for diagonal fork position
         fork_row_index = self.get_fork_index(rows)
         fork_column_index = self.get_fork_index(columns)   
         fork_diagonal_right = self.get_fork_index([board.get_right_diagonal()]) # get_fork_index only accepts a list of lines or 2D array
         fork_diagonal_left = self.get_fork_index([board.get_left_diagonal()])
+        
+        # check for all forks: a fork is the intersection of a row and column or an intersection of a row or column and a diagonal
         
         # for any fork in a row and column intersection or a row and diagonal intersection
         if fork_row_index is not None:  
             if fork_column_index is not None:             
                 if not board.square_is_occupied(fork_row_index, fork_column_index):
                     fork_positions.append([fork_row_index, fork_column_index])
+            # row and right diagonal fork has the same column position as the row
             if fork_diagonal_right:
                 if not board.square_is_occupied(fork_row_index, fork_row_index):
                         fork_positions.append([fork_row_index, fork_row_index]) 
+            # row and left diagonal fork has the opposite column position as the row reflected through the centre horizontal line
             if fork_diagonal_left:
                 if not board.square_is_occupied(fork_row_index, 2 - fork_row_index):
                         fork_positions.append([fork_row_index, 2 - fork_row_index])
         # for any fork in a column and diagonal intersection    
         if fork_column_index is not None:  
+            # column and right diagonal fork has the same row position as the column
             if fork_diagonal_right:
                 if not board.square_is_occupied(fork_column_index, fork_column_index):
                     fork_positions.append([fork_column_index, fork_column_index])
+            # column and left diagonal fork has the opposite row position as the column reflected through the centre vertical line
             if fork_diagonal_left:
                 if not board.square_is_occupied(2 - fork_column_index, fork_column_index):
                     fork_positions.append([2 - fork_column_index, fork_column_index])
-        # for a fork in the diagonal intersection
+        # for a fork in the diagonal intersection: the centre is the intersection
         if fork_diagonal_right and fork_diagonal_left:
             fork_positions.append([1, 1])
         
-        if fork_positions: # selects a random fork position if there is more than one or just the one
+        if fork_positions: # selects a random fork position if there is more than one fork or just the one
             return fork_positions[randint(0, len(fork_positions) - 1)] 
         else:
             return # no forks were found
@@ -320,7 +329,9 @@ class AIPlayer(Player):
         integers and allows for possiblity of victory. Returns row and column index else None."""
         rows = board.get_rows()
         columns = board.get_columns()
-        diagonals = [board.get_right_diagonal(), board.get_left_diagonal()]
+        diagonals = [board.get_right_diagonal(), board.get_left_diagonal()] # right diagonal is index 0, and left is index 1 
+                  
+        # returns the first found unoccupied square in a line with two blanks for intermediate mode or possible win in hard mode
         for index, row in enumerate(rows):
             if row.count(Square.BLANK) == 2 and row.count(Square.O) == 1:
                 for col in range(2):
@@ -437,8 +448,10 @@ class AIPlayer(Player):
             Game.round_count += 2
 #             # TESTING MOVE
 #             return 0, 2
-            starts = self.corners + [(1,1)]
-            return choice(starts)
+            
+            # Only allow for corner or centre start to guarantee a win or draw
+            starts = self.corners + [(1,1)] 
+            return choice(starts) # add element of randomness to first move 
         
         elif Game.round_count == 3:
             Game.round_count += 2
@@ -472,8 +485,7 @@ class AIPlayer(Player):
                             else:
                                 move = ((r + 2) % 4), c
                         elif board.get_columns()[c].count(Square.X) == 1:
-                            move = r, ((c + 2) % 4)
-            
+                            move = r, ((c + 2) % 4)   
             return move
 
         elif Game.round_count == 5:
@@ -501,6 +513,8 @@ class AIPlayer(Player):
             return self.random_ints(board)    
     
     def win_or_block(self, board: Board) -> Optional[tuple[int, int]]:
+        """Checks for a win or block. Selects the first found win position or a random block position if there are
+        more than one block moves."""
         block_positions = []  # Makes a list of all possible blocking points on the board of the opponent
 
         lines = [board.get_rows(),
@@ -551,22 +565,23 @@ class AIPlayer(Player):
         
     
     def move(self, board: Board) -> Union[tuple[int, int], list[int]]:
+        """Selects a move for the AI player based on the play mode of easy, intermediate or hard. """
         print("\nComputer is now thinking.")
         sleep(1.5)
 
-        if self.difficulty is None:
+        if self.difficulty is None: # easy mode
             return self.random_ints(board)
         
-        if (move := self.win_or_block(board)):
+        if (move := self.win_or_block(board)): # intermediate or hard mode always checks for win or block first
             return move
         
-        if self.difficulty:
-            if Game.go_first:
+        if self.difficulty: # hard mode
+            if Game.go_first: # strategy is based on if the human player plays first or not (go_first is for human player)
                 return self.defence_mode(board)
             else:
                 return self.offence_mode(board)
         
-        else:
+        else: # intermediate mode always checks for a fork first then for two blanks after two random moves
             if Game.round_count > 3:
                 if (move := self.check_fork(board)):
                     return move
@@ -587,7 +602,7 @@ class Game:
     succession. 
     """
     move_list = []
-    round_count = 1
+    round_count = 1 # round count is only used for AIplayer games and increase in odd increments (round 1, 3, 5)
     go_first = True # When True, player 1 goes first and when False, player 2 goes first.
 
     def __init__(self):
@@ -713,7 +728,8 @@ class Game:
         delay_effect(surround_string([winner_string], "#", 9), 0.00075, False) # customize the size of the box and speed of delay
 
     def check_for_winner(self) -> Optional[bool]:
-        """Checks if the game has been won in a row, column or diagonal. Returns boolean."""
+        """Checks if the game has been won in a row, column or diagonal if a winning line is found. It will return
+        the first found winning line starting by row, column, and then right and left diagonals."""
         check_winner_funcs = (
             self._check_rows,
             self._check_columns,
@@ -724,6 +740,8 @@ class Game:
                 return winner_found
 
     def get_move(self, player: Player) -> Union[tuple[int, int], list[int]]:
+        """Returns the currently played move of a row and then a column based on AI functionality 
+        or from validated input from a player.s"""
         if isinstance(player, AIPlayer):
             board = self.game_board
             row, column = player.move(board)
@@ -734,7 +752,7 @@ class Game:
     
     def take_turn(self, player: Player) -> None:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
-        Returns the indexed row and column. Returns tuple of integers. """
+        Returns the indexed row and column."""
         row, column = self.get_move(player)
 #         os.system('clear||cls')
         Game.move_list.append((row, column))
@@ -758,6 +776,8 @@ class Game:
         return row, column
 
     def _prompt_int(self, value: str) -> int:
+        """Returns two integers for a row and column move from the player input. Only allows 
+        for 1, 2, or 3 with each integer corresponding to a row and then a column."""
         valid_input = {1, 2, 3}
         while True:
             try:
@@ -772,6 +792,7 @@ class Game:
 
 
     def _one_player(self) -> bool:
+        """Sets the game to one or two players."""
         valid_input = {'1', '2', 'one', 'two'}
         while True:
             one_player = input("How many players? One or two: ").lower()
@@ -823,7 +844,8 @@ class Game:
         self.play_game()
 
     def next_game(self) -> None:
-        """Resets the board to blank squares, changes the the order of players, and starts a new game."""
+        """Resets the board to blank squares, changes the the order of players, resets round count and
+        move list, and starts a new game."""
         Game.round_count = 1
         Game.move_list.clear()
         Game.go_first = not Game.go_first
@@ -836,7 +858,7 @@ class Game:
 
     def play_game(self) -> None:
         """Main method for playing the game that terminates after all nine squares have been filled or a winner
-        has been declared."""
+        has been declared. Updates attributes of the Game and Player class with game information."""
         for i in range(9):
             if Game.go_first:
                 self.take_turn(self.players[i % 2])
@@ -861,7 +883,8 @@ class Game:
 
 # Two static methods for setting up the game and command line window
             
-def set_console_window_size(width, height):
+def set_console_window_size(width: float, height: float) -> None:
+    """Sets the consolute window to fit the board to the screen better."""
     # Check the platform (Windows or Unix-based)
     os.system('cls||clear')
     if os.name == 'nt':
@@ -871,11 +894,11 @@ def set_console_window_size(width, height):
         # Unix-based platforms (Linux, macOS)
         os.system(f'printf "\033[8;{height};{width}t"')
 
-def run_games():
+def run_games() -> None:
     """
     The Main method for running a series of Tic-Tac-Toe games. Starts a game session that keeps track 
     of the two players statistics and allows for multiple plays. Creates a Game Obect that manages the
-    game from start to finish, including player creation.
+    game from start to finish, including player creation and AI play.
     """
     games = Game()
     games.start_game()
@@ -895,7 +918,6 @@ def run_games():
 
         except ValueError:
             print(message)
-
 
 if __name__ == '__main__':
 #     set_console_window_size(80, 28)
