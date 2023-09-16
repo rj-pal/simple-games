@@ -369,7 +369,10 @@ class AIPlayer(Player):
             row = randint(0, 2)
             column = randint(0, 2)
         
-        Game.round_count += 2
+        # For testing AI players Only- I tested Easy AI player versus Hard AI player
+        if self.difficulty:
+            Game.round_count += 2
+        
         return row, column
        
     def defence_mode(self, board: Board) -> tuple[int, int]:
@@ -380,13 +383,15 @@ class AIPlayer(Player):
             Game.round_count += 2
             if (r, c) == (1, 1):
                 move = choice(self.corners)
-            elif (r, c) in self.corners:
-                move = 1, 1
-            elif (r, c) in self.insides:
-                if r == 1:    
-                    move = choice([0, 2]), (c + 2) % 4
-                else:
-                    move = (r + 2) % 4, choice([0, 2])
+            else:
+                move = 1, 1,
+#             elif (r, c) in self.corners:
+#                 move = 1, 1
+#             elif (r, c) in self.insides:
+#                 if r == 1:    
+#                     move = choice([0, 2]), (c + 2) % 4
+#                 else:
+#                     move = (r + 2) % 4, choice([0, 2])
             return move
         
         elif Game.round_count == 3:
@@ -402,11 +407,22 @@ class AIPlayer(Player):
                 else:
                     move = choice(self.insides)
             elif (r, c) in self.insides:
-                r, c = Game.move_list[1]
-                if board.get_rows()[r].count(Square.BLANK) == 2:
-                    move = r, (c + 2) % 4
+                r1, c1 = Game.move_list[2]
+                if (r1, c1) in self.insides:
+                    if r == 1:    
+                        move = choice([0, 2]), c
+                    else:
+                        move = r, choice([0, 2])
                 else:
-                    move = (r + 2) % 4, c
+                    if r == 1:
+                        move = r1, c
+                    else:
+                        move = r, c1
+                    
+#                 if board.get_rows()[r].count(Square.BLANK) == 2:
+#                     move = r, (c + 2) % 4
+#                 else:
+#                     move = (r + 2) % 4, c
             
             return move
         
@@ -429,8 +445,15 @@ class AIPlayer(Player):
                     if not board.square_is_occupied(*corner):
                         move = corner
             
-            elif (r, c) in self.insides:
-                move = 1, 1
+            elif (move := self.two_blanks(board)):
+                return move
+#             elif (r, c) in self.insides:
+                
+#                 print("CRASH")
+#                 print(Game.move_list)
+#                 print(Game.go_first)
+#                 print(board)
+                
             
             return move
                 
@@ -566,8 +589,9 @@ class AIPlayer(Player):
     
     def move(self, board: Board) -> Union[tuple[int, int], list[int]]:
         """Selects a move for the AI player based on the play mode of easy, intermediate or hard. """
-        print("\nComputer is now thinking.")
-        sleep(1.5)
+        # In Testing Mode
+#         print("\nComputer is now thinking.")
+#         sleep(1.5)
 
         if self.difficulty is None: # easy mode
             return self.random_ints(board)
@@ -754,11 +778,13 @@ class Game:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column."""
         row, column = self.get_move(player)
+        # In Testing Mode
 #         os.system('clear||cls')
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
-        self.print_move(player, row, column)
-        self.print_board()
+        # In Testing Mode
+#         self.print_move(player, row, column)
+#         self.print_board()
 
     def _prompt_move(self, name: str) -> Union[tuple[int, int], list[int]]:
         """Validates and formats the user inputted row and column. Checks if the inputted position is occupied."""
@@ -869,17 +895,43 @@ class Game:
             if i < 4:
                 continue
             elif self.check_for_winner():
-                sleep(0.25)
-                self.print_game_over()
+                # In Testing mode
+#                 sleep(0.25)
+#                 self.print_game_over()
                 self.update_players()
-                self.get_winner_info()
+                # In Testing Mode
+#                 self.get_winner_info()
                 break
 
         else:
-            draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
-            delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
+            # In Testing mode
+#             draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
+#             delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
             self._update_winner_info()
             self.update_players()
+            
+    def start_test(self) -> None:
+        """Resets the board to blank squares, changes the the order of players, resets round count and
+        move list, and starts a new game."""
+#         self.add_player(AIPlayer(name='Computer Intermediate', marker=Square.X, difficulty=False))
+#         self.add_player(AIPlayer(name='Computer HARD', marker=Square.X, difficulty=True))
+        self.add_player(AIPlayer(name='Computer Easy', marker=Square.X, difficulty=None))
+        self.add_player(AIPlayer(name='Computer Hard', marker=Square.O, difficulty=True))
+        
+        # Testing games
+        for i in range(100000): 
+            self.play_game()
+            if self.winner != None and self.winner.marker == Square.X:
+                print("EASY WON")
+                print(self.move_list)
+                print(self.print_first_player())
+                self.print_board()
+            Game.round_count = 1
+            Game.move_list.clear()
+            Game.go_first = not Game.go_first 
+            self.game_board.reset_board()
+        self.print_scoreboard()
+            
 
 # Two static methods for setting up the game and command line window
             
@@ -919,7 +971,18 @@ def run_games() -> None:
         except ValueError:
             print(message)
 
+
+          
+            
+def test_games() -> None:
+    """
+    .
+    """
+    games = Game()
+    games.start_test()
+
+
 if __name__ == '__main__':
 #     set_console_window_size(80, 28)
     set_console_window_size(85, 30)
-    run_games()
+    test_games()
