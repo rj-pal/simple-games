@@ -370,8 +370,8 @@ class AIPlayer(Player):
             column = randint(0, 2)
         
         # For testing AI players Only- I tested Easy AI player versus Hard AI player
-        if self.difficulty:
-            Game.round_count += 2
+#         if self.difficulty:
+            ##Game.round_count += 2
         
         return row, column
        
@@ -379,12 +379,12 @@ class AIPlayer(Player):
         """AI strategy for when the computer plays second. Strategy is based on the first move
         by the human player. The AI always optimizes for a win or draw. Returns optimal move."""
         r, c = Game.move_list[0]
-        if Game.round_count == 1:
-            Game.round_count += 2
+        if Game.round_count == 2:
+            ##Game.round_count += 2
             if (r, c) == (1, 1):
                 move = choice(self.corners)
             else:
-                move = 1, 1,
+                move = 1, 1
 #             elif (r, c) in self.corners:
 #                 move = 1, 1
 #             elif (r, c) in self.insides:
@@ -394,8 +394,8 @@ class AIPlayer(Player):
 #                     move = (r + 2) % 4, choice([0, 2])
             return move
         
-        elif Game.round_count == 3:
-            Game.round_count += 2
+        elif Game.round_count == 4:
+            ##Game.round_count += 2
             if (r, c) == (1, 1):
                 # Only triggered when the opposite corner to the move in previous round was played by player X
                 for corner in self.corners:
@@ -426,8 +426,8 @@ class AIPlayer(Player):
             
             return move
         
-        elif Game.round_count == 5:
-            Game.round_count += 2
+        elif Game.round_count == 6:
+            ##Game.round_count += 2
             if (r, c) == (1, 1):
                 r, c = Game.move_list[4]
                 if board.get_rows()[r].count(Square.BLANK) == 1:
@@ -468,7 +468,7 @@ class AIPlayer(Player):
         """AI strategy for when the computer plays first. Strategy is based on the first move by the
         computer and human player. The AI always optimizes for a win or draw. Returns optimal move."""
         if Game.round_count == 1:
-            Game.round_count += 2
+            ##Game.round_count += 2
 #             # TESTING MOVE
 #             return 0, 2
             
@@ -477,7 +477,7 @@ class AIPlayer(Player):
             return choice(starts) # add element of randomness to first move 
         
         elif Game.round_count == 3:
-            Game.round_count += 2
+            ##Game.round_count += 2
             r, c = Game.move_list[0]
             if (r, c) == (1, 1):
                 if Game.move_list[1] not in self.corners:
@@ -512,7 +512,7 @@ class AIPlayer(Player):
             return move
 
         elif Game.round_count == 5:
-            Game.round_count += 2
+            ##Game.round_count += 2
 
             if (move := self.check_fork(board)):
                 return move
@@ -581,7 +581,7 @@ class AIPlayer(Player):
                                     return index_2, 2 - index_2
         if block_positions:
             # Use randomly selected block position from max of three for variety sake
-            Game.round_count += 2
+            ##Game.round_count += 2
             return block_positions[randint(0, len(block_positions) - 1)]
         else:
             return None
@@ -626,7 +626,8 @@ class Game:
     succession. 
     """
     move_list = []
-    round_count = 1 # round count is only used for AIplayer games and increase in odd increments (round 1, 3, 5)
+    round_count = 0 ##### NEW TEST WITH continuous round count
+    # round count is only used for AIplayer games and increase in odd increments (round 1, 3, 5)
     go_first = True # When True, player 1 goes first and when False, player 2 goes first.
 
     def __init__(self):
@@ -783,8 +784,9 @@ class Game:
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
         # In Testing Mode
-#         self.print_move(player, row, column)
-#         self.print_board()
+        self.print_move(player, row, column)
+        self.print_board()
+        print(self.round_count)
 
     def _prompt_move(self, name: str) -> Union[tuple[int, int], list[int]]:
         """Validates and formats the user inputted row and column. Checks if the inputted position is occupied."""
@@ -886,6 +888,7 @@ class Game:
         """Main method for playing the game that terminates after all nine squares have been filled or a winner
         has been declared. Updates attributes of the Game and Player class with game information."""
         for i in range(9):
+            Game.round_count += 1
             if Game.go_first:
                 self.take_turn(self.players[i % 2])
             else:
@@ -919,14 +922,14 @@ class Game:
         self.add_player(AIPlayer(name='Computer Hard', marker=Square.O, difficulty=True))
         
         # Testing games
-        for i in range(100000): 
+        for i in range(1000): 
             self.play_game()
             if self.winner != None and self.winner.marker == Square.X:
                 print("EASY WON")
                 print(self.move_list)
                 print(self.print_first_player())
                 self.print_board()
-            Game.round_count = 1
+            Game.round_count = 0
             Game.move_list.clear()
             Game.go_first = not Game.go_first 
             self.game_board.reset_board()
