@@ -304,6 +304,7 @@ class AIPlayer(Player):
             if fork_diagonal_left:
                 if not board.square_is_occupied(fork_row_index, 2 - fork_row_index):
                         fork_positions.append([fork_row_index, 2 - fork_row_index])
+        
         # for any fork in a column and diagonal intersection    
         if fork_column_index is not None:  
             # column and right diagonal fork has the same row position as the column
@@ -314,6 +315,7 @@ class AIPlayer(Player):
             if fork_diagonal_left:
                 if not board.square_is_occupied(2 - fork_column_index, fork_column_index):
                     fork_positions.append([2 - fork_column_index, fork_column_index])
+        
         # for a fork in the diagonal intersection: the centre is the intersection
         if fork_diagonal_right and fork_diagonal_left:
             fork_positions.append([1, 1])
@@ -378,12 +380,18 @@ class AIPlayer(Player):
     def defence_mode(self, board: Board) -> tuple[int, int]:
         """AI strategy for when the computer plays second. Strategy is based on the first move
         by the human player. The AI always optimizes for a win or draw. Returns optimal move."""
+        print(f'AI {self.marker} is playing defence')
+        print(Game.move_list)
+        print(Game.round_count)
         r, c = Game.move_list[0]
         if Game.round_count == 2:
+            print("PLAYED HERE")
             ##Game.round_count += 2
             if (r, c) == (1, 1):
+                print("CORNERS")
                 move = choice(self.corners)
             else:
+                print("CENTRE")
                 move = 1, 1
 #             elif (r, c) in self.corners:
 #                 move = 1, 1
@@ -392,6 +400,7 @@ class AIPlayer(Player):
 #                     move = choice([0, 2]), (c + 2) % 4
 #                 else:
 #                     move = (r + 2) % 4, choice([0, 2])
+            print(f'FIRST MOVE {move}')    
             return move
         
         elif Game.round_count == 4:
@@ -458,6 +467,7 @@ class AIPlayer(Player):
             return move
                 
         else:
+            print("PLAYING BLANKS RANDOM")
             if (move := self.two_blanks(board)):
                 return move
             else:
@@ -467,6 +477,11 @@ class AIPlayer(Player):
     def offence_mode(self, board: Board) -> tuple[int, int]:
         """AI strategy for when the computer plays first. Strategy is based on the first move by the
         computer and human player. The AI always optimizes for a win or draw. Returns optimal move."""
+        print(f'AI {self.marker} is playing offence')
+        # for testig purposes so hard mode can play versus hard mode
+        if Game.round_count % 2 == 0:
+            return self.defence_mode(board)
+        
         if Game.round_count == 1:
             ##Game.round_count += 2
 #             # TESTING MOVE
@@ -603,7 +618,10 @@ class AIPlayer(Player):
             if Game.go_first: # strategy is based on if the human player plays first or not (go_first is for human player)
                 return self.defence_mode(board)
             else:
-                return self.offence_mode(board)
+                move = self.offence_mode(board)
+                print(f'WHAT IS THE MOVE I GET? {move}')
+                return move
+#                 return self.offence_mode(board)
         
         else: # intermediate mode always checks for a fork first then for two blanks after two random moves
             if Game.round_count > 3:
@@ -766,13 +784,15 @@ class Game:
 
     def get_move(self, player: Player) -> Union[tuple[int, int], list[int]]:
         """Returns the currently played move of a row and then a column based on AI functionality 
-        or from validated input from a player.s"""
+        or from validated input from a player."""
         if isinstance(player, AIPlayer):
             board = self.game_board
             row, column = player.move(board)
+            print(f'GET MOVE 1 {row, column}')
         else:
             name = player.name
             row, column = self._prompt_move(name)  # Validated in the prompt_move function.
+        print(f'GET MOVE 2 {row, column}')
         return row, column
     
     def take_turn(self, player: Player) -> None:
@@ -783,10 +803,19 @@ class Game:
 #         os.system('clear||cls')
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
-        # In Testing Mode
         self.print_move(player, row, column)
         self.print_board()
-        print(self.round_count)
+
+    def _make_moves(self, player: Player) -> None:
+        """Gets the row and column from the current player and updates the board tracker and game board for printing.
+        Returns the indexed row and column."""
+        row, column = self.get_move(player)
+        print(row, column)
+        Game.move_list.append((row, column))
+        self.update_board(row, column, player.marker)
+        # HARD vs hard testing
+        self.print_move(player, row, column)
+        self.print_board()
 
     def _prompt_move(self, name: str) -> Union[tuple[int, int], list[int]]:
         """Validates and formats the user inputted row and column. Checks if the inputted position is occupied."""
@@ -898,32 +927,57 @@ class Game:
             if i < 4:
                 continue
             elif self.check_for_winner():
-                # In Testing mode
-#                 sleep(0.25)
-#                 self.print_game_over()
+                sleep(0.25)
+                self.print_game_over()
                 self.update_players()
-                # In Testing Mode
-#                 self.get_winner_info()
+                self.get_winner_info()
                 break
-
         else:
-            # In Testing mode
-#             draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
-#             delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
+            draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
+            delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
             self._update_winner_info()
             self.update_players()
-            
-    def start_test(self) -> None:
-        """Resets the board to blank squares, changes the the order of players, resets round count and
-        move list, and starts a new game."""
+    
+    def _run_test_game(self) -> None:
+        """Same as play_game without sendding output to the terminal."""
+        for i in range(9):
+            Game.round_count += 1
+            if Game.go_first:
+                self._make_moves(self.players[i % 2])
+            else:
+                self._make_moves(self.players[i % 2 - 1])
+
+            if i < 4:
+                continue
+            elif self.check_for_winner():
+                self.update_players()
+                break
+        else:
+            self._update_winner_info()
+            self.update_players()
+    
+    
+    def start_test(self, level: str, games: int) -> None:
+        """Tests the AIPlayer class by having one ai player against another ai player. Set the level of
+        the first ai player to play against the computer in hard mode. Set the number of games to be tested"""
 #         self.add_player(AIPlayer(name='Computer Intermediate', marker=Square.X, difficulty=False))
 #         self.add_player(AIPlayer(name='Computer HARD', marker=Square.X, difficulty=True))
-        self.add_player(AIPlayer(name='Computer Easy', marker=Square.X, difficulty=None))
-        self.add_player(AIPlayer(name='Computer Hard', marker=Square.O, difficulty=True))
+        if level == 'easy'.lower():
+            difficulty = None
+        elif level == 'intermediate'.lower():
+            difficulty = False
+        elif level == 'hard'.lower():
+            difficulty = True
+        else:
+            exit("Only 'easy', 'intermediate', or 'hard is allowed for testing.")
         
+        self.add_player(AIPlayer(name=f'Computer {level.lower().capitalize()}', marker=Square.X, difficulty=difficulty))
+        self.add_player(AIPlayer(name='Computer Hard Mode', marker=Square.O, difficulty=True))
+        Game.go_first = not Game.go_first
         # Testing games
-        for i in range(1000): 
-            self.play_game()
+        for i in range(games): 
+            self._run_test_game()
+            print(Game.move_list)
             if self.winner != None and self.winner.marker == Square.X:
                 print("EASY WON")
                 print(self.move_list)
@@ -931,7 +985,7 @@ class Game:
                 self.print_board()
             Game.round_count = 0
             Game.move_list.clear()
-            Game.go_first = not Game.go_first 
+#             Game.go_first = not Game.go_first 
             self.game_board.reset_board()
         self.print_scoreboard()
             
@@ -973,16 +1027,17 @@ def run_games() -> None:
 
         except ValueError:
             print(message)
-
-
-          
             
 def test_games() -> None:
     """
     .
     """
+#     games = Game()
+#     games.start_test('easy', 10000)
+#     games = Game()
+#     games.start_test('intermediate', 10000)
     games = Game()
-    games.start_test()
+    games.start_test('hard', 100)
 
 
 if __name__ == '__main__':
