@@ -245,9 +245,7 @@ class Player:
         return str(player_info)
     
 class AIPlayer(Player):
-    
-    is_test = False
-    
+        
     def __init__(self, name: str = 'Computer', marker: Square = Square.O, difficulty: bool = False):
         """AIPlayer is a child class of Player and contains all the functionality for a one-player game
         against the computer. The computer player has three modes: easy, intermediate and hard.
@@ -417,7 +415,6 @@ class AIPlayer(Player):
             return move
         
         elif Game.round_count == 6:
-            ##Game.round_count += 2
             if (r, c) == (1, 1):
                 r, c = Game.move_list[4]
                 if board.get_rows()[r].count(Square.BLANK) == 1:
@@ -451,16 +448,15 @@ class AIPlayer(Player):
         """AI strategy for when the computer plays first. Strategy is based on the first move by the
         computer and human player. The AI always optimizes for a win or draw. Returns optimal move."""
         # for testing purposes so hard mode can play versus hard mode used by TestGame class; otherwise, ignored
-        if AIPlayer.is_test and Game.round_count % 2 == 0:
+        if Game.round_count % 2 == 0:
             return self.defence_mode(board)
-        
+       
         if Game.round_count == 1:            
             # Only allow for corner or centre start to guarantee a win or draw
             starts = self.corners + [(1,1)] 
             return choice(starts) # add element of randomness to first move 
         
         elif Game.round_count == 3:
-            ##Game.round_count += 2
             r, c = Game.move_list[0]
             if (r, c) == (1, 1):
                 if Game.move_list[1] not in self.corners:
@@ -568,10 +564,6 @@ class AIPlayer(Player):
     
     def move(self, board: Board) -> Union[tuple[int, int], list[int]]:
         """Selects a move for the AI player based on the play mode of easy, intermediate or hard. """
-        if not AIPlayer.is_test:
-            print("\nComputer is now thinking.")
-            sleep(1.5)
-
         if self.difficulty is None: # easy mode
             return self.random_ints(board)
         
@@ -853,7 +845,7 @@ class Game:
     def next_game(self) -> None:
         """Resets the board to blank squares, changes the the order of players, resets round count and
         move list, and starts a new game."""
-        Game.round_count = 1
+        Game.round_count = 0
         Game.move_list.clear()
         Game.go_first = not Game.go_first
         self.game_board.reset_board()
@@ -926,7 +918,7 @@ class TestGames(Game):
         if len(self.players) != 0: # clear the player list in case of retesting at different level or multiply tests
             self.players.clear()
         
-        AIPlayer.is_test = True
+#         AIPlayer.is_test = True
         self.add_player(AIPlayer(name=f'Computer {level.capitalize()}', marker=Square.X, difficulty=difficulty))
         self.add_player(AIPlayer(name='Computer Hard Mode', marker=Square.O, difficulty=True))
         
