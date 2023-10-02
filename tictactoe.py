@@ -29,7 +29,6 @@ WELCOME = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
-
 INTRO = """
 This is an online version of the classic game. Play multiple games per session
 against and opponent or the computer. X starts the game.
@@ -56,13 +55,15 @@ GAMEOVER = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
+
 # Printing functions for creating computer output effect and border box
 
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
     """Creates the effect of the words or characters printed one letter or line at a time. 
     Word_flush True delays each character. False delays each complete line in a list. """
-    if delay != 0:
-        delay = 0
+    #     Used when testing so that can play the games quicker
+    #     if delay != 0:
+    #         delay = 0
     for string in strings:
         for char in string:
             print(char, end='', flush=word_flush)
@@ -88,11 +89,12 @@ def surround_string(strings: list[str], symbol: str, offset: int = 0) -> list[st
 
     return ["\n" + "\n".join([symbol + string + symbol for string in output_list]) + "\n"]
 
+
 # Enum class of each Square as a list of strings for printing one line at a time on a board
 
 class Square(Enum):
-    """A Square is Blank, X or O. Each represents one square on the board. Each square is printed one line or list element at a time. 
-    Name of the square will be printed when called directly for printing."""
+    """A Square is Blank, X or O. Each represents one square on the board. Each square is printed one line or
+    list element at a time. Name of the square will be printed when called directly for printing."""
     BLANK = [
         "            ",
         "            ",
@@ -133,7 +135,7 @@ class Board:
     which is a 3D array of Square objects, and a horizontal attribute for the row lines. The data is store in Rows.
     Columns can be created from zipping the rows. The board is displayed line-by-line from top to bottom and uses 
     the join method. Each row is created line-by-line from zipping each Square in a row, top to bottom combined with
-    an asterik, which make up the vertical lines in the board. Each row is joined to a horizontal line.
+    an asterisk, which make up the vertical lines in the board. Each row is joined to a horizontal line.
     """
 
     def __init__(self):
@@ -160,8 +162,8 @@ class Board:
 
     def get_left_diagonal(self) -> list[Square]:
         """Returns a list of the left diagonal of Square objects. It is a sliced list of the game Board object."""
-        return list(self.board[i][-(i + 1)] for i in range(len(self.board))) 
-    
+        return list(self.board[i][-(i + 1)] for i in range(len(self.board)))
+
     def square_is_occupied(self, row: int, column: int) -> bool:
         """Checks if a square is occupied by an Ex or Oh."""
         return self.board[row][column] != Square.BLANK
@@ -199,7 +201,7 @@ class Player:
         """
         Player Class stores all the information on a player. It has marker attribute that must be a Square 
         Ex or Oh object. It also has a name attribute with default settings if no name is passed. It has 3 
-        statisitics for wins, losses and games played. The number of draws is included in the stats when 
+        statistics for wins, losses and games played. The number of draws is included in the stats when
         printing a string of a player. It has an attribute to indicate if the player will use the Game Class AI. 
         """
         self.marker = marker
@@ -243,32 +245,33 @@ class Player:
             self.games_played
         )
         return str(player_info)
-    
+
+
 class AIPlayer(Player):
-        
+
     def __init__(self, name: str = 'Computer', marker: Square = Square.O, difficulty: bool = False):
         """AIPlayer is a child class of Player and contains all the functionality for a one-player game
         against the computer. The computer player has three modes: easy, intermediate and hard.
         The computer is defaulted to name 'Computer' and marker 'O'"""
         super().__init__(name, marker)
-        self.difficulty = difficulty # None is easy mode, False is intermediate mode, True is hard mode
+        self.difficulty = difficulty  # None is easy mode, False is intermediate mode, True is hard mode
         self.corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
-        self.insides = [(0,1), (1,0), (1,2), (2,1)]
- 
-        
-    def get_fork_index(self, lines: list[[Square]])-> Optional[Union[int, bool]]:
+        self.insides = [(0, 1), (1, 0), (1, 2), (2, 1)]
+
+    def get_fork_index(self, lines: list[[Square]]) -> Optional[Union[int, bool]]:
         """Finds the position of a branch of a fork. Returns an integer of the row or column index
         if there is a column or row with a branch of a fork. Returns True if there is a diagonal fork 
         branch position. Returns None if no fork branch is found."""
         for index, line in enumerate(lines):
-            fork = Counter(line)      
-            if fork[Square.O] == 1 and fork[Square.BLANK] == 2:      
-                if len(lines) == 1: # this is for the two diagonals which are just a 1x3 matrix
+            fork = Counter(line)
+            if fork[Square.O] == 1 and fork[Square.BLANK] == 2:
+                if len(lines) == 1:  # this is for the two diagonals which are just a 1x3 matrix
                     return True
                 else:
-                    return index        
-     
-    
+                    return index
+        else:
+            return
+
     def check_fork(self, board: Board) -> Optional[tuple[int, int]]:
         """Checks for forks on the board that allows the computer to make a move where it will have 
         a winning position in two or more lines. The function searches the board for any fork branches.
@@ -280,61 +283,65 @@ class AIPlayer(Player):
         fork_diagonal_left = None
         # list of all potential forks on a board after a given move by a human player
         fork_positions = []
-        
+
         rows = board.get_rows()
         columns = board.get_columns()
-        
-        # check rows, columns and two diagonals to get an index of any fork position for row/col, or T/F for diagonal fork position
+
+        # check rows, columns and two diagonals to get an index of any fork position for row/col,
+        # or T/F for diagonal fork position
         fork_row_index = self.get_fork_index(rows)
-        fork_column_index = self.get_fork_index(columns)   
-        fork_diagonal_right = self.get_fork_index([board.get_right_diagonal()]) # get_fork_index only accepts a list of lines or 2D array
+        fork_column_index = self.get_fork_index(columns)
+        fork_diagonal_right = self.get_fork_index(
+            [board.get_right_diagonal()])  # get_fork_index only accepts a list of lines or 2D array
         fork_diagonal_left = self.get_fork_index([board.get_left_diagonal()])
-        
-        # check for all forks: a fork is the intersection of a row and column or an intersection of a row or column and a diagonal
-        
-        # for any fork in a row and column intersection or a row and diagonal intersection
-        if fork_row_index is not None:  
-            if fork_column_index is not None:             
+
+        # check for all forks: a fork is the intersection of a row and column or an intersection of a row or column
+        # and a diagonal. For any fork in a row and column intersection or a row and diagonal intersection
+        if fork_row_index is not None:
+            if fork_column_index is not None:
                 if not board.square_is_occupied(fork_row_index, fork_column_index):
                     fork_positions.append([fork_row_index, fork_column_index])
             # row and right diagonal fork has the same column position as the row
             if fork_diagonal_right:
                 if not board.square_is_occupied(fork_row_index, fork_row_index):
-                        fork_positions.append([fork_row_index, fork_row_index]) 
-            # row and left diagonal fork has the opposite column position as the row reflected through the centre horizontal line
+                    fork_positions.append([fork_row_index, fork_row_index])
+                    # row and left diagonal fork has the opposite column position as the row reflected through
+                    # the centre horizontal line
             if fork_diagonal_left:
                 if not board.square_is_occupied(fork_row_index, 2 - fork_row_index):
-                        fork_positions.append([fork_row_index, 2 - fork_row_index])
-        
+                    fork_positions.append([fork_row_index, 2 - fork_row_index])
+
         # for any fork in a column and diagonal intersection    
-        if fork_column_index is not None:  
+        if fork_column_index is not None:
             # column and right diagonal fork has the same row position as the column
             if fork_diagonal_right:
                 if not board.square_is_occupied(fork_column_index, fork_column_index):
                     fork_positions.append([fork_column_index, fork_column_index])
-            # column and left diagonal fork has the opposite row position as the column reflected through the centre vertical line
+            # column and left diagonal fork has the opposite row position as the column reflected through
+            # the centre vertical line
             if fork_diagonal_left:
                 if not board.square_is_occupied(2 - fork_column_index, fork_column_index):
                     fork_positions.append([2 - fork_column_index, fork_column_index])
-        
+
         # for a fork in the diagonal intersection: the centre is the intersection
         if fork_diagonal_right and fork_diagonal_left:
             fork_positions.append([1, 1])
-        
-        if fork_positions: # selects a random fork position if there is more than one fork or just the one
-            return fork_positions[randint(0, len(fork_positions) - 1)] 
-        else:
-            return # no forks were found
-    
 
-    def two_blanks(self, board) -> Optional[tuple[int, int]]:   
+        if fork_positions:  # selects a random fork position if there is more than one fork or just the one
+            return fork_positions[randint(0, len(fork_positions) - 1)]
+        else:
+            return  # no forks were found
+
+    def two_blanks(self, board) -> Optional[tuple[int, int]]:
         """Finds any line with two blanks and one 'O' marker. Used as alternative to random 
-        integers and allows for possiblity of victory. Returns row and column index else None."""
+        integers and allows for possibility of victory. Returns row and column index else None."""
         rows = board.get_rows()
         columns = board.get_columns()
-        diagonals = [board.get_right_diagonal(), board.get_left_diagonal()] # right diagonal is index 0, and left is index 1 
-                  
-        # returns the first found unoccupied square in a line with two blanks for intermediate mode or possible win in hard mode
+        diagonals = [board.get_right_diagonal(),
+                     board.get_left_diagonal()]  # right diagonal is index 0, and left is index 1
+
+        # returns the first found unoccupied square in a line with two blanks for intermediate mode
+        # or possible win in hard mode
         for index, row in enumerate(rows):
             if row.count(Square.BLANK) == 2 and row.count(Square.O) == 1:
                 for col in range(2):
@@ -363,7 +370,7 @@ class AIPlayer(Player):
                             continue
                         else:
                             return move_index, 2 - move_index
-     
+
     def random_ints(self, board: Board) -> tuple[int, int]:
         """Selects any open random positions on the board. Returns row and column index."""
         row = randint(0, 2)
@@ -373,7 +380,7 @@ class AIPlayer(Player):
             column = randint(0, 2)
 
         return row, column
-       
+
     def defence_mode(self, board: Board) -> tuple[int, int]:
         """AI strategy for when the computer plays second. Strategy is based on the first move
         by the human player. The AI always optimizes for a win or draw. Returns optimal move."""
@@ -385,92 +392,86 @@ class AIPlayer(Player):
                 move = choice(self.corners)
             else:
                 move = 1, 1
-  
             return move
-        
+
         elif Game.round_count == 4:
             if (r, c) == (1, 1):
                 # Only triggered when the opposite corner to the move in previous round was played by player X
                 for corner in self.corners:
-                    if not board.square_is_occupied(*corner): # randomly select one of the two free corners
-                        move = corner                     
+                    if not board.square_is_occupied(*corner):  # randomly select one of the two free corners
+                        return corner
             elif (r, c) in self.corners:
                 if not board.square_is_occupied((r + 2) % 4, (c + 2) % 4):
-                    move = (r + 2) % 4, (c + 2) % 4
+                    return (r + 2) % 4, (c + 2) % 4
                 else:
-                    move = choice(self.insides)
+                    return choice(self.insides)
             elif (r, c) in self.insides:
                 r1, c1 = Game.move_list[2]
                 if (r1, c1) in self.insides:
-                    if r == 1:    
-                        move = choice([0, 2]), c
+                    if r == 1:
+                        return choice([0, 2]), c
                     else:
-                        move = r, choice([0, 2])
+                        return r, choice([0, 2])
                 else:
                     if r == 1:
-                        move = r1, c
+                        return r1, c
                     else:
-                        move = r, c1
-            
-            return move
-        
+                        return r, c1
+
         elif Game.round_count == 6:
             if (r, c) == (1, 1):
                 r, c = Game.move_list[4]
                 if board.get_rows()[r].count(Square.BLANK) == 1:
-                    move =  r, (c + 2) % 4
+                    move = r, (c + 2) % 4
                 elif board.get_columns()[c].count(Square.BLANK) == 1:
                     move = (r + 2) % 4, c
-                    
 
             elif (r, c) in self.corners:
-                
-                if (move := self.two_blanks(board)):
+
+                if move := self.two_blanks(board):
                     return move
-        
+
                 for corner in self.corners:
                     if not board.square_is_occupied(*corner):
                         move = corner
-            
-            elif (move := self.two_blanks(board)):
+
+            elif move := self.two_blanks(board):
                 return move
 
             return move
-                
+
         else:
-            if (move := self.two_blanks(board)):
+            if move := self.two_blanks(board):
                 return move
             else:
                 return self.random_ints(board)
-             
-    
+
     def offence_mode(self, board: Board) -> tuple[int, int]:
         """AI strategy for when the computer plays first. Strategy is based on the first move by the
         computer and human player. The AI always optimizes for a win or draw. Returns optimal move."""
         # for testing purposes so hard mode can play versus hard mode used by TestGame class; otherwise, ignored
         if Game.round_count % 2 == 0:
             return self.defence_mode(board)
-       
-        if Game.round_count == 1:            
+
+        if Game.round_count == 1:
             # Only allow for corner or centre start to guarantee a win or draw
-            starts = self.corners + [(1,1)] 
-            return choice(starts) # add element of randomness to first move 
-        
+            starts = self.corners + [(1, 1)]
+            return choice(starts)  # add element of randomness to first move
+
         elif Game.round_count == 3:
             r, c = Game.move_list[0]
             if (r, c) == (1, 1):
                 if Game.move_list[1] not in self.corners:
-               
                     move = choice(self.corners)
                 else:
                     r, c = Game.move_list[1]
                     move = (r + 2) % 4, (c + 2) % 4
-            
+
             elif (r, c) in self.corners:
-                if Game.move_list[1] == (1, 1): 
-                    
+                if Game.move_list[1] == (1, 1):
+
                     move = (r + 2) % 4, c
-                    
+
                 elif Game.move_list[1] in self.corners:
                     for corner in self.corners:
                         if board.square_is_occupied(*corner):
@@ -486,31 +487,31 @@ class AIPlayer(Player):
                             else:
                                 move = ((r + 2) % 4), c
                         elif board.get_columns()[c].count(Square.X) == 1:
-                            move = r, ((c + 2) % 4)   
+                            move = r, ((c + 2) % 4)
             return move
 
         elif Game.round_count == 5:
-            if (move := self.check_fork(board)):
+            if move := self.check_fork(board):
                 return move
-            
+
             elif Game.move_list[1] in self.corners:
                 for move in self.corners:
                     if board.square_is_occupied(*move):
                         pass
                     else:
                         return move
-            elif (move := self.two_blanks(board)):
+            elif move := self.two_blanks(board):
                 return move
-            
+
             else:
                 return self.random_ints(board)
-         
+
         else:
-            if (move := self.two_blanks(board)):
+            if move := self.two_blanks(board):
                 return move
-            
-            return self.random_ints(board)    
-    
+
+            return self.random_ints(board)
+
     def win_or_block(self, board: Board) -> Optional[tuple[int, int]]:
         """Checks for a win or block. Selects the first found win position or a random block position if there are
         more than one block moves."""
@@ -533,25 +534,25 @@ class AIPlayer(Player):
                                     block_positions.append([index_1, index_2])
                                 else:
                                     return index_1, index_2
-                        
+
                         elif indicator == 1:
                             if not board.square_is_occupied(index_2, index_1):
                                 if marker is not Square.O:
                                     block_positions.append([index_2, index_1])
                                 else:
                                     return index_2, index_1
-                        
+
                         elif indicator == 2:
                             if not board.square_is_occupied(index_2, index_2):
                                 if marker is not Square.O:
                                     block_positions.append([index_2, index_2])
-                                    
+
                                 else:
                                     return index_2, index_2
                         else:
                             if not board.square_is_occupied(index_2, 2 - index_2):
                                 if marker is not Square.O:
-                                    block_positions.append([index_2, 2 - index_2])     
+                                    block_positions.append([index_2, 2 - index_2])
 
                                 else:
                                     return index_2, 2 - index_2
@@ -560,29 +561,29 @@ class AIPlayer(Player):
             return block_positions[randint(0, len(block_positions) - 1)]
         else:
             return None
-        
-    
+
     def move(self, board: Board) -> Union[tuple[int, int], list[int]]:
         """Selects a move for the AI player based on the play mode of easy, intermediate or hard. """
-        if self.difficulty is None: # easy mode
+        if self.difficulty is None:  # easy mode
             return self.random_ints(board)
-        
-        if (move := self.win_or_block(board)): # intermediate or hard mode always checks for win or block first
+
+        if move := self.win_or_block(board):  # intermediate or hard mode always checks for win or block first
             return move
-        
-        if self.difficulty: # hard mode
-            if Game.go_first: # strategy is based on if the human player plays first or not (go_first is for human player)
+
+        if self.difficulty:  # hard mode
+            if Game.go_first:  # strategy is based on if human player plays first or not (go_first is for human player)
                 return self.defence_mode(board)
             else:
                 return self.offence_mode(board)
-        
-        else: # intermediate mode always checks for a fork first then for two blanks after two random moves
+
+        else:  # intermediate mode always checks for a fork first then for two blanks after two random moves
             if Game.round_count > 3:
-                if (move := self.check_fork(board)):
+                if move := self.check_fork(board):
                     return move
-                if (move := self.two_blanks(board)):
+                if move := self.two_blanks(board):
                     return move
             return self.random_ints(board)
+
 
 class Game:
     """
@@ -597,13 +598,13 @@ class Game:
     succession. 
     """
     move_list = []
-    round_count = 0 
-    go_first = True # When True, player 1 goes first and when False, player 2 goes first.
+    round_count = 0
+    go_first = True  # When True, player 1 goes first and when False, player 2 goes first.
 
     def __init__(self):
         self.game_board = Board()  # Direct instance of a Board Class object to keep track of game information.
-        self.players: [Player] = []        
-        
+        self.players: [Player] = []
+
         self.winner = None  # The winner attributes with default settings reset when no winner
         self.win_index = 0  # these are updated when there is a winner.
         self.win_type = 'None'
@@ -662,13 +663,12 @@ class Game:
     def update_board(self, row: int, column: int, marker: Square) -> None:
         """Updates the board with the last played square."""
         self.game_board.update_square(row, column, marker)
-        
 
     def _check_win(self, squares: list[Square]) -> Optional[Square]:
         """Checks if a line has all the same markers to see if the game has been won."""
         marker, count = Counter(squares).most_common(1)[0]
         if count == len(squares) and marker is not Square.BLANK:
-            return marker                  
+            return marker
 
     def _check_rows(self) -> Optional[bool]:
         """Checks for winner in rows. Uses returned Square object to update the winner attributes. False if no Square
@@ -720,7 +720,8 @@ class Game:
             "left_diag": "the left diagonal."
         }
         winner_string = f"{winner_string} {win_type_dict[self.win_type]}\n"
-        delay_effect(surround_string([winner_string], "#", 9), 0.00075, False) # customize the size of the box and speed of delay
+        delay_effect(surround_string([winner_string], "#", 9), 0.00075,
+                     False)  # customize the size of the box and speed of delay
 
     def check_for_winner(self) -> Optional[bool]:
         """Checks if the game has been won in a row, column or diagonal if a winning line is found. It will return
@@ -746,18 +747,17 @@ class Game:
             name = player.name
             row, column = self._prompt_move(name)  # Validated in the prompt_move function.
         return row, column
-    
+
     def take_turn(self, player: Player) -> None:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column."""
         row, column = self.get_move(player)
-        # In Testing Mode
-#         os.system('clear||cls')
+        # In Testing Mode do not clear the screen to see the moves of the AIplayer
+        os.system('clear||cls')
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
         self.print_move(player, row, column)
         self.print_board()
-
 
     def _prompt_move(self, name: str) -> Union[tuple[int, int], list[int]]:
         """Validates and formats the user inputted row and column. Checks if the inputted position is occupied."""
@@ -789,7 +789,6 @@ class Game:
             except ValueError:
                 print("\nYou must enter a number. Try again.\n")
 
-
     def _one_player(self) -> bool:
         """Sets the game to one or two players."""
         valid_input = {'1', '2', 'one', 'two'}
@@ -815,7 +814,9 @@ class Game:
                 delay_effect(["\nYou are playing against the computer in hard mode."])
                 return True
             else:
-                print(f"\nThere is only easy, intermediate or hard mode.\nPlease select '1' for easy, '2' for intermediate or '3' for hard.")
+                print(
+                    f"\nThere is only easy, intermediate or hard mode.\nPlease select '1' for easy, '2' for "
+                    f"intermediate or '3' for hard.")
 
     def create_players(self) -> None:
         """Creates two players of the Player class for game play and add the players to the player attribute."""
@@ -882,13 +883,13 @@ class Game:
 
 
 class TestGames(Game):
-    
+
     def __init__(self):
-        
+
         super().__init__()
         self.level = None
         self.games = None
-        
+
     def start_test(self, level: str, games: int) -> None:
         """Tests the AIPlayer class by having one ai player against another ai player. Set the level of
         the first AI player to play against the computer in hard mode. Set the number of games to be tested.
@@ -899,9 +900,9 @@ class TestGames(Game):
         elif not isinstance(games, int):
             print("The number of games must be an integer and not a float or string.")
             return
-            
+
         self.games = games
-        
+
         if level == 'easy':
             difficulty = None
             self.level = 'easy'
@@ -914,47 +915,46 @@ class TestGames(Game):
         else:
             print("Only 'easy', 'intermediate', or 'hard is allowed for testing.")
             return
-        
-        if len(self.players) != 0: # clear the player list in case of retesting at different level or multiply tests
+
+        if len(self.players) != 0:  # clear the player list in case of retesting at different level or multiply tests
             self.players.clear()
-        
-#         AIPlayer.is_test = True
+
+        #         AIPlayer.is_test = True
         self.add_player(AIPlayer(name=f'Computer {level.capitalize()}', marker=Square.X, difficulty=difficulty))
         self.add_player(AIPlayer(name='Computer Hard Mode', marker=Square.O, difficulty=True))
-        
+
         # Since hard versus hard mode play the same strategy, there is no differentiation between X or O 
         # playing first. The AI hard strategy code is based on the AI player playing O, and thus
         # alternating who goes first will affect the code and cause an error or improper strategy moves.
         if self.level == 'hard':
             Game.go_first = not Game.go_first
-        
+
         # Testing games
-        for i in range(games): 
+        for i in range(games):
             self.play_game()
-            
+
             # Used for debugging, but now all errors seem to be fixed.
-            if self.winner != None and self.winner.marker == Square.X:
+            if self.winner is not None and self.winner.marker == Square.X:
                 print("EASY or INTERMEDIATE WON. You have a hole in your AI HARD mode strategy!")
                 print(self.move_list)
                 print(self.print_first_player())
                 self.print_board()
-            
+
             Game.round_count = 0
             Game.move_list.clear()
-            # alternatve who plays first to test both offensive and defensive strategy
+            # alternative who plays first to test both offensive and defensive strategy
             if self.level != 'hard':
-                Game.go_first = not Game.go_first 
+                Game.go_first = not Game.go_first
             self.game_board.reset_board()
-        
+
         # show the final statistics
         self.print_scoreboard()
-        
-        
+
     def play_game(self) -> None:
         """Same as play_game in the parent class without sending output to the terminal."""
         for i in range(9):
             Game.round_count += 1
-           
+
             if Game.go_first:
                 self.take_turn(self.players[i % 2])
             else:
@@ -968,29 +968,29 @@ class TestGames(Game):
         else:
             self._update_winner_info()
             self.update_players()
-          
-    def get_move(self, player: Player) -> Union[tuple[int, int], list[int]]:
+
+    def get_move(self, player: AIPlayer) -> Union[tuple[int, int], list[int]]:
         """Same as get_move in the parent class without the added effect of the computer 
         pausing to think and outputting a message to the terminal and calling the method
         for user input from the human player."""
         board = self.game_board
-           
+
         row, column = player.move(board)
 
         return row, column
-        
-    def take_turn(self, player: Player) -> None:
+
+    def take_turn(self, player: AIPlayer) -> None:
         """Gets the row and column from the current player and updates the board tracker and game board for printing.
         Returns the indexed row and column."""
         row, column = self.get_move(player)
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
-   
-    
+
+
 # Two static methods for setting up the game and command line window
-            
+
 def set_console_window_size(width: float, height: float) -> None:
-    """Sets the consolute window to fit the board to the screen better."""
+    """Sets the console window to fit the board to the screen better."""
     # Check the platform (Windows or Unix-based)
     os.system('cls||clear')
     if os.name == 'nt':
@@ -1000,10 +1000,11 @@ def set_console_window_size(width: float, height: float) -> None:
         # Unix-based platforms (Linux, macOS)
         os.system(f'printf "\033[8;{height};{width}t"')
 
+
 def run_games() -> None:
     """
     The Main method for running a series of Tic-Tac-Toe games. Starts a game session that keeps track 
-    of the two players statistics and allows for multiple plays. Creates a Game Obect that manages the
+    of the two players statistics and allows for multiple plays. Creates a Game Object that manages the
     game from start to finish, including player creation and AI play.
     """
     games = Game()
@@ -1027,6 +1028,5 @@ def run_games() -> None:
 
 
 if __name__ == '__main__':
-#     set_console_window_size(80, 28)
     set_console_window_size(85, 30)
     run_games()
