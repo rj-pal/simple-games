@@ -1,5 +1,5 @@
-*original*
-*original.py
+tictactoe_early.py
+original*
 *.idea
 *.ipynb_checkpoints
 __pycache__
