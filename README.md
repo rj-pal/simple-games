@@ -13,7 +13,7 @@ All ascii art and game board are also original work by me ❤️
 
 I performed some test of the 'AI' where the computer would play in hard mode against itself in easy, intermediate and hard mode. As expected, the computer in hard mode never lost against itself! When the computer played against itself in hard mode, there were only draws and no wins! This was crucial to validate my hard mode logic.
 
-I wrote a TestAI class to perform the tests which modified the code to allow the game to create two computer players. I also commented out any printing methods at the time of running the notebook just to run the AI player logic only. 
+I wrote a TestAI class to perform the tests which modified the code to allow the game to create two computer players. It validated that the computer mode worked properly and that there was a clear difference in the outcomes of the three different modes of play.
 
 ### Some Info on the Code Itself
 
