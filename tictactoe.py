@@ -55,7 +55,6 @@ GAMEOVER = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
-
 # Printing functions for creating computer output effect and border box
 
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
@@ -127,7 +126,6 @@ class Square(Enum):
         """Returns a string of the name and value of the square enum object."""
         return f'Name: {self.name}\nValue: {self.value}'
 
-
 class Board:
     """
     Board class stores the information for every square on the board. It allows for updating, resetting,
@@ -137,7 +135,6 @@ class Board:
     the join method. Each row is created line-by-line from zipping each Square in a row, top to bottom combined with
     an asterisk, which make up the vertical lines in the board. Each row is joined to a horizontal line.
     """
-
     def __init__(self):
         self.board = [
             [Square.BLANK] * 3,
@@ -194,7 +191,6 @@ class Board:
     def __repr__(self) -> str:
         """Returns a string of information on current attributes of the board for information purposes only."""
         return f'Board:\n{str(self.board)}\nHorizontal line:\n{self.horizontal_line}'
-
 
 class Player:
     def __init__(self, name: str, marker: Square):
@@ -258,7 +254,7 @@ class AIPlayer(Player):
         self.corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
         self.insides = [(0, 1), (1, 0), (1, 2), (2, 1)]
 
-    def get_fork_index(self, lines: list[[Square]]) -> Optional[Union[int, bool]]:
+    def _get_fork_index(self, lines: list[[Square]]) -> Optional[Union[int, bool]]:
         """Finds the position of a branch of a fork. Returns an integer of the row or column index
         if there is a column or row with a branch of a fork. Returns True if there is a diagonal fork 
         branch position. Returns None if no fork branch is found."""
@@ -272,7 +268,7 @@ class AIPlayer(Player):
         else:
             return
 
-    def check_fork(self, board: Board) -> Optional[tuple[int, int]]:
+    def _check_fork(self, board: Board) -> Optional[tuple[int, int]]:
         """Checks for forks on the board that allows the computer to make a move where it will have 
         a winning position in two or more lines. The function searches the board for any fork branches.
         If there is an intersection of two branches, the fork is added to a list, and randomly selects a fork.
@@ -332,7 +328,7 @@ class AIPlayer(Player):
         else:
             return  # no forks were found
 
-    def two_blanks(self, board) -> Optional[tuple[int, int]]:
+    def _two_blanks(self, board) -> Optional[tuple[int, int]]:
         """Finds any line with two blanks and one 'O' marker. Used as alternative to random 
         integers and allows for possibility of victory. Returns row and column index else None."""
         rows = board.get_rows()
@@ -371,7 +367,7 @@ class AIPlayer(Player):
                         else:
                             return move_index, 2 - move_index
 
-    def random_ints(self, board: Board) -> tuple[int, int]:
+    def _random_ints(self, board: Board) -> tuple[int, int]:
         """Selects any open random positions on the board. Returns row and column index."""
         row = randint(0, 2)
         column = randint(0, 2)
@@ -381,7 +377,7 @@ class AIPlayer(Player):
 
         return row, column
 
-    def defence_mode(self, board: Board) -> tuple[int, int]:
+    def _defence_mode(self, board: Board) -> tuple[int, int]:
         """AI strategy for when the computer plays second. Strategy is based on the first move
         by the human player. The AI always optimizes for a win or draw. Returns optimal move."""
 
@@ -446,7 +442,7 @@ class AIPlayer(Player):
             else:
                 return self.random_ints(board)
 
-    def offence_mode(self, board: Board) -> tuple[int, int]:
+    def _offence_mode(self, board: Board) -> tuple[int, int]:
         """AI strategy for when the computer plays first. Strategy is based on the first move by the
         computer and human player. The AI always optimizes for a win or draw. Returns optimal move."""
         # for testing purposes so hard mode can play versus hard mode used by TestGame class; otherwise, ignored
@@ -512,7 +508,7 @@ class AIPlayer(Player):
 
             return self.random_ints(board)
 
-    def win_or_block(self, board: Board) -> Optional[tuple[int, int]]:
+    def _win_or_block(self, board: Board) -> Optional[tuple[int, int]]:
         """Checks for a win or block. Selects the first found win position or a random block position if there are
         more than one block moves."""
         block_positions = []  # Makes a list of all possible blocking points on the board of the opponent
@@ -562,7 +558,7 @@ class AIPlayer(Player):
         else:
             return None
 
-    def move(self, board: Board) -> Union[tuple[int, int], list[int]]:
+    def _move(self, board: Board) -> Union[tuple[int, int], list[int]]:
         """Selects a move for the AI player based on the play mode of easy, intermediate or hard. """
         if self.difficulty is None:  # easy mode
             return self.random_ints(board)
@@ -986,7 +982,6 @@ class TestGames(Game):
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
 
-
 # Two static methods for setting up the game and command line window
 
 def set_console_window_size(width: float, height: float) -> None:
@@ -1025,7 +1020,6 @@ def run_games() -> None:
 
         except ValueError:
             print(message)
-
 
 if __name__ == '__main__':
     set_console_window_size(85, 30)
