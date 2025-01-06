@@ -1,5 +1,5 @@
 # Tic Tac Toe
-Tic-Tac-Toe Game for Command Line written in Python (requires Python 3.9 or higher)
+Tic-Tac-Toe Game for Command Line written in Python (requires **Python 3.9** or higher)
 ***
 This is simple Tic-Tac-Toe game with original algorithms for game play including keeping track of squares and checking for winner all created by me 🔥
 
