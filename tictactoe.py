@@ -803,7 +803,7 @@ class Game:
         """Updates the difficulty level boolean when playing against the computer."""
         valid_input = ['1', 'easy', '2', 'intermediate', '3', 'hard']
         while True:
-            level_of_difficulty = input("\nSelect the level of difficult, Easy, intermediate or Hard: ").lower()
+            level_of_difficulty = input("\nSelect the level of difficult, Easy, Intermediate or Hard: ").lower()
             if level_of_difficulty in valid_input[:2]:
                 delay_effect(["\nYou are playing against the computer in easy mode."])
                 return None
