@@ -19,9 +19,16 @@ def terminal(ws):
     sys.stdout = output
 
     try:
-        set_console_window_size(85, 30)
         game = Game()
         game.print_welcome_box()
+        game.print_intro()
+        
+        # Initialize game with players
+        game.add_player(Player("Player 1", Square.X))
+        game.add_player(AIPlayer())
+        
+        game.print_board()
+        
         initial_output = output.getvalue()
         if initial_output:
             ws.send(initial_output)
@@ -32,23 +39,33 @@ def terminal(ws):
             user_input = ws.receive()
             if user_input:
                 try:
-                    row, col = map(int, user_input.split(','))
-                    if game.game_board.square_is_occupied(row, col):
-                        print("Invalid move. Try again.")
+                    if ',' in user_input:
+                        row, col = map(lambda x: int(x.strip()) - 1, user_input.split(','))
+                        if 0 <= row <= 2 and 0 <= col <= 2:
+                            if game.game_board.square_is_occupied(row, col):
+                                print("\nThat square is already occupied! Try again.\n")
+                            else:
+                                game.take_turn(game.players[0], row, col)
+                                game.print_board()
+                                
+                                if game.check_for_winner():
+                                    print(f"\nWinner: {game.players[0].name}!")
+                                    break
+                                
+                                # AI's turn
+                                ai_row, ai_col = game.players[1].move(game.game_board)
+                                game.take_turn(game.players[1], ai_row, ai_col)
+                                game.print_board()
+                                
+                                if game.check_for_winner():
+                                    print(f"\nWinner: {game.players[1].name}!")
+                                    break
+                        else:
+                            print("\nInvalid move! Row and column must be between 1 and 3.\n")
                     else:
-                        game.take_turn(game.players[0], row, col)
-                        if game.check_for_winner():
-                            print(f"Winner: {game.players[0].name}")
-                            break
-                        if isinstance(game.players[1], AIPlayer):
-                            ai_row, ai_col = game.players[1].move(game.game_board)
-                            game.take_turn(game.players[1], ai_row, ai_col)
-                            if game.check_for_winner():
-                                print(f"Winner: {game.players[1].name}")
-                                break
-
+                        print("\nInvalid input format. Use row,col (e.g., 1,2)\n")
                 except (ValueError, IndexError):
-                    print("Invalid input format. Use row,col (e.g., 0,1)")
+                    print("\nInvalid input format. Use row,col (e.g., 1,2)\n")
                 sys.stdout.flush()
                 new_output = output.getvalue()
                 if new_output:
