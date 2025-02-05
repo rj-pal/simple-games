@@ -1,5 +1,3 @@
-=======
-
 from flask import Flask, render_template, request, jsonify
 from tictactoe import Game, Player, Square, AIPlayer
 
@@ -70,4 +68,3 @@ def make_move():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
->>>>>>> 61e9b622e22122720c14ba1305f18335227ec3d3
