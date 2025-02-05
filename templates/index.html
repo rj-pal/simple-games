@@ -138,7 +138,7 @@
             const cells = document.getElementsByClassName('cell');
             for (let i = 0; i < cells.length; i++) {
                 const state = boardState[i];
-                cells[i].textContent = state === 'X' ? 'X' : state === 'O' ? 'O' : '';
+                cells[i].textContent = state === 'Square.X' ? 'X' : state === 'Square.O' ? 'O' : '';
             }
         }
     </script>
