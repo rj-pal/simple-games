@@ -21,31 +21,22 @@ def terminal(ws):
         # Initialize game
         set_console_window_size(85, 30)
         game = Game()
-        game.print_welcome_box()
+        game.start_game()
 
         # Send initial output
-        initial_output = output.getvalue()
-        if initial_output:
-            ws.send(initial_output)
+        ws.send(output.getvalue())
         output.truncate(0)
         output.seek(0)
 
         # Handle input
         while True:
-            try:
-                user_input = ws.receive()
-                if user_input:
-                    # Redirect input to game
-                    print(user_input, end='')
-                    # Send any output back to client
-                    new_output = output.getvalue()
-                    if new_output:
-                        ws.send(new_output)
-                    output.truncate(0)
-                    output.seek(0)
-            except Exception as e:
-                print(f"WebSocket error: {e}")
-                break
+            user_input = ws.receive()
+            if user_input:
+                # Process input and capture output
+                print(user_input, end='')
+                ws.send(output.getvalue())
+                output.truncate(0)
+                output.seek(0)
 
     finally:
         sys.stdout = old_stdout
