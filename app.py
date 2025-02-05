@@ -1,70 +1,63 @@
-from flask import Flask, render_template, request, jsonify
-from tictactoe import Game, Player, Square, AIPlayer
+from flask import Flask, render_template
+from flask_sock import Sock
+import sys
+from io import StringIO
+from tictactoe import Game, Player, Square, AIPlayer, set_console_window_size
 
 app = Flask(__name__)
+sock = Sock(app)
 game = None
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('terminal.html')
 
-@app.route('/start_game', methods=['POST'])
-def start_game():
-    global game
-    data = request.json
-    game_type = data.get('gameType')
-    player_name = data.get('playerName')
-    difficulty = data.get('difficulty')
-    
-    game = Game()
-    game.add_player(Player(player_name, Square.X))
-    
-    if game_type == 'single':
-        if difficulty == 'easy':
-            diff_setting = None
-        elif difficulty == 'intermediate':
-            diff_setting = False
-        else:
-            diff_setting = True
-        game.add_player(AIPlayer(difficulty=diff_setting))
-    else:
-        game.add_player(Player(data.get('player2Name'), Square.O))
-    
-    return jsonify({'status': 'success'})
+@sock.route('/terminal')
+def terminal(ws):
+    old_stdout = sys.stdout
+    output = StringIO()
+    sys.stdout = output
 
-@app.route('/make_move', methods=['POST'])
-def make_move():
-    data = request.json
-    row = data.get('row')
-    col = data.get('col')
-    
-    if game.game_board.square_is_occupied(row, col):
-        return jsonify({'status': 'invalid'})
-        
-    game.take_turn(game.players[0])
-    
-    if game.check_for_winner():
-        return jsonify({
-            'status': 'winner',
-            'board': [str(square) for row in game.game_board.get_rows() for square in row],
-            'winner': game.players[0].name
-        })
-    
-    if isinstance(game.players[1], AIPlayer):
-        ai_row, ai_col = game.players[1].move(game.game_board)
-        game.game_board.update_square(ai_row, ai_col, Square.O)
-        
-        if game.check_for_winner():
-            return jsonify({
-                'status': 'winner',
-                'board': [str(square) for row in game.game_board.get_rows() for square in row],
-                'winner': game.players[1].name
-            })
-    
-    return jsonify({
-        'status': 'continue',
-        'board': [str(square) for row in game.game_board.get_rows() for square in row]
-    })
+    try:
+        set_console_window_size(85, 30)
+        game = Game()
+        game.print_welcome_box()
+        initial_output = output.getvalue()
+        if initial_output:
+            ws.send(initial_output)
+        output.truncate(0)
+        output.seek(0)
+
+        while True:
+            user_input = ws.receive()
+            if user_input:
+                try:
+                    row, col = map(int, user_input.split(','))
+                    if game.game_board.square_is_occupied(row, col):
+                        print("Invalid move. Try again.")
+                    else:
+                        game.take_turn(game.players[0], row, col)
+                        if game.check_for_winner():
+                            print(f"Winner: {game.players[0].name}")
+                            break
+                        if isinstance(game.players[1], AIPlayer):
+                            ai_row, ai_col = game.players[1].move(game.game_board)
+                            game.take_turn(game.players[1], ai_row, ai_col)
+                            if game.check_for_winner():
+                                print(f"Winner: {game.players[1].name}")
+                                break
+
+                except (ValueError, IndexError):
+                    print("Invalid input format. Use row,col (e.g., 0,1)")
+                sys.stdout.flush()
+                new_output = output.getvalue()
+                if new_output:
+                    ws.send(new_output)
+                output.truncate(0)
+                output.seek(0)
+
+    finally:
+        sys.stdout = old_stdout
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
