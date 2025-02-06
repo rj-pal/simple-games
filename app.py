@@ -24,22 +24,37 @@ from flask import session
 @app.route('/play', methods=['POST'])
 def play():
     player_name = request.form.get('player_name')
+    players_mode = request.form.get('players')
     game_mode = request.form.get('game_mode')
+    player2_name = request.form.get('player2_name')
     
     if not player_name:
         return redirect(url_for('home'))
     
-    # Create or update player record
+    # Create or update player records
     player = GameResult.query.filter_by(player_name=player_name).first()
     if not player:
         player = GameResult(player_name=player_name)
         db.session.add(player)
-        db.session.commit()
+        
+    if players_mode == 'two' and player2_name:
+        player2 = GameResult.query.filter_by(player_name=player2_name).first()
+        if not player2:
+            player2 = GameResult(player_name=player2_name)
+            db.session.add(player2)
+    
+    db.session.commit()
     
     session['current_player'] = 'X'
     session['board'] = [['' for _ in range(3)] for _ in range(3)]
+    session['players_mode'] = players_mode
+    session['player2_name'] = player2_name if players_mode == 'two' else None
         
-    return render_template('game.html', player_name=player_name, game_mode=game_mode)
+    return render_template('game.html', 
+                         player_name=player_name,
+                         player2_name=player2_name if players_mode == 'two' else None,
+                         game_mode=game_mode,
+                         players_mode=players_mode)
 
 @app.route('/get_current_player')
 def get_current_player():

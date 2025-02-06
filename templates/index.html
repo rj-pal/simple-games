@@ -49,14 +49,43 @@
     <h1>Tic Tac Toe</h1>
     
     <form action="/play" method="POST">
+        <div style="margin: 20px 0;">
+            <label>Game Mode:</label><br>
+            <input type="radio" name="players" value="one" checked> Single Player
+            <input type="radio" name="players" value="two"> Two Players
+        </div>
+        
         <input type="text" name="player_name" placeholder="Enter your name" required>
-        <select name="game_mode">
-            <option value="easy">Easy</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="hard">Hard</option>
-        </select>
+        <div id="player2Input" style="display: none;">
+            <input type="text" name="player2_name" placeholder="Enter player 2 name">
+        </div>
+        
+        <div id="difficultySelect">
+            <select name="game_mode">
+                <option value="easy">Easy</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+        
         <button type="submit">Start Game</button>
     </form>
+
+    <script>
+        document.getElementsByName('players').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const player2Input = document.getElementById('player2Input');
+                const difficultySelect = document.getElementById('difficultySelect');
+                if (e.target.value === 'two') {
+                    player2Input.style.display = 'block';
+                    difficultySelect.style.display = 'none';
+                } else {
+                    player2Input.style.display = 'none';
+                    difficultySelect.style.display = 'block';
+                }
+            });
+        });
+    </script>
 
     <div class="leaderboard">
         <h2>Leaderboard</h2>
