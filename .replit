@@ -16,7 +16,7 @@ author = 12810285
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python tictactoe.py"
+args = "python app.py"
 
 [[ports]]
 localPort = 8080
