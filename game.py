@@ -3,6 +3,9 @@ from collections import namedtuple
 def int_converter(number):
     return divmod(number, 3)
 
+def pair_converter(pair):
+    return pair[0]*3 + pair[1]
+
 class TicTacToe:
 
     def __init__(self):
@@ -104,10 +107,12 @@ class TicTacToe:
             )
             return str(player_info)
 
-        
+pair_list = []     
 for i in range(9):
-    print(int_converter(i)
-)
+    pair_list.append(int_converter(i))
+print(pair_list)
+for pair in pair_list:
+    print(pair_converter(pair))
 
 T = TicTacToe()
 # print(T.board)
