@@ -7,6 +7,7 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game_results.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'your-secret-key-here'  # Required for session management
 
 db.init_app(app)
 
@@ -18,6 +19,8 @@ def home():
     results = GameResult.query.order_by(GameResult.wins.desc()).all()
     return render_template('index.html', results=results)
 
+from flask import session
+
 @app.route('/play', methods=['POST'])
 def play():
     player_name = request.form.get('player_name')
@@ -25,15 +28,22 @@ def play():
     
     if not player_name:
         return redirect(url_for('home'))
-        
+    
     # Create or update player record
     player = GameResult.query.filter_by(player_name=player_name).first()
     if not player:
         player = GameResult(player_name=player_name)
         db.session.add(player)
         db.session.commit()
+    
+    session['current_player'] = 'X'
+    session['board'] = [['' for _ in range(3)] for _ in range(3)]
         
     return render_template('game.html', player_name=player_name, game_mode=game_mode)
+
+@app.route('/get_current_player')
+def get_current_player():
+    return jsonify({'player': session.get('current_player', 'X')})
 
 @app.route('/update_score', methods=['POST'])
 def update_score():

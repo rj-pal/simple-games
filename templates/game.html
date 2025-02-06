@@ -43,9 +43,14 @@
     <script>
         const playerName = "{{ player_name }}";
         const gameMode = "{{ game_mode }}";
-        let currentPlayer = 'X';
         let gameBoard = Array(3).fill().map(() => Array(3).fill(''));
         let gameOver = false;
+
+        function getCurrentPlayer() {
+            return fetch('/get_current_player')
+                .then(response => response.json())
+                .then(data => data.player);
+        }
 
         async function makeMove(cell) {
             if (gameOver || cell.innerText !== '') return;
@@ -53,6 +58,7 @@
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
             
+            const currentPlayer = await getCurrentPlayer();
             cell.innerText = currentPlayer;
             gameBoard[row][col] = currentPlayer;
             
