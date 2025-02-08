@@ -1,11 +1,21 @@
 from collections import namedtuple, Counter
 from typing import Tuple, List
+from Player import Player
 
-def int_converter(number):
-    return divmod(number, 3)
+def int_converter(number, columns):
+    return divmod(number, columns)
 
-def pair_converter(pair):
-    return pair[0]*3 + pair[1]
+def pair_converter(pair, columns):
+    return pair[0]*columns + pair[1]
+
+def board(rows: int, columns: int):
+    board = []
+    for i in range(rows):
+        if i == 1:
+            board.append(["x" for _ in range(columns)])
+        else:
+            board.append([0 for _ in range(columns)])
+    return board
 
 class TicTacToe:
 
@@ -15,14 +25,10 @@ class TicTacToe:
          self.move_list: List = []
          self.round_count: int = 0
          self.go_first: bool = True
-         self.board: List[List] = [
-            [0] * 3,
-            ["x"] * 3,
-            [0] * 3
-        ]
-         self.players: Tuple[TicTacToe.Player, TicTacToe.Player] = (
-            TicTacToe.Player("Player 1", "x"),
-            TicTacToe.Player("Player 2", "o")
+         self.board: List[List] = board(3,3)
+         self.players: Tuple[Player, Player] = (
+            self.TicTacToePlayer("Player 1", "x"),
+            self.TicTacToePlayer("Player 2", "o")
         )
          self.winner: TicTacToe.Player = None  # The winner attributes with default settings reset when no winner
          self.win_index: int = 0  # these are updated when there is a winner.
@@ -139,54 +145,66 @@ class TicTacToe:
             self._update_winner_info(winner, "left_diag")
             return True
 
-    class Player:
+    class TicTacToePlayer(Player):
 
-        def __init__(self, name: str, marker: str):
-            self.name = None
-            if marker not in TicTacToe.VALID_MARKERS:
+        def __init__(self, name: str = None, marker: str = None):
+            if marker.lower() not in {"x", "o"}:  # Assuming VALID_MARKERS is {"x", "o"}
                 raise ValueError(f"Invalid marker: {marker}. Must be 'x' or 'o'.")
-            self.marker = marker
-            self.win_count = 0
-            self.lost_count = 0
-            self.games_played = 0
 
-        def game_played(self) -> None:
-            """Updates the number of total games played by the player."""
-            self.games_played += 1
+            super().__init__(name, marker)  # Initialize inherited attributes
 
-        def won(self) -> None:
-            """Updates the number of games won of the player."""
-            self.win_count += 1
+    
+    # class Player(Player):
 
-        def lost(self) -> None:
-            """Updates the number of games lost of the player."""
-            self.lost_count += 1
+    #     def __init__(self, name: str, marker: str):
+    #         self.name = None
+    #         if marker not in TicTacToe.VALID_MARKERS:
+    #             raise ValueError(f"Invalid marker: {marker}. Must be 'x' or 'o'.")
+    #         self.marker = marker
+    #         self.win_count = 0
+    #         self.lost_count = 0
+        #     self.games_played = 0
 
-        def get_draw_count(self) -> int:
-            """Returns the number of tied games of the player based on the other game statistics."""
-            return self.games_played - (self.win_count + self.lost_count)
+        # def game_played(self) -> None:
+        #     """Updates the number of total games played by the player."""
+        #     self.games_played += 1
 
-        def __repr__(self) -> str:
-            """Returns a string of information on current attributes of the player for information purposes only. Stored
-            as a named tuple. """
-            PlayerRepr = namedtuple("Player", ["name", "marker", "win", "lost", "draw", "played"])
+        # def won(self) -> None:
+        #     """Updates the number of games won of the player."""
+        #     self.win_count += 1
 
-            player_info = PlayerRepr(
-                self.name,
-                self.marker,
-                self.win_count,
-                self.lost_count,
-                self.get_draw_count(),
-                self.games_played
-            )
-            return str(player_info)
+        # def lost(self) -> None:
+        #     """Updates the number of games lost of the player."""
+        #     self.lost_count += 1
 
+        # def get_draw_count(self) -> int:
+        #     """Returns the number of tied games of the player based on the other game statistics."""
+        #     return self.games_played - (self.win_count + self.lost_count)
+
+        # def __repr__(self) -> str:
+        #     """Returns a string of information on current attributes of the player for information purposes only. Stored
+        #     as a named tuple. """
+        #     PlayerRepr = namedtuple("Player", ["name", "marker", "win", "lost", "draw", "played"])
+
+        #     player_info = PlayerRepr(
+        #         self.name,
+        #         self.marker,
+        #         self.win_count,
+        #         self.lost_count,
+        #         self.get_draw_count(),
+        #         self.games_played
+        #     )
+        #     return str(player_info)
+
+# print(board(3,3))
+# exit()
 # pair_list = []     
 # for i in range(9):
-#     pair_list.append(int_converter(i))
+#     pair_list.append(int_converter(i,3))
 # print(pair_list)
 # for pair in pair_list:
-#     print(pair_converter(pair))
+#     print(pair_converter(pair, 3))
+# exit()
 
 T = TicTacToe()
 T.update_player("Joe", "x")
