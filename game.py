@@ -1,4 +1,5 @@
 from collections import namedtuple, Counter
+from typing import Tuple, List
 
 def int_converter(number):
     return divmod(number, 3)
@@ -8,19 +9,24 @@ def pair_converter(pair):
 
 class TicTacToe:
 
+    VALID_MARKERS = {"x", "o"}
+
     def __init__(self):
-         self.move_list = []
-         self.round_count = 0
-         self.go_first = True
-         self.board = [
+         self.move_list: List = []
+         self.round_count: int = 0
+         self.go_first: bool = True
+         self.board: List[List] = [
             [0] * 3,
-            ["X"] * 3,
+            ["x"] * 3,
             [0] * 3
         ]
-         self.players: [Player] = []
-         self.winner = None  # The winner attributes with default settings reset when no winner
-         self.win_index = 0  # these are updated when there is a winner.
-         self.win_type = 'None' 
+         self.players: Tuple[TicTacToe.Player, TicTacToe.Player] = (
+            TicTacToe.Player("Player 1", "x"),
+            TicTacToe.Player("Player 2", "o")
+        )
+         self.winner: TicTacToe.Player = None  # The winner attributes with default settings reset when no winner
+         self.win_index: int = 0  # these are updated when there is a winner.
+         self.win_type: str = 'None' 
 
     def print_winner(self):
         print(f"Winning Player: {self.winner.name}")
@@ -56,18 +62,20 @@ class TicTacToe:
         """Updates the board with the last played square."""
         self.board.update_square(row, column, marker)
 
-
     def reset_board(self) -> None:
         """Sets each square in the board to a blank."""
-        for r, row in enumerate(self.board):
-            for c in range(len(row)):
-                self.board[r][c] = 0
+        self.board = [[0] * 3 for _ in range(3)]
+        # for r, row in enumerate(self.board):
+        #     for c in range(len(row)):
+        #         self.board[r][c] = 0
 
-    def add_player(self, name: str, marker: str) -> None:
-        """Adds a player to the player list. Maximum of two players for each game session."""
-        if len(self.players) < 2:
-            player = self.Player(name, marker)
-            self.players.append(player)
+    def update_player(self, name: str, marker: str) -> None:
+        """Updates a player's name based on their marker ('x' or 'o')."""
+        marker = marker.lower()    
+        if marker not in self.VALID_MARKERS:
+            raise ValueError(f"Invalid marker '{marker}'. Must be 'x' or 'o'.")
+        marker_to_index = {"x": 0, "o": 1}
+        self.players[marker_to_index[marker]].name = name if name else f"Anonymous {marker.capitalize()}"
 
     def update_players(self) -> None:
         """Updates the game statistics on the two players based on if there is a winner or not."""
@@ -132,8 +140,11 @@ class TicTacToe:
             return True
 
     class Player:
+
         def __init__(self, name: str, marker: str):
-            self.name = name if name else f"Anonymous {self.marker}"
+            self.name = None
+            if marker not in TicTacToe.VALID_MARKERS:
+                raise ValueError(f"Invalid marker: {marker}. Must be 'x' or 'o'.")
             self.marker = marker
             self.win_count = 0
             self.lost_count = 0
@@ -158,13 +169,14 @@ class TicTacToe:
         def __repr__(self) -> str:
             """Returns a string of information on current attributes of the player for information purposes only. Stored
             as a named tuple. """
-            PlayerRepr = namedtuple("Player", ["name", "marker", "win", "lost", "played"])
+            PlayerRepr = namedtuple("Player", ["name", "marker", "win", "lost", "draw", "played"])
 
             player_info = PlayerRepr(
                 self.name,
                 self.marker,
                 self.win_count,
                 self.lost_count,
+                self.get_draw_count(),
                 self.games_played
             )
             return str(player_info)
@@ -177,14 +189,19 @@ class TicTacToe:
 #     print(pair_converter(pair))
 
 T = TicTacToe()
-T.add_player("Joe", "X")
+T.update_player("Joe", "x")
+T.update_player("Mason", "o")
+T.update_player("", "x")
+print(T.players)
 print(T.check_for_winner())
 T.print_winner()
+print(T.board)
 
 # print(T.board)
 # print(T.get_columns())
 # print(T.get_rows())
-# T.reset_board()
+T.reset_board()
+print(T.board)
 # T.update_square(2, 2, 'X')
 
 # T.update_players()
