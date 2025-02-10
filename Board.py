@@ -7,8 +7,8 @@ class Board:
     def _initialize_board(self) -> list[list]:
         board = []
         for i in range(self.rows):
-            if i == 1:
-                board.append(["x" for _ in range(self.columns)])
+            if i == 1 or i == 5:
+                board.append([1 for _ in range(self.columns)])
             else:
                 board.append([0 for _ in range(self.columns)])
         return board
@@ -22,6 +22,19 @@ class Board:
     def get_left_diagonal(self) -> list:
         return [self.board[i][-(i + 1)] for i in range(len(self.board))]
     
+    def get_right_diagonals(self, dimension: int) -> list:
+        column_space = self.rows - dimension + 1
+        row_space = self.columns - dimension + 1
+        print({column_space, row_space})
+        right_diagonals = []
+        for i in range(column_space):
+            
+            for j in range(row_space):
+                print(f"ROW {i}, COL{j}")
+                right_diagonals.append([self.board[i + n][j+ n] for n in range(4)])
+                # print(right_diagonals)
+        return right_diagonals
+
     def get_right_diagonal(self) -> list:
         return [self.board[i][i] for i in range(len(self.board))]
     
@@ -40,6 +53,11 @@ class Board:
     def __repr__(self) -> str:
         """Returns a string of information on current attributes of the board for information purposes only."""
         return f'Board:\n{str(self.board)}'
+
+test=Board(6,7)
+for row in test.get_rows():
+    print(row)
+diagonals = test.get_right_diagonals(4)
 
 # def board(rows: int, columns: int):
 #     board = []
