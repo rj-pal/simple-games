@@ -1,7 +1,7 @@
-from collections import namedtuple, Counter
 from typing import Tuple, List
 from Player import Player
-from Board import Board
+from Board import Board, WinChecker, winner_info
+# import TicTacToeCLI as ttt
 
 def int_converter(number, columns):
     return divmod(number, columns)
@@ -21,13 +21,14 @@ def board(rows: int, columns: int):
 class TicTacToe:
 
     def __init__(self):
+         self.board: List[List] = self.create_board()
          self.move_list: List = []
          self.round_count: int = 0
          self.go_first: bool = True
-         self.board: List[List] = self.create_board()
          self.winner: TicTacToe.Player = None  # The winner attributes with default settings reset when no winner
-         self.win_index: int = 0  # these are updated when there is a winner.
-         self.win_type: str = 'None' 
+         self.win_marker: str = 'None'
+         self.win_type: str = 'None'
+         self.win: WinChecker = WinChecker(self.board)
 
          self.players = self.create_players()
 
@@ -39,49 +40,39 @@ class TicTacToe:
             self.TicTacToePlayer("Player 1", "x"),
             self.TicTacToePlayer("Player 2", "o"),
         )
+    @property
+    def board_size(self):
+        return self.board.rows * self.board.columns
 
     def print_winner(self):
         print(f"Winning Player: {self.winner.name}")
         print(f"Playing {self.winner.marker}")
-        print(f"Won in {self.win_type} {self.win_index}")
-
-    # def get_rows(self) -> list[list]:
-    #     """Returns a list of the rows of Square objects. It is the 2D game Board object list of lists."""
-    #     return self.board
-
-    # def get_columns(self) -> list[list]:
-    #     """Returns a list of the columns of Square objects. It is a list of lists of each row position from
-    #     the Board object using zipped row positions and mapped into a list for consistency with rows."""
-    #     return list(map(list, zip(*self.board)))   
+        if self.win_index == -1:
+             print(f"Won in {self.win_type}")
+        else:
+            print(f"Won in {self.win_type} {self.win_index + 1}")
     
-    # def get_left_diagonal(self) -> list:
-    #     """Returns a list of the left diagonal of Square objects. It is a sliced list of the game Board object."""
-    #     return list(self.board[i][-(i + 1)] for i in range(len(self.board)))
+    def print_stats(self):
+        for player in self.players:
+            print(player.__str__())
+
+    def is_valid(self, row, col):
+        return self.board.square_is_occupied(row, col)
+
+    def make_move(self, row, col, marker):
+        if not self.board.square_is_occupied(row, col):
+            self.board.add_to_square(row, col, marker)
+            self.move_list.append((row, col))
+            self.round_count += 1
+            return True
+        return False
     
-    # def get_right_diagonal(self) -> list:
-    #     """Returns a list of the right diagonal of Square objects. It is a sliced list of the game Board object."""
-    #     return list(self.board[i][i] for i in range(len(self.board)))
-
-    # def square_is_occupied(self, row: int, column: int) -> bool:
-    #     """Checks if a square is occupied by an Ex or Oh."""
-    #     return self.board[row][column] != 0
-
-    # def update_square(self, row: int, column: int, square: str) -> None:
-    #     """Updates the square on the board to an Ex or Oh from the Square class."""
-    #     self.board[row][column] = square
-
-    # def update_board(self, row: int, column: int, marker: str) -> None:
-    #     """Updates the board with the last played square."""
-    #     self.board.update_square(row, column, marker)
-
     def reset_board(self) -> None:
         """Sets each square in the board to a blank."""
         self.board.reset_board()
-        # for r, row in enumerate(self.board):
-        #     for c in range(len(row)):
-        #         self.board[r][c] = 0
+    
 
-    def update_player(self, name: str, marker: str) -> None:
+    def update_player_info(self, name: str, marker: str) -> None:
         """Updates a player's name based on their marker ('x' or 'o')."""
         marker = marker.lower()    
         if marker not in {"x", "o"}:
@@ -89,7 +80,7 @@ class TicTacToe:
         marker_to_index = {"x": 0, "o": 1}
         self.players[marker_to_index[marker.lower()]].name = name
 
-    def update_players(self) -> None:
+    def update_players_stats(self) -> None:
         """Updates the game statistics on the two players based on if there is a winner or not."""
         for player in self.players:
             player.game_played()
@@ -98,58 +89,16 @@ class TicTacToe:
             elif self.winner is not None:
                 player.lost()
     
-    def _update_winner_info(self, win_marker: str = 'None', win_type: str = 'None', win_index: int = 0) -> None:
+    def update_winner_info(self) -> None:
         """Updates the winner attributes to store information on the current winner. Resets to default values if
         there is no winner. """
+        win_marker, win_type, row, col = self.win.get_win_info()
         for player in self.players:
             if player.marker == win_marker:
                 self.winner = player
-        self.win_index = win_index + 1
         self.win_type = win_type
-
-    def check_for_winner(self): #-> Optional[bool]:
-        """Checks if the game has been won in a row, column or diagonal if a winning line is found. It will return
-        the first found winning line starting by row, column, and then right and left diagonals."""
-        check_winner_funcs = (
-            self._check_rows,
-            self._check_columns,
-            self._check_diagonals
-        )
-        for f in check_winner_funcs:
-            if winner_found := f():
-                return winner_found
-
-    def _check_win(self, squares: list): #-> Optional:
-        """Checks if a line has all the same markers to see if the game has been won."""
-        marker, count = Counter(squares).most_common(1)[0]
-        if marker != 0 and count == 3:
-            return marker
-
-    def _check_rows(self): #-> Optional[bool]:
-        """Checks for winner in rows. Uses returned Square object to update the winner attributes. False if no Square
-        object is assigned. """
-        for r, row in enumerate(self.board.get_rows()):
-            if winner := self._check_win(row):
-                self._update_winner_info(winner, "row", r)
-                return True
-
-    def _check_columns(self): #-> Optional[bool]:
-        """Checks for winner in columns. Uses returned Square object to update winner attributes. False if no Square
-        object is assigned. """
-        for c, column in enumerate(self.board.get_columns()):
-            if winner := self._check_win(column):
-                self._update_winner_info(winner, "col", c)
-                return True
-
-    def _check_diagonals(self): #-> Optional[bool]:
-        """Checks for winner in diagonals. Uses returned Square object to update winner attributes. False if no
-        Square object is assigned. """
-        if winner := self._check_win(self.board.get_right_diagonal()):
-            self._update_winner_info(winner, "right_diag")
-            return True
-        if winner := self._check_win(self.board.get_left_diagonal()):
-            self._update_winner_info(winner, "left_diag")
-            return True
+        marker_to_index = {"row": row, "column": col}
+        self.win_index = marker_to_index.get(win_type, -1)
 
     class TicTacToePlayer(Player):
 
@@ -172,6 +121,18 @@ class TicTacToe:
             self._marker = value.lower()  # Directly set the private attribute
 
 
+  # print(T.board)
+    # print(T.players)
+    
+
+    # new_board = board_translator(T.board.board)
+    # test = TicTacToeCLI(create_board(new_board))
+    # test.print_board()
+
+
+    # exit()
+  
+
 # print(board(3,3))
 # exit()
 # pair_list = []     
@@ -182,20 +143,19 @@ class TicTacToe:
 #     print(pair_converter(pair, 3))
 # exit()
 
-T = TicTacToe()
-T.update_player("Joe", "x")
-T.update_player("Mason", "O")
+# T = TicTacToe()
+# T.update_player("Joe", "x")
+# T.update_player("Mason", "O")
 # T.update_player("", "x")
-print(T.players)
-print(T.check_for_winner())
-T.print_winner()
-print(T.board)
+# print(T.players)
+# print(T.check_for_winner())
+# T.print_winner()
 
 # print(T.board)
 # print(T.get_columns())
 # print(T.get_rows())
-T.reset_board()
-print(T.board)
+# T.reset_board()
+# print(T.board)
 # T.update_square(2, 2, 'X')
 
 # T.update_players()

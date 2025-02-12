@@ -1,5 +1,6 @@
 from collections import namedtuple
 from typing import Tuple, List
+from copy import deepcopy
 
 class Player:
     def __init__(self, name: str = None, marker: str = None):
@@ -8,6 +9,7 @@ class Player:
         self._win_count = 0
         self._lost_count = 0
         self._games_played = 0
+        self._draw_count = self.draw_count
         self.name = name
         self.marker = marker
 
@@ -65,6 +67,12 @@ class Player:
         """Returns the number of tied games of the player based on the other game statistics."""
         return self.games_played - (self.win_count + self.lost_count)
 
+    def get_player_name(self) -> str:
+        return deepcopy(self.name)
+    
+    def get_player_marker(self) -> str:
+        return deepcopy(self.marker)
+    
     def game_played(self) -> None:
         """Updates the number of total games played by the player."""
         self.games_played += 1
@@ -89,6 +97,12 @@ class Player:
             self.games_played
         )
         return str(player_info)
+    
+    def __str__(self) -> str:
+        """Returns a string of key information on the player statistics used for printing in the Game Class."""
+        player_string = f"\n{self.marker}: {self.name}\nWin: {self.win_count}, Loss: {self.lost_count}, " \
+                        f"Draw: {self.draw_count}\n"
+        return player_string
 
 a =Player()
 print(a.name)
