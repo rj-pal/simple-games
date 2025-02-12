@@ -1,6 +1,25 @@
 from Board import Board, WinChecker, winner_info
 
 
+test = Board(3, 3)
+moves = [(0, 0, 'x'), (0, 1, 'o'), (0, 2, 'x'), (1, 1, 'o'), (1, 0, 'x'), (1, 2, 'o'), (2, 1, 'x'), (2, 0, 'o'), (2, 2, 'x')]
+
+for move in moves:
+    test.update_square(*move)
+
+print(test.board.__str__())
+
+win = WinChecker(test)
+result = win.check_for_winner(3)  # Standard Connect 4 win condition
+
+if result:
+    a, b, c, d = result
+    winner_info(a, b, c, d)
+else:
+    print("No winner found.")
+
+exit()
+
 test = Board(6, 7)
 
 # Fill the bottom row (row index 5) with "b"

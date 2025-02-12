@@ -74,9 +74,21 @@ class WinChecker:
         self.win_column = None
 
     def get_win_info(self):
-        return self.win_marker, self.win_type, self.win_row, self.win_column
+        return {
+            "marker": self.win_marker,
+            "type": self.win_type,
+            "row": self.win_row,
+            "column": self.win_column
+            # "win_length": self.win_length
+        }
+
+    # def get_win_info(self):
+    #     return self.win_marker, self.win_type, self.win_row, self.win_column
     
-    def _update_win_info(self, marker: Union[int, str], win_type: str, win_row: int, win_column: int):
+    def reset_win_info(self):
+        self._update_win_info()
+    
+    def _update_win_info(self, marker: Union[int, str]=None, win_type: str=None, win_row: int=None, win_column: int=None):
         self.win_marker = marker
         self.win_type = win_type 
         self.win_row = win_row

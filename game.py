@@ -1,7 +1,6 @@
 from typing import Tuple, List
 from Player import Player
 from Board import Board, WinChecker, winner_info
-# import TicTacToeCLI as ttt
 
 def int_converter(number, columns):
     return divmod(number, columns)
@@ -25,9 +24,9 @@ class TicTacToe:
          self.move_list: List = []
          self.round_count: int = 0
          self.go_first: bool = True
-         self.winner: TicTacToe.Player = None  # The winner attributes with default settings reset when no winner
-         self.win_marker: str = 'None'
-         self.win_type: str = 'None'
+         self.winner_name: str = None  # The winner attributes with default settings reset when no winner
+         self.winner_marker: str = None
+         self.win_type: str = None
          self.win: WinChecker = WinChecker(self.board)
 
          self.players = self.create_players()
@@ -45,8 +44,8 @@ class TicTacToe:
         return self.board.rows * self.board.columns
 
     def print_winner(self):
-        print(f"Winning Player: {self.winner.name}")
-        print(f"Playing {self.winner.marker}")
+        print(f"Winning Player: {self.winner_name}")
+        print(f"Playing {self.winner_marker}")
         if self.win_index == -1:
              print(f"Won in {self.win_type}")
         else:
@@ -70,9 +69,14 @@ class TicTacToe:
     def reset_board(self) -> None:
         """Sets each square in the board to a blank."""
         self.board.reset_board()
-    
 
-    def update_player_info(self, name: str, marker: str) -> None:
+    def reset_game_state(self):
+        self.reset_board()
+        self.reset_winner()
+        self.move_list = []
+        self.round_count = 0
+
+    def update_player_name(self, name: str, marker: str) -> None:
         """Updates a player's name based on their marker ('x' or 'o')."""
         marker = marker.lower()    
         if marker not in {"x", "o"}:
@@ -84,21 +88,37 @@ class TicTacToe:
         """Updates the game statistics on the two players based on if there is a winner or not."""
         for player in self.players:
             player.game_played()
-            if player == self.winner:
+            if player.name == self.winner_name:
                 player.won()
-            elif self.winner is not None:
+            elif self.winner_name is not None:
                 player.lost()
     
     def update_winner_info(self) -> None:
         """Updates the winner attributes to store information on the current winner. Resets to default values if
         there is no winner. """
-        win_marker, win_type, row, col = self.win.get_win_info()
+        print("INFO", self.win.get_win_info())
+        winner_info = self.get_winner_info()
         for player in self.players:
-            if player.marker == win_marker:
-                self.winner = player
-        self.win_type = win_type
-        marker_to_index = {"row": row, "column": col}
-        self.win_index = marker_to_index.get(win_type, -1)
+            if player.marker == winner_info["marker"]:
+                self.winner_name = player.name
+                self.winner_marker = player.marker
+        self.win_type = winner_info["type"]
+        # marker_to_index = {"row": row, "column": col}
+        self.win_index = winner_info.get(self.win_type, -1)
+
+    def check_winner(self):
+        return self.win.check_for_winner()
+
+    def get_winner_info(self):
+        return self.win.get_win_info()
+    
+    def reset_winner(self):
+        self.win.reset_win_info()
+        self.winner_name = None
+        self.winner_marker = None
+        self.win_type = None
+        self.win_index = None
+        
 
     class TicTacToePlayer(Player):
 
@@ -119,44 +139,3 @@ class TicTacToe:
             if value not in {"x", "o", "X", "O"}:
                 raise ValueError(f"Invalid marker: {value}. Must be 'x' or 'o'.")
             self._marker = value.lower()  # Directly set the private attribute
-
-
-  # print(T.board)
-    # print(T.players)
-    
-
-    # new_board = board_translator(T.board.board)
-    # test = TicTacToeCLI(create_board(new_board))
-    # test.print_board()
-
-
-    # exit()
-  
-
-# print(board(3,3))
-# exit()
-# pair_list = []     
-# for i in range(9):
-#     pair_list.append(int_converter(i,3))
-# print(pair_list)
-# for pair in pair_list:
-#     print(pair_converter(pair, 3))
-# exit()
-
-# T = TicTacToe()
-# T.update_player("Joe", "x")
-# T.update_player("Mason", "O")
-# T.update_player("", "x")
-# print(T.players)
-# print(T.check_for_winner())
-# T.print_winner()
-
-# print(T.board)
-# print(T.get_columns())
-# print(T.get_rows())
-# T.reset_board()
-# print(T.board)
-# T.update_square(2, 2, 'X')
-
-# T.update_players()
-# print(T.players)

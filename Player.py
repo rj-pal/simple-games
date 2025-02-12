@@ -9,7 +9,6 @@ class Player:
         self._win_count = 0
         self._lost_count = 0
         self._games_played = 0
-        self._draw_count = self.draw_count
         self.name = name
         self.marker = marker
 
@@ -19,9 +18,6 @@ class Player:
 
     @name.setter
     def name(self, value):
-        # if not value:
-        #     value = 
-        #     raise ValueError("Player name cannot be empty.")
         self._name = value
 
     @property
@@ -97,6 +93,7 @@ class Player:
             self.games_played
         )
         return str(player_info)
+
     
     def __str__(self) -> str:
         """Returns a string of key information on the player statistics used for printing in the Game Class."""
