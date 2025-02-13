@@ -2,6 +2,7 @@ from enum import Enum
 from itertools import chain
 from time import sleep
 import os
+from typing import Optional
 from Game import TicTacToe, winner_info
 
 class Square(Enum):
@@ -54,6 +55,8 @@ INTRO = """
 This is an online version of the classic game. Play multiple games per session
 against and opponent or the computer. X starts the game.
 """
+THINKING = "\nComputer is now thinking."
+DRAW = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
 
 horizontal_line = "* " * 18 + "*"
 
@@ -102,21 +105,19 @@ def surround_string(strings: list[str], symbol: str, offset: int = 0) -> list[st
 
 def get_player_names() -> None:
         """Creates two players of the Player class for game play and add the players to the player attribute."""
-        # Checks for one or two players first. Player one is Ex by default. 
-        # Player two is Oh by default. Computer is also Oh by default in one player games.
-        # one_player = self._one_player()
-
-        name_x = input("\nPlayer one please enter the name of the player for X: ")
-        # self.add_player(Player(name, Square.X))
-
-        # if one_player:
-        #     difficulty = self._select_difficulty_level()
-        #     self.add_player(AIPlayer(difficulty=difficulty))
-        # else:
-        name_y = input("\nPlayer two please enter the name of the player for O: ")
-            # self.add_player(Player(name, Square.O))
+        
+        name_x = input("\nPlayer one please enter the name of the player for X or press enter: ")
+       
+        name_y = input("\nPlayer two please enter the name of the player for O or press enter: ")
+        
         return name_x, name_y
+def get_player_name() -> None:
+        """Creates two players of the Player class for game play and add the players to the player attribute."""
+        
+        name_x = input("\nPlayer one please enter the name of the player for X or press enter: ")
 
+        
+        return name_x
 
 def one_player() -> bool:
         """Sets the game to one or two players."""
@@ -127,6 +128,26 @@ def one_player() -> bool:
                 return one_player in ['1', 'one']
             else:
                 print('\nOnly one or two players are allowed.\n')
+
+def select_difficulty_level() -> Optional[bool]:
+    """Updates the difficulty level boolean when playing against the computer."""
+    valid_input = ['1', 'easy',  '2', 'intermediate', '3', 'hard']
+    while True:
+        level_of_difficulty = input("\nSelect the level of difficult for the AI: Easy, Intermediate or Hard: ").lower()
+        if level_of_difficulty in valid_input[:2]:
+            delay_effect(["\nYou are playing against the computer in easy mode."])
+            return None
+        elif level_of_difficulty in valid_input[2:4]:
+            delay_effect(["\nYou are playing against the computer in intermediate mode."])
+            return False
+        elif level_of_difficulty in valid_input[4:]:
+            delay_effect(["\nYou are playing against the computer in hard mode."])
+            return True
+        else:
+            print(
+                f"\nThere is only easy, intermediate or hard mode.\nPlease select '1' for easy, '2' for "
+                f"intermediate or '3' for hard.")
+
 
 def prompt_int(value: str) -> int:
         """Returns two integers for a row and column move from the player input. Only allows 
@@ -174,6 +195,11 @@ def print_start_game():
      print(WELCOME)
      print(delay_effect([INTRO]))
 
+def print_first_player(name) -> None:
+    """Prints who is plays first and their marker."""
+    delay_effect([f'\n{name} plays first.'])
+    input('\nPress Enter to start the game.')
+
 def print_first_prompt(name):
      delay_effect([f"\nIt is {name}'s turn. Select a row and column\n"])
 
@@ -203,43 +229,60 @@ def print_winner_info(name, marker, win_type, win_index) -> None:
 def set_up_game():
     print_start_game()
     if one_player():
-        x, y = get_player_names()
+        difficulty = select_difficulty_level()
+        Game = TicTacToe()
+        Game.create_ai_player(difficulty=difficulty)
+        x = get_player_name()
+        Game.update_player_name(x, "x")
+        print(Game.players[1].difficulty)
+        
     else:
         x, y = get_player_names()
-    Game = TicTacToe()
-    Game.update_player_name(x, "x")
-    Game.update_player_name(y, "o")
+        Game = TicTacToe()
+        Game.update_player_name(x, "x")
+        Game.update_player_name(y, "o")
 
     return Game
 
 def play_game(Game) -> None:
-    for i in range(Game.board_size):
-        Game.round_count += 1  
-        player = Game.players[i % 2]
-        name = player.get_player_name()
-        print_first_prompt(name)
-        while True:
-            r, c = prompt_move()
-            if Game.make_move(r, c, player.marker):
-                break
-            else:
-                print_second_prompt(name)
+    for i in range(Game.board_size): 
+        print(Game.round_count)
+        Game.go_first = False
+        if Game.go_first:
+            player = Game.players[i % 2]
+        else:
+            player = Game.players[i % 2 - 1]
         
-        # game_board = board_translator(Game.board.get_board())
+        name = player.get_player_name()
+        if i == 0:
+            print_first_player(name)
+        
+        if isinstance(player, TicTacToe.TicTacToePlayer):
+            
+            print_first_prompt(name)
+            while True:
+                row, col = prompt_move()
+                if Game.make_move(row, col, player.marker):
+                    break
+                else:
+                    print_second_prompt(name)
+        elif isinstance(player, TicTacToe.AIPlayer):
+            print(THINKING)
+            sleep(1.5)
+            row, col = player.move(Game.board)
+            Game.make_move(row, col, player.marker)
+        
         print_board(Game.board.get_board())
 
-        if i >= 4 and Game.win.check_for_winner():
-            
+        if i >= 4 and Game.check_winner():
             break
     else:
-        draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
-        delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
+        delay_effect(surround_string([DRAW], "#", 9), 0.00075, False)
     Game.update_winner_info()
     Game.update_players_stats()
     Game.print_winner()
-    # winner_info(*Game.win.get_win_info())
+    print(Game.move_list)
     Game.reset_game_state()
-    # print(Game.move_list)
     print(Game.print_stats())
 
 

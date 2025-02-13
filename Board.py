@@ -138,6 +138,9 @@ class WinChecker:
                 return True
         return False
 
+# B=Board(3,3)
+# print(B.get_rows())
+# print(B.get_diagonals(3,"right"))
 
 # from typing import Union, Optional
 # from collections import Counter
