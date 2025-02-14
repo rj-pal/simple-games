@@ -246,8 +246,7 @@ def set_up_game():
 
 def play_game(Game) -> None:
     for i in range(Game.board_size): 
-        print(Game.round_count)
-        Game.go_first = False
+        # print(Game.round_count)
         if Game.go_first:
             player = Game.players[i % 2]
         else:

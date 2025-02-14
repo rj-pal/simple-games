@@ -391,7 +391,7 @@ class TicTacToe:
 
                 elif (r, c) in self.corners:
                     if self.game.move_list[1] == (1, 1):
-                        print("HERE")
+                        # print("HERE")
 
                         # move = (r + 2) % 4, c
                         move = (r + 2) % 4, (c + 2) % 4
@@ -489,16 +489,29 @@ class TicTacToe:
         def move(self, board: Board) -> Union[tuple[int, int], list[int]]:
             """Selects a move for the AI player based on the play mode of easy, intermediate or hard. """
             if self.difficulty is None:  # easy mode
-                return self.random_ints(self.game.board)
+                result = self.random_ints(self.game.board)
+                assert result is not None 
+                return result
+                # return self.random_ints(self.game.board)
 
             if move := self.win_or_block(self.game.board):  # intermediate or hard mode always checks for win or block first
                 return move
+                # result = move
+                # assert result is not None 
+                # return result
+            
 
             if self.difficulty:  # hard mode
                 if self.game.go_first:  # strategy is based on if human player plays first or not (go_first is for human player)
-                    return self.defence_mode(self.game.board)
+                    result = self.defence_mode(self.game.board)
+                    assert result is not None 
+                    return result
+                    # return self.defence_mode(self.game.board)
                 else:
-                    return self.offence_mode(self.game.board)
+                    result = self.offence_mode(self.game.board)
+                    assert result is not None 
+                    return result
+                    # return self.offence_mode(self.game.board)
 
             else:  # intermediate mode always checks for a fork first then for two blanks after two random moves
                 if self.game.round_count > 3:
