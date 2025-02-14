@@ -307,13 +307,25 @@ class TicTacToe:
             """AI strategy for when the computer plays second. Strategy is based on the first move
             by the human player. The AI always optimizes for a win or draw. Returns optimal move."""
 
+            def assert_test(two_ints: tuple[int, int]):
+                assert len(two_ints) == 2
+                a, b = two_ints
+                assert a is not None
+                assert b is not None 
+
+
             r, c = self.game.move_list[0]
             if self.game.round_count == 1:
 
                 if (r, c) == (1, 1):
                     move = choice(self.corners)
+                    # print(*move)
+                    assert move is not None
+                    assert_test(move)
+                    # move = choice(self.corners)
                 else:
                     move = 1, 1
+                
                 return move
 
             elif self.game.round_count == 3:
@@ -321,52 +333,94 @@ class TicTacToe:
                     # Only triggered when the opposite corner to the move in previous round was played by player X
                     for corner in self.corners:
                         if not self.game.board.square_is_occupied(*corner):  # randomly select one of the two free corners
-                            return corner
+                            move = corner
+                            assert move is not None
+                            assert_test(move)
+                            return move#corner
                 elif (r, c) in self.corners:
+################# 
                     if not self.game.board.square_is_occupied((r + 2) % 4, (c + 2) % 4):
-                        return (r + 2) % 4, (c + 2) % 4
+                        move = (r + 2) % 4, (c + 2) % 4
+                        assert_test(move)
+                        assert move is not None
+                        return move#(r + 2) % 4, (c + 2) % 4
                     else:
-                        return choice(self.insides)
+                        move = choice(self.insides)
+                        assert_test(move)
+                        assert move is not None
+                        return move#choice(self.insides)
                 elif (r, c) in self.insides:
                     r1, c1 = self.game.move_list[2]
                     if (r1, c1) in self.insides:
                         if r == 1:
-                            return choice([0, 2]), c
+                            move = choice([0, 2]), c
+                            assert move is not None
+                            assert_test(move)
+                            return move#choice([0, 2]), c
                         else:
-                            return r, choice([0, 2])
+                            move = r, choice([0, 2])
+                            assert move is not None
+                            assert_test(move)
+                            return move#r, choice([0, 2])
                     else:
                         if r == 1:
+                            move = r1, c
+                            assert move is not None
+                            assert_test(move)
                             return r1, c
                         else:
+                            move = r, c1
+                            assert move is not None
+                            assert_test(move)
                             return r, c1
 
             elif self.game.round_count == 5:
                 if (r, c) == (1, 1):
                     r, c = self.game.move_list[4]
+                    # find a two blank strategy and place in same row or column as the last x move
                     if self.game.board.get_rows()[r].count(0) == 1:
                         move = r, (c + 2) % 4
+                        assert move is not None
+                        assert_test(move)
                     elif self.game.board.get_columns()[c].count(0) == 1:
                         move = (r + 2) % 4, c
+                        assert move is not None
+                        assert_test(move)
 
                 elif (r, c) in self.corners:
-
-                    if move := self.two_blanks(self.game.board):
-                        return move
+# Might need this two blank strategy to keep win alive
+                    # if move := self.two_blanks(self.game.board):
+                    #     return move
 
                     for corner in self.corners:
                         if not self.game.board.square_is_occupied(*corner):
                             move = corner
+                            assert move is not None
+                            assert_test(move)
 
                 elif move := self.two_blanks(self.game.board):
+                    assert move is not None
+                    assert_test(move)
                     return move
 
+                else:
+                    # print("IM HERE!!!!")
+                    # print(self.game.move_list)
+                    # print(self.game.board)
+                    move = self.random_ints(self.game.board)
                 return move
-
+            
             else:
                 if move := self.two_blanks(self.game.board):
+                    assert move is not None
+                    assert_test(move)
                     return move
                 else:
-                    return self.random_ints(self.game.board)
+                    move = self.random_ints(self.game.board)
+
+                    assert move is not None
+                    assert_test(move)
+                    return move#self.random_ints(self.game.board)
 
         def offence_mode(self, board: Board) -> tuple[int, int]:
             """AI strategy for when the computer plays first. Strategy is based on the first move by the
@@ -504,7 +558,7 @@ class TicTacToe:
             if self.difficulty:  # hard mode
                 if self.game.go_first:  # strategy is based on if human player plays first or not (go_first is for human player)
                     result = self.defence_mode(self.game.board)
-                    assert result is not None 
+                    # assert result is not None 
                     return result
                     # return self.defence_mode(self.game.board)
                 else:

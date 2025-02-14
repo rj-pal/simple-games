@@ -98,7 +98,16 @@ def play_game(Game) -> None:
 
 winner_list = []
 Game.create_ai_player(difficulty=True)
-for _ in range(100):
+for _ in range(1000):
+    Game.go_first = False
+    play_game(Game)
+
+print(Counter(winner_list))
+
+winner_list = []
+Game.create_ai_player(difficulty=True)
+for _ in range(1000):
+    Game.go_first = True
     play_game(Game)
 
 print(Counter(winner_list))
