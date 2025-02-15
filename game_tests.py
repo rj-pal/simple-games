@@ -1,7 +1,6 @@
 from Game import *
 from Board import *
 from Player import *
-from collections import Counter
 
 # Game Tests for Board Conditions
 
@@ -43,74 +42,75 @@ move_patterns = [
 
 
 Game = TicTacToe()
-winner_list = []
+# winner_list = []
 def play_game(Game) -> None:
-    Game.reset_game_state()
     for i in range(Game.board_size): 
         round_count = i
         if Game.go_first:
             player = Game.players[i % 2]
         else:
             player = Game.players[i % 2 - 1]
-        if i == 0:
-            first_player_name = player.name
+        # if i == 0:
+        #     print(f"First player is: {player.name}")
         if isinstance(player, TicTacToe.TicTacToePlayer):
-            
             while True:
-                # if i >= len(move_list):
                 move = randint(0, 2), randint(0, 2), player.marker
-                # else:
-                #     move = *move_list[i], player.marker
                 if Game.make_move(*move):
                     break
-                # else:
-                #     i += 1
         elif isinstance(player, TicTacToe.AIPlayer):
             row, col = player.move(Game.board)
             Game.make_move(row, col, player.marker)
-
-
         if round_count >= 4 and Game.check_winner():
             break
     Game.update_winner_info()
     Game.update_players_stats()
-    winner_list.append(Game.winner_name)
-    if Game.winner_name == "Player 1":
-        print(first_player_name)
-        print(Game.move_list)
-    # Game.print_winner()
-    # print(Game.board)
-    # print()
-    return Game.get_winner_info()
+    Game.reset_game_state()
+    # winner_list.append(Game.winner_name)
+    # if Game.winner_name == "Player 1":
+    #     print(first_player_name)
+    #     print(Game.move_list)
+    # return Game.get_winner_info()
 
-# Game.create_ai_player(difficulty=None)
-# for _ in range(10000):
-#     play_game(Game)
-
-# print(Counter(winner_list))
-
-# winner_list = []
-# Game.create_ai_player(difficulty=False)
-# for _ in range(100000):
-#     play_game(Game)
-
-# print(Counter(winner_list))
-
-winner_list = []
-Game.create_ai_player(difficulty=True)
-for _ in range(1000):
+number_of_games = 25000
+Game.create_ai_player(name="Computer Easy Offence", difficulty=None)
+for _ in range(number_of_games):
     Game.go_first = False
     play_game(Game)
+print(Game.print_stats())
 
-print(Counter(winner_list))
-
-winner_list = []
-Game.create_ai_player(difficulty=True)
-for _ in range(1000):
+Game.create_ai_player(name="Computer Easy Defence", difficulty=None)
+for _ in range(number_of_games):
     Game.go_first = True
     play_game(Game)
+print(Game.print_stats())
 
-print(Counter(winner_list))
+Game.create_ai_player(name="Computer Intermediate Offence", difficulty=False)
+for _ in range(number_of_games):
+    Game.go_first = False
+    play_game(Game)
+print(Game.print_stats())
+
+
+Game.create_ai_player(name="Computer Intermediate Defence", difficulty=False)
+for _ in range(number_of_games):
+    Game.go_first = True
+    play_game(Game)
+print(Game.print_stats())
+
+
+Game.create_ai_player(name="Computer Hard Offence", difficulty=True)
+for _ in range(number_of_games):
+    Game.go_first = False
+    play_game(Game)
+print(Game.print_stats())
+
+# print(Counter(winner_list))
+
+Game.create_ai_player(name="Computer Hard Defence", difficulty=True)
+for _ in range(number_of_games):
+    Game.go_first = True
+    play_game(Game)
+print(Game.print_stats())
 
 
 

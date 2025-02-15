@@ -42,10 +42,10 @@ class TicTacToe:
             self.TicTacToePlayer("Player 2", "o"),
             # self.AIPlayer(game=self),
         )
-    def create_ai_player(self, difficulty: Optional[bool]) -> Tuple[Player, Player]:
+    def create_ai_player(self, name: Optional[str], difficulty: Optional[bool]) -> Tuple[Player, Player]:
         self.players = (
             self.TicTacToePlayer("Player 1", "x"),
-            self.AIPlayer(game=self, difficulty=difficulty),
+            self.AIPlayer(name=name, game=self, difficulty=difficulty),
         )
 
     @property
@@ -65,10 +65,12 @@ class TicTacToe:
             print(player.__str__())
 
     def is_valid(self, row, col):
-        return self.board.square_is_occupied(row, col)
+        if 0 <= (row * col) < self.board_size: # validate the move is on the board
+            return not self.board.square_is_occupied(row, col)
+        return False
 
     def make_move(self, row, col, marker):
-        if not self.board.square_is_occupied(row, col):
+        if self.is_valid(row, col):
             self.board.add_to_square(row, col, marker)
             self.move_list.append((row, col))
             self.round_count += 1

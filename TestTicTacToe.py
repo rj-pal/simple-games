@@ -107,9 +107,17 @@ class TestTicTacToe(unittest.TestCase):
         result = play_game(self.Game, True, move_list)
         self.assertEqual(result, expected)
 
-    def test_invalid_move(self):
+    def test_one_occupied_square_move(self):
         """Test trying to add a move to an already occupied square."""
         move_list = [(0, 0), (0, 1), (0, 0), (1, 1), (0, 2), (2, 2)]
+        result = play_game(self.Game, True, move_list)
+        # Expect the valid game outcome after ignoring the invalid move
+        expected = {'marker': 'x', 'type': 'right_diagonal', 'row': 0, 'column': 0}
+        self.assertEqual(result, expected)
+
+    def test_invalid_moves(self):
+        """Test trying to add a move to an already occupied square."""
+        move_list = [(0, 0), (0, 1), (3, 3),(0, 0), (1, 1), (0, 2), (-3, -3), (2, 2)]
         result = play_game(self.Game, True, move_list)
         # Expect the valid game outcome after ignoring the invalid move
         expected = {'marker': 'x', 'type': 'right_diagonal', 'row': 0, 'column': 0}
