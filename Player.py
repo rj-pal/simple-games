@@ -101,9 +101,9 @@ class Player:
                         f"Draw: {self.draw_count}\n"
         return player_string
 
-a =Player()
-print(a.name)
-print(a.marker)
+# a =Player()
+# print(a.name)
+# print(a.marker)
 # class Player:
 #         def __init__(self, name: str = None, marker: str = None):
 #             self.name = name

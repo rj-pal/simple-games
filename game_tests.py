@@ -2,185 +2,136 @@ from Game import *
 from Board import *
 from Player import *
 
-# Game Tests for Board Conditions
+def play_game(game_instance) -> None:
+    """
+    Simulates a single game by alternating turns between players.
 
-# Define the move patterns
-move_patterns = [
-    ("x wins in column", [(1, 1), (0, 1), (0, 0), (2, 2), (2, 0), (2, 1), (1, 0)]),
-    ("o wins in second row", [(1, 0, 'o'), (0, 0, 'x'), (1, 1, 'o'), (0, 1, 'x'), (1, 2, 'o')]),
-    ("x wins diagonally", [(0, 0, 'x'), (0, 1, 'o'), (1, 1, 'x'), (0, 2, 'o'), (2, 2, 'x')]),
-    ("no winner", [(0, 0, 'x'), (0, 1, 'o'), (0, 2, 'x'), (1, 1, 'o'), (1, 0, 'x'), (1, 2, 'o'), (2, 1, 'x'), (2, 0, 'o'), (2, 2, 'x')])
-]
-# print(move_patterns)
-move_patterns = [
-    [(2, 0), (1, 2), (0, 1), (2, 1), (2, 2)],
-    [(1, 1), (2, 0), (0, 0), (2, 1), (2, 2)],
-    [(1, 0), (2, 1), (2, 2), (0, 0), (1, 2)],
-    [(0, 1), (2, 1), (1, 1), (2, 2), (0, 2), (0, 0), (1, 2), (2, 0), (1, 0)],
-    [(0, 2), (2, 1), (1, 1), (1, 2), (0, 0), (2, 0), (1, 0), (0, 1), (2, 2)],
-    [(0, 0), (1, 2), (2, 2), (0, 1), (0, 2), (1, 0), (2, 1), (2, 0), (1, 1)],
-    [(1, 0), (0, 0), (1, 1), (2, 1), (0, 1), (0, 2), (2, 0), (2, 2), (1, 2)],
-    [(1, 2), (1, 1), (0, 0), (0, 2), (2, 1), (1, 0), (0, 1), (2, 2), (2, 0)],
-    [(0, 2), (2, 2), (0, 0), (0, 1), (2, 0), (1, 0), (2, 1), (1, 1), (1, 2)],
-    [(0, 2), (2, 2), (2, 1), (0, 0), (1, 1), (1, 0), (2, 0), (1, 2), (0, 1)],
-    [(2, 2), (1, 1), (2, 0), (0, 2), (1, 0), (0, 0), (0, 1), (1, 2), (2, 1)],
-    [(0, 1), (0, 0), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2), (0, 2), (1, 1)],
-    [(1, 2), (1, 0), (0, 2), (0, 1), (2, 2), (2, 1), (2, 0), (1, 1), (0, 0)],
-    [(1, 0), (1, 1), (1, 2), (0, 1), (0, 2), (2, 1), (2, 2), (0, 0), (2, 0)],
-    [(0, 2), (2, 2), (2, 0), (1, 1), (1, 0), (1, 2), (0, 1), (0, 0), (2, 1)],
-    [(2, 1), (1, 1), (0, 1), (2, 2), (1, 0), (1, 2), (0, 0), (0, 2), (2, 0)],
-    [(2, 1), (2, 2), (1, 1), (0, 2), (1, 0), (1, 2), (2, 0), (0, 1), (0, 0)],
-    [(0, 2), (1, 0), (0, 1), (2, 0), (1, 2), (0, 0), (1, 1), (2, 1), (2, 2)],
-    [(0, 2), (1, 1), (1, 0), (0, 0), (2, 1), (0, 1), (2, 0), (2, 2), (1, 2)],
-    [(1, 1), (1, 2), (2, 0), (2, 1), (0, 1), (2, 2), (0, 0), (1, 0), (0, 2)],
-    [(1, 0), (0, 1), (0, 0), (0, 2), (2, 2), (1, 2), (2, 1), (2, 0), (1, 1)],
-    [(1, 2), (0, 1), (2, 2), (2, 0), (2, 1), (1, 1), (0, 0), (0, 2), (1, 0)],
-    [(2, 2), (0, 2), (0, 1), (2, 0), (1, 2), (0, 0), (1, 1), (2, 1), (1, 0)],
-    [(2, 0), (2, 1), (0, 0), (0, 2), (1, 2), (2, 2), (1, 1), (0, 1), (1, 0)],
-    [(2, 1), (0, 2), (1, 0), (1, 1), (0, 1), (1, 2), (2, 2), (2, 0), (0, 0)],
-]
+    Parameters:
+        game_instance (Game): The game instance to play.
 
-
-Game = TicTacToe()
-# winner_list = []
-def play_game(Game) -> None:
-    for i in range(Game.board_size): 
-        round_count = i
-        if Game.go_first:
-            player = Game.players[i % 2]
+    Behavior:
+        - Alternates moves between players.
+        - Makes moves based on player type (blind human/AI Player Mode).
+        - Stops if a winner is found.
+        - Updates game state and player stats post-game.
+    """
+    for round_count in range(game_instance.board_size):
+        # Determine which player goes next based on turn order and position in game-instance tuple for X and O
+        if game_instance.go_first:
+            player = game_instance.players[round_count % 2]
         else:
-            player = Game.players[i % 2 - 1]
-        # if i == 0:
-        #     print(f"First player is: {player.name}")
-        if isinstance(player, TicTacToe.TicTacToePlayer):
+            player = game_instance.players[(round_count % 2) - 1]
+
+        # Handle moves based on player type
+        if isinstance(player, TicTacToe.TicTacToePlayer): 
             while True:
+                # Simulates blind human play (the same as AI easy mode)
                 move = randint(0, 2), randint(0, 2), player.marker
-                if Game.make_move(*move):
+                if game_instance.make_move(*move):
                     break
         elif isinstance(player, TicTacToe.AIPlayer):
-            row, col = player.move(Game.board)
-            Game.make_move(row, col, player.marker)
-        if round_count >= 4 and Game.check_winner():
+            row, col = player.move(game_instance.board)
+            game_instance.make_move(row, col, player.marker)
+
+        # Check for a winner after a minimum number of moves
+        if round_count >= 4 and game_instance.check_winner():
             break
-    Game.update_winner_info()
-    Game.update_players_stats()
-    Game.reset_game_state()
-    # winner_list.append(Game.winner_name)
-    # if Game.winner_name == "Player 1":
-    #     print(first_player_name)
-    #     print(Game.move_list)
-    # return Game.get_winner_info()
 
-number_of_games = 25000
-Game.create_ai_player(name="Computer Easy Offence", difficulty=None)
-for _ in range(number_of_games):
-    Game.go_first = False
+    # Post-game updates and display of stats
+    game_instance.update_winner_info()
+    game_instance.update_players_stats()
+    game_instance.reset_game_state()
+    return
+
+
+def test_games(number_of_games: int, ai_levels: dict, test_modes: dict) -> None:
+    """
+    Runs test games between a human player and AI at varying difficulty levels and modes.
+
+    Parameters:
+        number_of_games (int): The number of games to simulate per configuration.
+        ai_levels (dict): A dictionary mapping AI difficulty names to internal difficulty values.
+        test_modes (dict): A dictionary mapping test modes (offensive/defensive) to boolean values.
+
+    Behavior:
+        - Iterates through AI difficulty levels and test modes.
+        - Creates an AI player for each configuration and simulates games versus a blind human.
+        - Prints statistics after each configuration.
+    """
+    for difficulty_level, difficulty_bool_value in ai_levels.items():
+        print(f"Blind mode tests for Player 1 versus AI Player ({difficulty_level} Mode).")
+        for mode_name, go_first in test_modes.items():
+            Game.create_ai_player(name=f"Computer ({difficulty_level} Mode - {mode_name})", difficulty=difficulty_bool_value)
+            print(f"Player 1 moves first: {go_first}. Running {number_of_games} games.")
+            
+            for _ in range(number_of_games):
+                Game.go_first = go_first
+                play_game(Game)
+
+            print(Game.print_stats())
+
+
+def test_ai_games(number_of_games: int, ai_level1: any, ai_level2: any) -> None:
+    """
+    Simulates AI-versus-AI games at specified difficulty levels.
+
+    Parameters:
+        number_of_games (int): The number of games to simulate per configuration.
+        ai_level1 (any): Difficulty level for the first AI player.
+        ai_level2 (any): Difficulty level for the second AI player.
+
+    Behavior:
+        - Runs simulations with AI players of varying difficulty levels competing against each other.
+        - Enforces rule that AI Hard mode cannot play X or be the first AI player in player tuple to keep AI logic
+        - Alternates which AI goes first.
+        - Prints statistics after each configuration.
+    """
+    ai_level_map = {None: "Easy", False: "Intermediate", True: "Hard"}
+
+    if ai_level1:
+        print("Testing Hard mode as X is not allowed unless both players are on Hard mode.")
+        raise TypeError("Invalid AI difficulty configuration.")
+
+    print(f"AI ({ai_level_map[ai_level1]} Mode) versus AI ({ai_level_map[ai_level2]} Mode).")
+    for first_player in range(2):
+        if first_player == 0:
+            print(f"AI ({ai_level_map[ai_level2]}) moves first.")
+        else:
+            print(f"AI ({ai_level_map[ai_level1]}) moves first.")
+
+        Game.add_ai_players_for_testing(ai_level1, ai_level2)
+
+        for _ in range(number_of_games):
+            Game.go_first = bool(first_player)
+            play_game(Game)
+
+        print(Game.print_stats())
+
+
+# Configuration dictionaries
+AI_LEVELS = {"Easy": None, "Intermediate": False, "Hard": True}
+TEST_MODES = {"Offense": False, "Defense": True}
+
+# Instantiate Game Object for Testing
+Game = TicTacToe()
+
+# Run human vs AI tests
+test_games(1000, AI_LEVELS, TEST_MODES)
+
+# Run AI vs AI tests
+test_ai_games(1000, None, True)
+test_ai_games(1000, False, True)
+test_ai_games(1000, None, None)
+test_ai_games(1000, False, False)
+
+# Additional hard-mode-only AI vs AI tests
+Game.add_two_hard_move_ai_players_for_testing()
+print(f"AI (Hard Mode) versus AI (Hard Mode). Running {1000} games.")
+
+for _ in range(1000):
     play_game(Game)
+
 print(Game.print_stats())
 
-Game.create_ai_player(name="Computer Easy Defence", difficulty=None)
-for _ in range(number_of_games):
-    Game.go_first = True
-    play_game(Game)
-print(Game.print_stats())
-
-Game.create_ai_player(name="Computer Intermediate Offence", difficulty=False)
-for _ in range(number_of_games):
-    Game.go_first = False
-    play_game(Game)
-print(Game.print_stats())
-
-
-Game.create_ai_player(name="Computer Intermediate Defence", difficulty=False)
-for _ in range(number_of_games):
-    Game.go_first = True
-    play_game(Game)
-print(Game.print_stats())
-
-
-Game.create_ai_player(name="Computer Hard Offence", difficulty=True)
-for _ in range(number_of_games):
-    Game.go_first = False
-    play_game(Game)
-print(Game.print_stats())
-
-# print(Counter(winner_list))
-
-Game.create_ai_player(name="Computer Hard Defence", difficulty=True)
-for _ in range(number_of_games):
-    Game.go_first = True
-    play_game(Game)
-print(Game.print_stats())
-
-
-
-
-
-
-# Initialize the game
-# Game = TicTacToe()
-# for pattern_name, moves in move_patterns:
-#     print(f"\nTesting pattern: {pattern_name}")    
-    
-#     for i, move in enumerate(moves):
-#         Game.round_count += 1  
-#         player = Game.players[i % 2]
-#         name = player.get_player_name()
-#         print("NOW PLAYING", name)
-#         Game.make_move(*move)
-#         print(Game.board.__str__())
-        
-#         if i >= 4 and Game.check_winner():
-#             print("WINNER FOUND")
-#             break
-#     else:
-#         print("TIE")
-#         # Game.reset_winner()
-#     # Final game updates
-#     Game.update_winner_info()
-#     Game.update_players_stats()
-    
-#     Game.print_winner()
-#     print(Game.print_stats())
-#     Game.reset_game_state()
-
+# Exit script
 exit()
-
-
-  
-
-# print(board(3,3))
-# exit()
-# pair_list = []     
-# for i in range(9):
-#     pair_list.append(int_converter(i,3))
-# print(pair_list)
-# for pair in pair_list:
-#     print(pair_converter(pair, 3))
-exit()
-
-# T = TicTacToe()
-# T.update_player_name("Joe", "x")
-# T.update_player_name("Mason", "O")
-
-# T.winner = T.players[0]
-# print(T.winner.name)
-# T.update_players_stats()
-
-# T.players[0].game_played()
-# print(T.players)
-
-# T.update_player("", "x")
-# print(T.players)
-# print(T.check_for_winner())
-# T.print_winner()
-
-# print(T.board)
-# print(T.get_columns())
-# print(T.get_rows())
-# T.reset_board()
-# print(T.board)
-# T.update_square(2, 2, 'X')
-
-# T.update_players()
-# print(T.players)
