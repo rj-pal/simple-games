@@ -1,6 +1,4 @@
-from Board import Board, WinChecker, winner_info
-
-WinChecker()
+from tictactoe.Board import Board, WinChecker, winner_info
 
 # Visualizations of the Board Unit Tests
 

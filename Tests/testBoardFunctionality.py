@@ -1,6 +1,7 @@
 import unittest
 from Board import Board, WinChecker
 
+
 class TestBoardFunctionality(unittest.TestCase):
     
     def setUp(self):
