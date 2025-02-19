@@ -3,7 +3,7 @@ from itertools import chain
 from time import sleep
 import os
 from typing import Optional
-from Game import TicTacToe, winner_info
+from Game import TicTacToe
 
 class Square(Enum):
     """Represents a single Tic Tac Toe square: Blank, X, or O."""

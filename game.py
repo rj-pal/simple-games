@@ -2,7 +2,7 @@ from collections import Counter
 from random import choice, randint
 from typing import Tuple, List, Union, Optional
 from Player import Player
-from Board import Board, WinChecker, winner_info
+from Board import Board, WinChecker
 
 def int_converter(number, columns):
     return divmod(number, columns)
@@ -40,10 +40,10 @@ class TicTacToe:
             self.TicTacToePlayer("Player 1", "x"),
             self.TicTacToePlayer("Player 2", "o"),
         )
-    def create_ai_player(self, name: Optional[str], difficulty: Optional[bool]) -> Tuple[Player, Player]:
+    def create_ai_player(self, difficulty: Optional[bool]) -> Tuple[Player, Player]:
         self.players = (
             self.TicTacToePlayer("Player 1", "x"),
-            self.AIPlayer(name=name, difficulty=difficulty, game=self),
+            self.AIPlayer(difficulty=difficulty, game=self),
         )
 
     def add_two_hard_move_ai_players_for_testing(self):
