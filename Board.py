@@ -4,8 +4,9 @@ from collections import Counter
 def int_converter(number, columns):
     return divmod(number, columns)
 
-def winner_info(a, b, c, d):
-    print(f"Winner {a} is type {b} in Row {c + 1} and Column {d + 1}")
+def winner_info(winner_dictionary):
+    print(f"Winning player marker {winner_dictionary["marker"]} is win of type {winner_dictionary["type"]} in " +
+          f"Row {winner_dictionary["row"] + 1} and Column {winner_dictionary["column"] + 1}")
 
 class Board:
     def __init__(self, rows: int, columns: int):
@@ -79,11 +80,10 @@ class WinChecker:
             "type": self.win_type,
             "row": self.win_row,
             "column": self.win_column
-            # "win_length": self.win_length
         }
 
-    # def get_win_info(self):
-    #     return self.win_marker, self.win_type, self.win_row, self.win_column
+    def get_win_info_as_tuple(self):
+        return self.win_marker, self.win_type, self.win_row, self.win_column
     
     def reset_win_info(self):
         self._update_win_info()
@@ -99,9 +99,6 @@ class WinChecker:
         for key, value in counter.items():
             if value >= win_value and key != 0:
                 return key
-        # value, count = counter.most_common(1)[0]
-        # if count >= win_value and value != 0:
-        #     return value
         return None
     
     def _check_rows(self, win_value: int) -> Optional[tuple]:
@@ -128,29 +125,11 @@ class WinChecker:
                 return winner, "left_diagonal", r, c
     
     def check_for_winner(self, win_value: int=3) -> Optional[tuple]:
-        # if win_value <= max(self.board.rows / 2, self.board.columns / 2):
-        #     raise ValueError(f"Invalid win condition: {win_value} is too small for this board size "
-        #                  f"({self.board.rows}x{self.board.columns}). "
-        #                  f"win_value must be greater than {int(max(self.board.rows / 2, self.board.columns / 2) // 1)}")
+        if win_value > max(self.board.rows, self.board.columns):
+            raise ValueError(f"Invalid win condition: {win_value} is too large for a board of size "
+                         f"({self.board.rows}x{self.board.columns}). It must fit within given board dimensions. ")
         for check_func in (self._check_rows, self._check_columns, self._check_diagonals):
             if winner_found := check_func(win_value):
                 self._update_win_info(*winner_found)
                 return True
         return False
-
-# B=Board(3,3)
-# print(B.get_rows())
-# print(B.get_diagonals(3,"right"))
-
-
-# board = [
-#     [ 1,  2,  3,  4],
-#     [ 5,  6,  7,  8],
-#     [ 9, 10, 11, 12],
-#     [13, 14, 15, 16]
-# ]
-        # for i in range(self.rows):
-        #     if i == 1 or i == 5:
-        #         board.append([8//n for n in range(1, self.columns + 1)])
-        #     else:
-        #         board.append([0 for _ in range(self.columns)])

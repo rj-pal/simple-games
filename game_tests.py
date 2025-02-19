@@ -30,6 +30,7 @@ def play_game(game_instance) -> None:
                 if game_instance.make_move(*move):
                     break
         elif isinstance(player, TicTacToe.AIPlayer):
+            # Moves are validated in the AIPlayer Class itself
             row, col = player.move(game_instance.board)
             game_instance.make_move(row, col, player.marker)
 
@@ -44,7 +45,7 @@ def play_game(game_instance) -> None:
     return
 
 
-def test_games(number_of_games: int, ai_levels: dict, test_modes: dict) -> None:
+def test_games(number_of_games: int) -> None:
     """
     Runs test games between a human player and AI at varying difficulty levels and modes.
 
@@ -58,12 +59,18 @@ def test_games(number_of_games: int, ai_levels: dict, test_modes: dict) -> None:
         - Creates an AI player for each configuration and simulates games versus a blind human.
         - Prints statistics after each configuration.
     """
+    # Configuration dictionaries for testing
+    ai_levels = {"Easy": None, "Intermediate": False, "Hard": True}
+    test_modes = {"Offense": False, "Defense": True}
+
+
     for difficulty_level, difficulty_bool_value in ai_levels.items():
         print(f"Blind mode tests for Player 1 versus AI Player ({difficulty_level} Mode).")
         for mode_name, go_first in test_modes.items():
             Game.create_ai_player(name=f"Computer ({difficulty_level} Mode - {mode_name})", difficulty=difficulty_bool_value)
+            # go_first == True is set for human player to make the first move
             print(f"Player 1 moves first: {go_first}. Running {number_of_games} games.")
-            
+
             for _ in range(number_of_games):
                 Game.go_first = go_first
                 play_game(Game)
@@ -107,31 +114,26 @@ def test_ai_games(number_of_games: int, ai_level1: any, ai_level2: any) -> None:
 
         print(Game.print_stats())
 
-
-# Configuration dictionaries
-AI_LEVELS = {"Easy": None, "Intermediate": False, "Hard": True}
-TEST_MODES = {"Offense": False, "Defense": True}
-
 # Instantiate Game Object for Testing
 Game = TicTacToe()
+number_of_games = 10000
 
-# Run human vs AI tests
-test_games(1000, AI_LEVELS, TEST_MODES)
+# Run simulated human vs AI tests
+test_games(number_of_games)
 
 # Run AI vs AI tests
-test_ai_games(1000, None, True)
-test_ai_games(1000, False, True)
-test_ai_games(1000, None, None)
-test_ai_games(1000, False, False)
+test_ai_games(number_of_games, None, True)
+test_ai_games(number_of_games, False, True)
+test_ai_games(number_of_games, None, None)
+test_ai_games(number_of_games, False, False)
 
 # Additional hard-mode-only AI vs AI tests
 Game.add_two_hard_move_ai_players_for_testing()
-print(f"AI (Hard Mode) versus AI (Hard Mode). Running {1000} games.")
+print(f"AI (Hard Mode) versus AI (Hard Mode). Running {number_of_games} games.")
 
-for _ in range(1000):
+for _ in range(number_of_games):
     play_game(Game)
 
 print(Game.print_stats())
 
-# Exit script
 exit()
