@@ -60,6 +60,17 @@ DRAW = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n
 
 horizontal_line = "* " * 18 + "*"
 
+def set_console_window_size(width: float, height: float) -> None:
+    """Sets the console window to fit the board to the screen better."""
+    # Check the platform (Windows or Unix-based)
+    os.system('cls||clear')
+    if os.name == 'nt':
+        # Windows platform
+        os.system(f'mode con: cols={width} lines={height}')
+    else:
+        # Unix-based platforms (Linux, macOS)
+        os.system(f'printf "\033[8;{height};{width}t"')
+
 def clear_screen() -> None:
     """Clears the terminal screen."""
     os.system('clear||cls')
@@ -68,8 +79,8 @@ def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = Tr
     """Creates the effect of the words or characters printed one letter or line at a time. 
     Word_flush True delays each character. False delays each complete line in a list. """
     #     Used when testing so that can play the games quicker
-    if delay != 0:
-        delay = 0
+    # if delay != 0:
+    #     delay = 0
     for string in strings:
         for char in string:
             print(char, end='', flush=word_flush)
@@ -172,7 +183,7 @@ def prompt_move(): # -> Union[tuple[int, int], list[int]]:
 
         return row, column
 
-def board_translator(raw_board: list[list[int | str]]) -> list[list[Square]]:
+def board_translator(raw_board: list[list[int, str]]) -> list[list[Square]]:
     """Converts a raw board with 0, 'x', 'o' into Square enum values."""
     mapping = {0: Square.BLANK, "x": Square.X, "o": Square.O}
     return [[mapping[cell] for cell in row] for row in raw_board]
@@ -191,9 +202,13 @@ def print_board(game_board) -> None:
     game_board = board_translator(game_board)
     delay_effect([create_board(game_board)], 0.00075, False)
 
+def print_move(name, row: int, column: int) -> None:
+    """Returns a string for printing the last played square on the board by the current player."""
+    delay_effect([f"\n{name} played the square in row {row + 1} and column {column + 1}.\n"])
+
 def print_start_game():
      print(WELCOME)
-     print(delay_effect([INTRO]))
+     delay_effect([INTRO])
 
 def print_first_player(name) -> None:
     """Prints who is plays first and their marker."""
@@ -231,10 +246,10 @@ def set_up_game():
     if one_player():
         difficulty = select_difficulty_level()
         Game = TicTacToe()
-        Game.create_ai_player(difficulty=difficulty)
+        name_dictionary = {None: "CPU Easy", False: "CPU Intermediate", True: "CPU Hard"}
+        Game.create_ai_player(name=name_dictionary[difficulty], difficulty=difficulty)
         x = get_player_name()
         Game.update_player_name(x, "x")
-        print(Game.players[1].difficulty)
         
     else:
         x, y = get_player_names()
@@ -255,6 +270,7 @@ def play_game(Game) -> None:
         name = player.get_player_name()
         if i == 0:
             print_first_player(name)
+            clear_screen()
         
         if isinstance(player, TicTacToe.TicTacToePlayer):
             
@@ -271,6 +287,8 @@ def play_game(Game) -> None:
             row, col = player.move(Game.board)
             Game.make_move(row, col, player.marker)
         
+        clear_screen()
+        print_move(name, row, col)
         print_board(Game.board.get_board())
 
         if i >= 4 and Game.check_winner():
@@ -280,7 +298,7 @@ def play_game(Game) -> None:
     Game.update_winner_info()
     Game.update_players_stats()
     Game.print_winner()
-    print(Game.move_list)
+    # print(Game.move_list)
     Game.reset_game_state()
     print(Game.print_stats())
 
@@ -303,12 +321,14 @@ def play_again():
             print(message)
 
 if __name__ == '__main__':
+    set_console_window_size(85, 30)
     Game = set_up_game()
     play_game(Game)
     print_scoreboard(Game.players)
     multiplay = play_again()
     while multiplay:
          Game.reset_board()
+         clear_screen()
          play_game(Game)
          multiplay = play_again()
          print_scoreboard(Game.players)     

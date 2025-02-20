@@ -1,8 +1,8 @@
 from collections import Counter
 from random import choice, randint
 from typing import Tuple, List, Union, Optional
-from Player import Player
 from Board import Board, WinChecker
+from Player import Player
 
 def int_converter(number, columns):
     return divmod(number, columns)
@@ -40,10 +40,10 @@ class TicTacToe:
             self.TicTacToePlayer("Player 1", "x"),
             self.TicTacToePlayer("Player 2", "o"),
         )
-    def create_ai_player(self, difficulty: Optional[bool]) -> Tuple[Player, Player]:
+    def create_ai_player(self, name: Optional[str], difficulty: Optional[bool]) -> Tuple[Player, Player]:
         self.players = (
             self.TicTacToePlayer("Player 1", "x"),
-            self.AIPlayer(difficulty=difficulty, game=self),
+            self.AIPlayer(name=name, difficulty=difficulty, game=self),
         )
 
     def add_two_hard_move_ai_players_for_testing(self):
@@ -351,7 +351,6 @@ class TicTacToe:
                             assert_test(move)
                             return move#corner
                 elif (r, c) in self.corners:
-################# 
                     if not self.game.board.square_is_occupied((r + 2) % 4, (c + 2) % 4):
                         move = (r + 2) % 4, (c + 2) % 4
                         assert_test(move)
@@ -592,7 +591,7 @@ class TicTacToe:
     
     class AITestPlayer(AIPlayer):
 
-        def __init__(self, name: str = 'CPU', marker: str = "o", difficulty: bool = False, game: 'TicTacToe' = None, hard_test: bool = False):
+        def __init__(self, name: str = 'Computer', marker: str = "o", difficulty: bool = False, game: 'TicTacToe' = None, hard_test: bool = False):
             """AIPlayer is a child class of Player and contains all the functionality for a one-player game
             against the computer. The computer player has three modes: easy, intermediate and hard.
             The computer is defaulted to name 'Computer' and marker 'O'"""

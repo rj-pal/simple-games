@@ -5,8 +5,9 @@ def int_converter(number, columns):
     return divmod(number, columns)
 
 def winner_info(winner_dictionary):
-    print(f"Winning player marker {winner_dictionary["marker"]} is win of type {winner_dictionary["type"]} in " +
-          f"Row {winner_dictionary["row"] + 1} and Column {winner_dictionary["column"] + 1}")
+    print(f"Winning player marker {winner_dictionary['marker']} is win of type {winner_dictionary['type']} in "
+      f"Row {winner_dictionary['row'] + 1} and Column {winner_dictionary['column'] + 1}")
+
 
 class Board:
     def __init__(self, rows: int, columns: int):

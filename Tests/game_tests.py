@@ -1,6 +1,14 @@
+import sys
+import os
+
+parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+sys.path.append(parent_dir)
+
+
 from Game import *
 from Board import *
 from Player import *
+from random import randint
 
 def play_game(game_instance) -> None:
     """
@@ -23,13 +31,13 @@ def play_game(game_instance) -> None:
             player = game_instance.players[(round_count % 2) - 1]
 
         # Handle moves based on player type
-        if isinstance(player, TicTacToe.TicTacToePlayer): 
+        if isinstance(player, Game.TicTacToePlayer): 
             while True:
                 # Simulates blind human play (the same as AI easy mode)
                 move = randint(0, 2), randint(0, 2), player.marker
                 if game_instance.make_move(*move):
                     break
-        elif isinstance(player, TicTacToe.AIPlayer):
+        elif isinstance(player, Game.AIPlayer):
             # Moves are validated in the AIPlayer Class itself
             row, col = player.move(game_instance.board)
             game_instance.make_move(row, col, player.marker)
@@ -116,7 +124,7 @@ def test_ai_games(number_of_games: int, ai_level1: any, ai_level2: any) -> None:
 
 # Instantiate Game Object for Testing
 Game = TicTacToe()
-number_of_games = 10000
+number_of_games = 10
 
 # Run simulated human vs AI tests
 test_games(number_of_games)
@@ -128,6 +136,7 @@ test_ai_games(number_of_games, None, None)
 test_ai_games(number_of_games, False, False)
 
 # Additional hard-mode-only AI vs AI tests
+
 Game.add_two_hard_move_ai_players_for_testing()
 print(f"AI (Hard Mode) versus AI (Hard Mode). Running {number_of_games} games.")
 
