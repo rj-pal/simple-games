@@ -70,6 +70,9 @@ class TicTacToe:
         else:
             print(f"Won in {self.win_type} {self.win_index + 1}")
     
+    def get_winner_attributes(self):
+        return self.winner_name, self.winner_marker, self.win_type, self.win_index
+    
     def print_stats(self):
         for player in self.players:
             print(player.__str__())

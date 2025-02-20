@@ -3,7 +3,7 @@ from enum import Enum
 from itertools import chain
 from time import sleep
 from typing import Optional
-from game import TicTacToe
+from Game import TicTacToe
 
 class Square(Enum):
     """Represents a single Tic Tac Toe square: Blank, X, or O."""
@@ -46,6 +46,27 @@ WELCOME = """
    *      * * *   *    * *     * * *    *     * *     * * *   * *   * * *    *
    *        *     *   *          *     * *   *          *    *   *  * *      *
    *        *     *    * *       *    *   *   * *       *     * *   * * *    *
+   *                                                                         *
+   *                                                                         *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+"""
+
+GAMEOVER = """
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   *                                                                         *
+   *                                                                         *
+   *               * * *        **        *       *    * * * *               *
+   *              *            *  *       * *   * *    *                     *
+   *              *   * *     *    *      *   *   *    * * *                 * 
+   *              *     *    *      *     *       *    *                     *
+   *               * * *    *        *    *       *    * * * *               *
+   *                                                                         *
+   *                                                                         *
+   *                *  *     *       *    * * * *     *  *  *                *
+   *              *      *    *     *     *           *      *               *
+   *              *      *     *   *      * * *       *  *  *                *
+   *              *      *      * *       *           *      *               *
+   *                *  *         *        * * * *     *       *              *
    *                                                                         *
    *                                                                         *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -124,10 +145,7 @@ def get_player_names() -> None:
         return name_x, name_y
 def get_player_name() -> None:
         """Creates two players of the Player class for game play and add the players to the player attribute."""
-        
         name_x = input("\nPlayer one please enter the name of the player for X or press enter: ")
-
-        
         return name_x
 
 def one_player() -> bool:
@@ -210,6 +228,17 @@ def print_start_game():
      print(WELCOME)
      delay_effect([INTRO])
 
+def print_game_over() -> None:
+    """Prints a flashing "Game Over" when a winner has been declared"""
+    print()
+    clear_screen()
+    for _ in range(5):
+        print(GAMEOVER.center(os.get_terminal_size().columns - 1), end='\r')
+        sleep(0.75)
+        clear_screen()
+        sleep(0.5)
+    print()
+
 def print_first_player(name) -> None:
     """Prints who is plays first and their marker."""
     delay_effect([f'\n{name} plays first.'])
@@ -228,17 +257,22 @@ def print_scoreboard(player_list) -> None:
 
 def print_winner_info(name, marker, win_type, win_index) -> None:
         """Displays the information of the winner of the game using the winner attributes."""
-        winner_string = f"\nWinner winner chicken dinner. {name} is the winner.\n{marker} " \
-                        f"wins in"
-        win_type_dict = {
-            "row": f"row {win_index}.",
-            "col": f"column {win_index}.",
-            "right_diag": "the right diagonal.",
-            "left_diag": "the left diagonal."
-        }
-        winner_string = f"{winner_string} {win_type_dict[win_type]}\n"
-        delay_effect(surround_string([winner_string], "#", 9), 0.00075,
-                     False)  # customize the size of the box and speed of delay
+        if all(info is None for info in (name, marker, win_type)):
+            draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
+            delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
+        else:
+          
+            winner_string = f"\nWinner winner chicken dinner. {name} is the winner.\n{marker} " \
+                            f"wins in"
+            win_type_dict = {
+                "row": f"row {win_index + 1}.",
+                "column": f"column {win_index + 1}.",
+                "right_diagonal": "the right diagonal.",
+                "left_diagonal": "the left diagonal."
+            }
+            winner_string = f"{winner_string} {win_type_dict[win_type]}\n"
+            delay_effect(surround_string([winner_string], "#", 9), 0.00075,
+                        False)  # customize the size of the box and speed of delay
    
 
 def set_up_game():
@@ -292,15 +326,18 @@ def play_game(Game) -> None:
         print_board(Game.board.get_board())
 
         if i >= 4 and Game.check_winner():
+            print_game_over()
             break
     else:
         delay_effect(surround_string([DRAW], "#", 9), 0.00075, False)
+    print_board(Game.board.get_board())
     Game.update_winner_info()
     Game.update_players_stats()
-    Game.print_winner()
+    winner = Game.get_winner_attributes()
+    print_winner_info(*winner)
+    # Game.print_winner()
     # print(Game.move_list)
     Game.reset_game_state()
-    print(Game.print_stats())
 
 
 def play_again():
