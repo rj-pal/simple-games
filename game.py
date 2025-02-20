@@ -1,8 +1,8 @@
 from collections import Counter
 from random import choice, randint
 from typing import Tuple, List, Union, Optional
+from Board import Board, WinChecker
 from Player import Player
-from Board import Board, WinChecker, winner_info
 
 def int_converter(number, columns):
     return divmod(number, columns)
@@ -26,12 +26,11 @@ class TicTacToe:
          self.move_list: List = []
          self.round_count: int = 0
          self.go_first: bool = True
-         self.winner_name: str = None  # The winner attributes with default settings reset when no winner
+         self.winner_name: str = None  # All winner attributes default to None when no winner or based on Winchecker
          self.winner_marker: str = None
          self.win_type: str = None
          self._win: WinChecker = WinChecker(self.board)
-
-         self.players = self.create_human_players()
+         self.players = self.create_human_players() # Default to two player mode
 
     def create_board(self):
         return Board(3,3)
@@ -40,12 +39,23 @@ class TicTacToe:
         return (
             self.TicTacToePlayer("Player 1", "x"),
             self.TicTacToePlayer("Player 2", "o"),
-            # self.AIPlayer(game=self),
         )
     def create_ai_player(self, name: Optional[str], difficulty: Optional[bool]) -> Tuple[Player, Player]:
         self.players = (
             self.TicTacToePlayer("Player 1", "x"),
-            self.AIPlayer(name=name, game=self, difficulty=difficulty),
+            self.AIPlayer(name=name, difficulty=difficulty, game=self),
+        )
+
+    def add_two_hard_move_ai_players_for_testing(self):
+        self.players = (
+            self.AITestPlayer(name="AI one", marker="x", game=self, difficulty=True, hard_test=True),
+            self.AITestPlayer(name="AI two", marker="o", game=self, difficulty=True, hard_test=True),
+        )
+
+    def add_ai_players_for_testing(self, difficulty_one: bool, difficulty_two: bool):
+        self.players = (
+            self.AITestPlayer(name="AI one", marker="x", game=self, difficulty=difficulty_one),
+            self.AITestPlayer(name="AI two", marker="o", game=self, difficulty=difficulty_two),
         )
 
     @property
@@ -158,7 +168,7 @@ class TicTacToe:
 
     class AIPlayer(Player):
 
-        def __init__(self, name: str = 'Computer', marker: str = "o", game: 'TicTacToe' = None, difficulty: bool = False):
+        def __init__(self, name: str = 'CPU', marker: str = "o", difficulty: bool = False, game: 'TicTacToe' = None):
             """AIPlayer is a child class of Player and contains all the functionality for a one-player game
             against the computer. The computer player has three modes: easy, intermediate and hard.
             The computer is defaulted to name 'Computer' and marker 'O'"""
@@ -308,6 +318,7 @@ class TicTacToe:
         def defence_mode(self, board: Board) -> tuple[int, int]:
             """AI strategy for when the computer plays second. Strategy is based on the first move
             by the human player. The AI always optimizes for a win or draw. Returns optimal move."""
+            
 
             def assert_test(two_ints: tuple[int, int]):
                 assert len(two_ints) == 2
@@ -340,7 +351,6 @@ class TicTacToe:
                             assert_test(move)
                             return move#corner
                 elif (r, c) in self.corners:
-################# 
                     if not self.game.board.square_is_occupied((r + 2) % 4, (c + 2) % 4):
                         move = (r + 2) % 4, (c + 2) % 4
                         assert_test(move)
@@ -558,12 +568,14 @@ class TicTacToe:
             
 
             if self.difficulty:  # hard mode
-                if self.game.go_first:  # strategy is based on if human player plays first or not (go_first is for human player)
+                if self.game.go_first:  # strategy is based on if human player plays first or not (go_first is for human player
+                    
                     result = self.defence_mode(self.game.board)
                     # assert result is not None 
                     return result
                     # return self.defence_mode(self.game.board)
                 else:
+
                     result = self.offence_mode(self.game.board)
                     assert result is not None 
                     return result
@@ -576,4 +588,41 @@ class TicTacToe:
                     if move := self.two_blanks(self.game.board):
                         return move
                 return self.random_ints(self.game.board)
+    
+    class AITestPlayer(AIPlayer):
 
+        def __init__(self, name: str = 'Computer', marker: str = "o", difficulty: bool = False, game: 'TicTacToe' = None, hard_test: bool = False):
+            """AIPlayer is a child class of Player and contains all the functionality for a one-player game
+            against the computer. The computer player has three modes: easy, intermediate and hard.
+            The computer is defaulted to name 'Computer' and marker 'O'"""
+            super().__init__(name, marker, difficulty, game)
+            self.hard_test = hard_test
+
+        def move(self, board: Board) -> Union[tuple[int, int], list[int]]:
+            """Selects a move for the AI player based on the play mode of easy, intermediate or hard. """
+            if self.difficulty is None:  # easy mode
+                result = self.random_ints(self.game.board)
+                return result
+
+            if result := self.win_or_block(self.game.board):  # intermediate or hard mode always checks for win or block first
+                return result
+               
+
+            if self.difficulty:  # hard mode
+                if self.game.go_first:  # strategy is based on if human player plays first or not (go_first is for human player)
+                    if self.hard_test and (self.game.round_count % 2 == 0):
+                        return self.offence_mode(self.game.board)
+                    return self.defence_mode(self.game.board)
+                else:
+                    if self.hard_test and (self.game.round_count % 2 == 1):
+                        return self.defence_mode(self.game.board)
+
+                    return self.offence_mode(self.game.board)
+
+            else:  # intermediate mode always checks for a fork first then for two blanks after two random moves
+                if self.game.round_count > 3:
+                    if move := self.check_fork(self.game.board):
+                        return move
+                    if move := self.two_blanks(self.game.board):
+                        return move
+                return self.random_ints(self.game.board)
