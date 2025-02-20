@@ -1,9 +1,9 @@
+import os
 from enum import Enum
 from itertools import chain
 from time import sleep
-import os
 from typing import Optional
-from Game import TicTacToe
+from game import TicTacToe
 
 class Square(Enum):
     """Represents a single Tic Tac Toe square: Blank, X, or O."""
@@ -156,8 +156,8 @@ def select_difficulty_level() -> Optional[bool]:
             return True
         else:
             print(
-                f"\nThere is only easy, intermediate or hard mode.\nPlease select '1' for easy, '2' for "
-                f"intermediate or '3' for hard.")
+                "\nThere is only easy, intermediate or hard mode.\nPlease select '1' for easy, '2' for "
+                "intermediate or '3' for hard.")
 
 
 def prompt_int(value: str) -> int:
