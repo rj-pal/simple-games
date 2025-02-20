@@ -2,6 +2,14 @@ version = 1
 requires-python = ">=3.12"
 
 [[package]]
+name = "alphazerogeneral"
+version = "0.0.2"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2a/98/652f9c30486c27ba6f1a9a09449b5a4b7e4bf172ab9e592eb63bb9a62567/alphazerogeneral-0.0.2-py3-none-any.whl", hash = "sha256:7591ed916f40e16f0e4712d7fcf8c63325000eefdda26b4eb9849f104e47d82a", size = 39124 },
+]
+
+[[package]]
 name = "asgiref"
 version = "3.8.1"
 source = { registry = "https://pypi.org/simple" }
@@ -168,12 +176,14 @@ name = "repl-nix-workspace"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "alphazerogeneral" },
     { name = "flask" },
     { name = "rapid-router" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "alphazerogeneral", specifier = ">=0.0.2" },
     { name = "flask", specifier = ">=3.1.0" },
     { name = "rapid-router", specifier = ">=7.2.9" },
 ]

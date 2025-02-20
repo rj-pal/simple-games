@@ -410,11 +410,11 @@ if __name__ == '__main__':
     set_console_window_size(85, 30)
     Game = set_up_game()
     play_game(Game)
-    print_scoreboard(Game.players)
     multiplay = play_again()
+    print_scoreboard(Game.players)
     while multiplay:
         Game.reset_board()
-        clear_screen()
+        # clear_screen()
         play_game(Game)
         multiplay = play_again()
         print_scoreboard(Game.players)
