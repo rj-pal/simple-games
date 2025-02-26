@@ -19,6 +19,168 @@ def board(rows: int, columns: int):
             board.append([0 for _ in range(columns)])
     return board
 
+class ConnectFour:
+
+    def __init__(self, connect_value: int=4, rows: int=6, columns: int=7):
+         self.connect_value = connect_value
+         self.rows = rows
+         self.columns = columns
+         self.board: List[List] = self.create_board()
+         self.move_list: List = []
+         self.round_count: int = 0
+         self.go_first: bool = True
+         self.winner_name: str = None  # All winner attributes default to None when no winner or based on Winchecker
+         self.winner_marker: str = None
+         self.win_type: str = None
+         self.win_row: int = -1
+         self.win_column: int = -1
+         self._win: WinChecker = WinChecker(self.board, self.connect_value)
+         self.players = self.create_human_players() # Default to two player mode
+
+    def create_board(self):
+        return Board(self.rows, self.columns)
+
+    def create_human_players(self) -> Tuple[Player, Player]:
+        return (
+            self.ConnectFourPlayer("Player 1", "r"),
+            self.ConnectFourPlayer("Player 2", "y"),
+        )
+    # def create_ai_player(self, name: Optional[str], difficulty: Optional[bool]) -> Tuple[Player, Player]:
+    #     self.players = (
+    #         self.TicTacToePlayer("Player 1", "r"),
+    #         self.AIPlayer(name=name, difficulty=difficulty, game=self),
+    #     )
+
+    # def add_two_hard_move_ai_players_for_testing(self):
+    #     self.players = (
+    #         self.AITestPlayer(name="AI one", marker="x", game=self, difficulty=True, hard_test=True),
+    #         self.AITestPlayer(name="AI two", marker="o", game=self, difficulty=True, hard_test=True),
+    #     )
+
+    # def add_ai_players_for_testing(self, difficulty_one: bool, difficulty_two: bool):
+    #     self.players = (
+    #         self.AITestPlayer(name="AI one", marker="x", game=self, difficulty=difficulty_one),
+    #         self.AITestPlayer(name="AI two", marker="o", game=self, difficulty=difficulty_two),
+    #     )
+
+    @property
+    def board_size(self):
+        return self.rows * self.columns
+
+    def print_winner(self):
+        print(f"Winning Player: {self.winner_name}")
+        print(f"Playing {self.winner_marker}")
+        print(f"Won in {self.win_type} at row {self.win_row + 1} and column {self.win_column + 1}.")
+    
+    def get_winner_attributes(self):
+        return self.winner_name, self.winner_marker, self.win_type, self.win_row, self.win_column
+    
+    def print_stats(self):
+        for player in self.players:
+            print(player.__str__())
+
+    def is_valid(self, row, col):
+        if 0 <= col < self.columns: # validate the move is on the board
+            return not self.board.square_is_occupied(row, col)
+        return False
+
+    def make_move(self, col, marker):
+        for row in range(self.rows - 1, -1, -1):
+            if self.is_valid(row, col):
+                self.board.add_to_square(row, col, marker)
+                self.move_list.append((row, col))
+                self.round_count += 1
+                return True
+        return False
+    
+    def reset_board(self) -> None:
+        """Sets each square in the board to a blank."""
+        self.board.reset_board()
+
+    def reset_game_state(self):
+        self.reset_board()
+        self.reset_winner()
+        self.move_list = []
+        self.round_count = 0
+        self.go_first = not self.go_first
+
+    # def update_ai_player_level(self, difficulty: bool):
+    #     for player in self.players:
+    #         if isinstance(player, self.AIPlayer): 
+    #             player.difficulty = difficulty
+
+    def update_player_name(self, name: str, marker: str) -> None:
+        """Updates a player's name based on their marker ('r' or 'y')."""
+        marker = marker.lower()    
+        if marker not in {"x", "o"}:
+            raise ValueError(f"Invalid marker '{marker}'. Must be 'r' or 'y'.")
+        marker_to_index = {"r": 0, "y": 1}
+        self.players[marker_to_index[marker.lower()]].name = name
+
+    def update_players_stats(self) -> None:
+        """Updates the game statistics on the two players based on if there is a winner or not."""
+        for player in self.players:
+            player.game_played()
+            if player.name == self.winner_name:
+                player.won()
+            elif self.winner_name is not None:
+                player.lost()
+    
+    def update_winner_info(self) -> None:
+        """Updates the winner attributes to store information on the current winner. Resets to default values if
+        there is no winner. """
+        winner_info = self.get_winner_info()
+        for player in self.players:
+            if player.marker == winner_info["marker"]:
+                self.winner_name = player.name
+                self.winner_marker = player.marker_name
+        self.win_type = winner_info["type"]
+        self.win_row = winner_info["row"]
+        self.win_column = winner_info["column"]
+
+    def check_winner(self):
+        return self._win.check_for_winner()
+
+    def get_winner_info(self):
+        return self._win.get_win_info()
+    
+    def reset_winner(self):
+        self._win.reset_win_info()
+        self.winner_name = None
+        self.winner_marker = None
+        self.win_type = None
+        self.win_row = -1
+        self.win_column = -1
+        
+
+    class ConnectFourPlayer(Player):
+        def __init__(self, name: str = None, marker: str = None):
+            super().__init__(name, marker)  # Initialize the name first
+            self.marker = marker  # Use the property setter for validation
+            self.marker_name = self._get_marker_name()
+
+        @Player.name.setter
+        def name(self, value):
+            """Ensure name is assigned for empty string."""
+            if not value:
+                value = f"Anonymous {self.marker.capitalize()}"
+            self._name = value  # Directly set the private attribute
+
+        @Player.marker.setter
+        def marker(self, value):
+            """Ensure marker is only 'r' or 'y'."""
+            if value not in {"r", "y", "R", "Y"}:
+                raise ValueError(f"Invalid marker: {value}. Must be 'r' or 'y'.")
+            self._marker = value.lower()  # Directly set the private attribute
+            self.marker_name = self._get_marker_name()  # Update marker_name when marker changes
+        
+        def _get_marker_name(self):
+            """Determine the marker name based on the marker value."""
+            return "Red" if self._marker == "r" else "Yellow"
+
+
+
+
 class TicTacToe:
 
     def __init__(self):
@@ -29,6 +191,7 @@ class TicTacToe:
          self.winner_name: str = None  # All winner attributes default to None when no winner or based on Winchecker
          self.winner_marker: str = None
          self.win_type: str = None
+         self.win_index: int = None
          self._win: WinChecker = WinChecker(self.board)
          self.players = self.create_human_players() # Default to two player mode
 
@@ -126,7 +289,7 @@ class TicTacToe:
     def update_winner_info(self) -> None:
         """Updates the winner attributes to store information on the current winner. Resets to default values if
         there is no winner. """
-        winner_info = self.get_winner_info()
+        winner_info = self.get_winner_info() # returns dictionary with keys: marker, type, row, column
         for player in self.players:
             if player.marker == winner_info["marker"]:
                 self.winner_name = player.name
@@ -629,3 +792,24 @@ class TicTacToe:
                     if move := self.two_blanks(self.game.board):
                         return move
                 return self.random_ints(self.game.board)
+
+
+test = ConnectFour()
+print(test.board)
+test.make_move(0,"r")
+test.make_move(0,"r")
+test.make_move(0,"y")
+test.make_move(3,"y")
+test.make_move(0,"y")
+test.make_move(0,"y")
+test.make_move(0,"y")
+test.make_move(0,"y")
+test.make_move(0,"y")
+test.make_move(0,"y")
+print()
+print(test.board)
+if test.check_winner():
+    test.update_winner_info()
+    test.get_winner_attributes()
+    test.print_winner()
+# print(test.board.columns)

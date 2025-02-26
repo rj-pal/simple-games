@@ -68,8 +68,9 @@ class Board:
         return f"Board({self.rows}x{self.columns})\n{self.__str__()}"
 
 class WinChecker:
-    def __init__(self, board: Board):
+    def __init__(self, board: Board, win_value: int=3):
         self.board = board
+        self.win_value = win_value
         self.win_marker = None
         self.win_type = None
         self.win_row = None
@@ -125,12 +126,12 @@ class WinChecker:
                 c = self.board.columns - 1 - c
                 return winner, "left_diagonal", r, c
     
-    def check_for_winner(self, win_value: int=3) -> Optional[tuple]:
-        if win_value > max(self.board.rows, self.board.columns):
-            raise ValueError(f"Invalid win condition: {win_value} is too large for a board of size "
+    def check_for_winner(self) -> Optional[tuple]:
+        if self.win_value > max(self.board.rows, self.board.columns):
+            raise ValueError(f"Invalid win condition: {self.win_value} is too large for a board of size "
                          f"({self.board.rows}x{self.board.columns}). It must fit within given board dimensions. ")
         for check_func in (self._check_rows, self._check_columns, self._check_diagonals):
-            if winner_found := check_func(win_value):
+            if winner_found := check_func(self.win_value):
                 self._update_win_info(*winner_found)
                 return True
         return False

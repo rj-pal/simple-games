@@ -5,7 +5,7 @@ parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 sys.path.append(parent_dir)
 
 
-from Game import *
+from Game import TicTacToe
 from Board import *
 from Player import *
 from random import randint

@@ -3,7 +3,7 @@ from enum import Enum
 from itertools import chain
 from time import sleep
 from typing import Optional
-from Game import TicTacToe
+from Game import * #TicTacToe
 
 
 class Square(Enum):
@@ -75,7 +75,9 @@ against and opponent or the computer. X starts the game.
 THINKING = "\nComputer is now thinking."
 DRAW = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
 
-horizontal_line = "* " * 18 + "*"
+# horizontal_line = "* " * 18 + "*" # for Tic Tac Toe
+horizontal_line = "* " * 44 + "*" # for Tic Tac Toe
+
 
 
 def set_console_window_size(width: float, height: float) -> None:
@@ -237,10 +239,27 @@ def create_row(row: list[list[Square]]) -> str:
     ])
 
 
+# def create_row(row: list[list[str]]) -> str:
+#     """Returns a string of a single row of the board with elements in red, but not the '*' separator."""
+#     return "\n".join([
+#         "*".join(f"\033[31m{item}\033[0m" for item in line).center(os.get_terminal_size().columns - 1)
+#         for line in zip(*row)
+#     ])
+
+
+# def create_row(row: list[list[str]]) -> str:
+#     """Returns a string of a single row of the board with 'line' in red."""
+#     return "\n".join([
+#         f"\033[31m{'*'.join(line)}\033[0m".center(os.get_terminal_size().columns - 1)
+#         for line in zip(*row)
+#     ])
+
+
 def create_board(game_board) -> str:
     """Returns a string of the complete board created row by row using _create_row method for printing."""
     return f"\n{horizontal_line.center(os.get_terminal_size().columns - 1)}\n".join(
         [create_row([square.value for square in row]) for row in game_board])
+
 
 
 def print_board(game_board) -> None:
@@ -407,16 +426,26 @@ def play_again():
 
 
 if __name__ == '__main__':
-    set_console_window_size(85, 30)
-    Game = set_up_game()
-    play_game(Game)
-    multiplay = play_again()
-    print_scoreboard(Game.players)
-    while multiplay:
-        Game.reset_board()
-        # clear_screen()
-        play_game(Game)
-        multiplay = play_again()
-        print_scoreboard(Game.players)
 
-    exit()
+    test = ConnectFour()
+    test.make_move(0, "x")
+    test.make_move(0, "o")
+    test.make_move(6, "o")
+    test.make_move(6, "x")
+    test.make_move(7, "o")
+    print_board(test.board.get_board())
+
+
+    # set_console_window_size(85, 30)
+    # Game = set_up_game()
+    # play_game(Game)
+    # multiplay = play_again()
+    # print_scoreboard(Game.players)
+    # while multiplay:
+    #     Game.reset_board()
+    #     # clear_screen()
+    #     play_game(Game)
+    #     multiplay = play_again()
+    #     print_scoreboard(Game.players)
+
+    # exit()
