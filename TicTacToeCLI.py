@@ -3,43 +3,44 @@ from enum import Enum
 from itertools import chain
 from time import sleep
 from typing import Optional
-from Game import * #TicTacToe
+from games.Game import TicTacToe, ConnectFour
+from utils.square import Square
 
-from colorama import Fore, Style
+# from colorama import Fore, Style
 
 
-class Square(Enum):
-    """Represents a single Tic Tac Toe square: Blank, X, or O."""
-    BLANK = ["            "] * 5
+# class Square(Enum):
+#     """Represents a single Tic Tac Toe square: Blank, X, or O."""
+#     BLANK = ["            "] * 5
     
-    R = [
-        Fore.RED + "    ****    " + Style.RESET_ALL, 
-        Fore.RED + "  ********  " + Style.RESET_ALL, 
-        Fore.RED + " ********** " + Style.RESET_ALL, 
-        Fore.RED + "  ********  " + Style.RESET_ALL,
-        Fore.RED + "    ****    " + Style.RESET_ALL
-    ]
+#     R = [
+#         Fore.RED + "    ****    " + Style.RESET_ALL, 
+#         Fore.RED + "  ********  " + Style.RESET_ALL, 
+#         Fore.RED + " ********** " + Style.RESET_ALL, 
+#         Fore.RED + "  ********  " + Style.RESET_ALL,
+#         Fore.RED + "    ****    " + Style.RESET_ALL
+#     ]
     
-    Y = [
-    Fore.LIGHTYELLOW_EX + "    ****    " + Style.RESET_ALL, 
-    Fore.LIGHTYELLOW_EX + "  ********  " + Style.RESET_ALL, 
-    Fore.LIGHTYELLOW_EX + " ********** " + Style.RESET_ALL, 
-    Fore.LIGHTYELLOW_EX + "  ********  " + Style.RESET_ALL,
-    Fore.LIGHTYELLOW_EX + "    ****    " + Style.RESET_ALL
-   ]
+#     Y = [
+#     Fore.LIGHTYELLOW_EX + "    ****    " + Style.RESET_ALL, 
+#     Fore.LIGHTYELLOW_EX + "  ********  " + Style.RESET_ALL, 
+#     Fore.LIGHTYELLOW_EX + " ********** " + Style.RESET_ALL, 
+#     Fore.LIGHTYELLOW_EX + "  ********  " + Style.RESET_ALL,
+#     Fore.LIGHTYELLOW_EX + "    ****    " + Style.RESET_ALL
+#    ]
 
-    O = [
-        "    *  *    ", "  *      *  ", " *        * ", "  *      *  ", "    *  *    "
-    ]
-    X = [
-        "  *       * ", "    *   *   ", "      *     ", "    *   *   ", "  *       * "
-    ]
+#     O = [
+#         "    *  *    ", "  *      *  ", " *        * ", "  *      *  ", "    *  *    "
+#     ]
+#     X = [
+#         "  *       * ", "    *   *   ", "      *     ", "    *   *   ", "  *       * "
+#     ]
 
-    def __str__(self) -> str:
-        return self.name
+#     def __str__(self) -> str:
+#         return self.name
 
-    def __repr__(self) -> str:
-        return f'Name: {self.name}\nValue: {self.value}'
+#     def __repr__(self) -> str:
+#         return f'Name: {self.name}\nValue: {self.value}'
 
 
 WELCOME = """

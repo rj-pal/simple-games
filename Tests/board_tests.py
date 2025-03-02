@@ -1,10 +1,4 @@
-import sys
-import os
-
-parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-sys.path.append(parent_dir)
-
-from Board import Board, WinChecker, winner_info
+from core.board import Board, WinChecker, winner_info
 
 # Visualizations of the Board Unit Tests
 
@@ -23,13 +17,13 @@ print(B.get_diagonals(2,"left"))
 print(B.get_diagonals(1, "left")) # This goes right to left
 
 
-def print_winner(win_object, win_number):
+def print_winner(win_object):
     """Requires Winchecker function. Returns any winner information as string."""
-    result = win_object.check_for_winner(win_number) 
+    result = win_object.check_for_winner() 
     if result:
         winner_stats = win_object.get_win_info()
         winner_info(winner_stats)
-        print(f"Winning Condition: {win_number}-in-a-row.")
+        print(f"Winning Condition: {win_object.win_value}-in-a-row.")
     else:
         print("No winner found.")
 
@@ -43,9 +37,8 @@ for col in range(7):
 print(test.board)
 print(test)
 
-win = WinChecker(test)
-print_winner(win, 4)  # Standard Connect 4 win condition of 4 in a row
-
+win = WinChecker(test, 4)
+print_winner(win)  # Standard Connect 4 win condition of 4 in a row
 
 # Testing winner condition in non-standard boards. This is to make sure the diagonal win checking is functional
 # Make sure it does not through error for various sized win conditions that do not fit on a board
@@ -59,8 +52,8 @@ test.update_square(2, 2, "r")
 print(test)
 
 
-win = WinChecker(test)
-print_winner(win, 2)
+win = WinChecker(test, 2)
+print_winner(win)
 win.reset_win_info()
 # print_winner(win, 10)
 win.reset_win_info()
@@ -69,12 +62,12 @@ test.update_square(0, 0, "b")
 test.update_square(1, 1, "r")
 test.update_square(2, 2, "r")
 print(test)
-print_winner(win, 2)
+print_winner(win)
 
 
 
 test = Board(6, 7)
-win = WinChecker(test)
+win = WinChecker(test, 4)
 # Right diagonal winner configuration (from top-left to bottom-right)
 test.update_square(0, 0, "b")
 test.update_square(1, 1, "b")
@@ -82,11 +75,11 @@ test.update_square(2, 2, "b")
 test.update_square(3, 3, "b")
 test.update_square(4, 6, "r")
 print(test)
-print_winner(win, 2)
+print_winner(win)
 win.reset_win_info()
-print_winner(win, 4)
+print_winner(win)
 win.reset_win_info()
-print_winner(win, 5)
+print_winner(win)
 
 
 # Left diagonal winner (random position from top-right to bottom-left) with X and Os
@@ -97,7 +90,7 @@ test.update_square(4, 2, "x")  # Third "x" in the diagonal
 test.update_square(5, 1, "x")  # Fourth "x" in the diagonal
 test.update_square(4, 6, "o")  # Just a random "o" in another spot
 print(test)
-print_winner(win, 4)
+print_winner(win)
 
 # Right diagonal winner (random position from top-left to bottom-right)
 test.reset_board()
@@ -107,4 +100,4 @@ test.update_square(3, 3, "x")  # Third "x" in the diagonal
 test.update_square(4, 4, "x")  # Fourth "x" in the diagonal
 test.update_square(5, 0, "o")  # Just a random "o" in another spot
 print(test)
-print_winner(win, 4)
+print_winner(win)

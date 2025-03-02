@@ -1,5 +1,5 @@
 import unittest
-from Board import Board, WinChecker
+from core.board import Board, WinChecker
 
 
 class TestBoardFunctionality(unittest.TestCase):

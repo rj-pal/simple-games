@@ -1,13 +1,6 @@
-import sys
-import os
-
-parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-sys.path.append(parent_dir)
-
-
-from Game import TicTacToe
-from Board import *
-from Player import *
+from games.Game import TicTacToe
+from core.board import *
+from core.player import *
 from random import randint
 
 def play_game(game_instance) -> None:

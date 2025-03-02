@@ -1,8 +1,8 @@
 from collections import Counter
 from random import choice, randint
 from typing import Tuple, List, Union, Optional
-from Board import Board, WinChecker
-from Player import Player
+from core.board import Board, WinChecker
+from core.player import Player
 
 def int_converter(number, columns):
     return divmod(number, columns)
