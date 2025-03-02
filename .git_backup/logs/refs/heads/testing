@@ -1,0 +1,7 @@
+0000000000000000000000000000000000000000 50440085aa839f8cf27088d56724a4463c930ed3 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1694826631 -0400	branch: Created from main
+50440085aa839f8cf27088d56724a4463c930ed3 23664412654b0aaf0a1edcdc5d5b1404dfd793b2 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1694837362 -0400	commit: Added test function to test AI capability
+23664412654b0aaf0a1edcdc5d5b1404dfd793b2 6fc82907d16708f5b115e79381f6316e5a9a07bc Robert Pal <92271019+rj-pal@users.noreply.github.com> 1694882174 -0400	commit: Fixed bug in testing
+6fc82907d16708f5b115e79381f6316e5a9a07bc 78b34c7fce9f7b9813c8c017564c9c1f54e1417b Robert Pal <92271019+rj-pal@users.noreply.github.com> 1694922708 -0400	commit: Completed test functions and added way to test hard versus hard
+78b34c7fce9f7b9813c8c017564c9c1f54e1417b 62f0513f371443eb52f82d30261ca8054c8a4052 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1695523106 -0400	commit: Added test class for AI mode testing. Performed tests in notebook.
+62f0513f371443eb52f82d30261ca8054c8a4052 60ac97d5553500fd8c56788803d756e26c76f72e Robert Pal <92271019+rj-pal@users.noreply.github.com> 1695525069 -0400	commit: Fixed small bug in human player code after previous refactoring
+60ac97d5553500fd8c56788803d756e26c76f72e 78cfbeb3270b915348db57934ca9993b055a542f Robert Pal <92271019+rj-pal@users.noreply.github.com> 1696218527 -0400	commit: Formatting and spelling fixes, minor changes, and rerun tests.

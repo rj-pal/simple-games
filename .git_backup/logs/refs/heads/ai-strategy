@@ -1,0 +1,8 @@
+0000000000000000000000000000000000000000 5de2b34ae78a752349f8de7c91b37e6ff0ab9a31 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1688699188 -0400	branch: Created from main
+5de2b34ae78a752349f8de7c91b37e6ff0ab9a31 c84aa4673832e73e80ab0806375b4207b0d309a1 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1688699303 -0400	commit: Update AI strategy and code structure. In progress
+c84aa4673832e73e80ab0806375b4207b0d309a1 d8ddc50479f00a7fc69546180328b99d36005b84 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1688706022 -0400	commit: Refactored AI strategy in new AI player clas
+d8ddc50479f00a7fc69546180328b99d36005b84 9ed0abb1d6542ca2bd62ec533b80781383affc30 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1689004659 -0400	commit: Updated AI strategy for defensive play
+9ed0abb1d6542ca2bd62ec533b80781383affc30 97956a56e42a3e8547f21a3cf6cda987a8bca5cb Robert Pal <92271019+rj-pal@users.noreply.github.com> 1689304036 -0400	commit: Added dispaly features and code clean up
+97956a56e42a3e8547f21a3cf6cda987a8bca5cb a84bb9b3a199e237dac83b5497cd284fa67eff8a Robert Pal <92271019+rj-pal@users.noreply.github.com> 1689379383 -0400	commit: Fixed AI strategy bugs and code clean up
+a84bb9b3a199e237dac83b5497cd284fa67eff8a f4b5e6d8acf6efb5194247ca9b5008ee420a7d41 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1692763023 -0400	commit: Tested code and fixed small bug
+f4b5e6d8acf6efb5194247ca9b5008ee420a7d41 50440085aa839f8cf27088d56724a4463c930ed3 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1694826072 -0400	commit: Fixed minor bugs in AI strategy, cleaned code, added documentation

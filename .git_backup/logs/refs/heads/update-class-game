@@ -1,0 +1,21 @@
+0000000000000000000000000000000000000000 df023f3bd46963df6b6726a42f52edefb33a83f6 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1738812999 -0500	branch: Created from main
+df023f3bd46963df6b6726a42f52edefb33a83f6 c0874a2ff37b2115125a271fe7133f157c325aac Robert Pal <92271019+rj-pal@users.noreply.github.com> 1738853177 -0500	commit: Create game.py
+c0874a2ff37b2115125a271fe7133f157c325aac 016d6cba7150570ff510d79fa6fb7b92ce4df395 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1738856589 -0500	commit: Update game.py with tuple to int testing
+016d6cba7150570ff510d79fa6fb7b92ce4df395 f226e4bf1b7895cf1785dd582c9ffa80aebe0d46 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1738858694 -0500	commit: Update game.py. Added more functionality from original code base
+f226e4bf1b7895cf1785dd582c9ffa80aebe0d46 49e6a851b6482c51e54783f983dfb47e5effd915 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1738988718 -0500	commit: Update game.py with code changes to player and board
+49e6a851b6482c51e54783f983dfb47e5effd915 2c5af76677b3e240fd261ae979baff16a5489c17 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739043664 -0500	commit: Added Player class and inherited Tic Tac Toe behaviour
+2c5af76677b3e240fd261ae979baff16a5489c17 ae69effe194656d62861e5dbd8667ff1110ccc4f Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739071308 -0500	commit: Update Player and added Board class
+ae69effe194656d62861e5dbd8667ff1110ccc4f 0e449f71343c3a108b3118789c86a9d9e7f6a039 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739163568 -0500	commit: Update Board to allow multiple diagonal checks
+0e449f71343c3a108b3118789c86a9d9e7f6a039 a7a08e1af269f0c07fdd8caba8e400981e8ae0d8 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739212195 -0500	commit: Update Board Class with win checking
+a7a08e1af269f0c07fdd8caba8e400981e8ae0d8 be37ac9a272be515933226ba4a3a0c4302a5318e Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739336326 -0500	commit: Major updates across all Class for encapsulation and modularization
+be37ac9a272be515933226ba4a3a0c4302a5318e e394d4a575a58d44709685ce5756b9871497b6b6 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739384953 -0500	commit: Major updates to all Board, Game, Player Classes for better readability and usability
+e394d4a575a58d44709685ce5756b9871497b6b6 bdeb3c09d2a112555bcb6365a8eb9b109ababc79 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739418897 -0500	commit: Incorporated AI player and strategy into refactor
+bdeb3c09d2a112555bcb6365a8eb9b109ababc79 393bf5320797fc20f351854ea22ccdec3649b389 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739508414 -0500	commit: Added Test Class for Unit Testing
+393bf5320797fc20f351854ea22ccdec3649b389 5f9dc897214467851099a69d1a19c2f6316af144 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739552898 -0500	commit: Fixed Bug in AI Defence Mode
+5f9dc897214467851099a69d1a19c2f6316af144 8d8f628a82ae894b8f2966f79a7b66151967771b Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739650745 -0500	commit: Cleaned up some testing code and added layer of validation in game class
+8d8f628a82ae894b8f2966f79a7b66151967771b f2df3209010edaa9ea78947eeed882e46901375c Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739851767 -0500	commit: Update Games testing to check all AI configs
+f2df3209010edaa9ea78947eeed882e46901375c 0c70493acbab7b783d016bfc00ccd30c472defe7 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739983416 -0500	commit: Update tests and unittests
+0c70493acbab7b783d016bfc00ccd30c472defe7 9c8ee97b66963fc5e4d15f97d1978971c7f68092 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739986745 -0500	commit: Added Test Directory
+9c8ee97b66963fc5e4d15f97d1978971c7f68092 1dff5d0ec94a0ad82a3ef4680a77fab58b21fec7 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739986895 -0500	commit: Create settings.json
+1dff5d0ec94a0ad82a3ef4680a77fab58b21fec7 88cd3c4665cb6e6bce605c0fa49998c8742beb6f Robert Pal <92271019+rj-pal@users.noreply.github.com> 1739987601 -0500	commit: Fixed run time errors
+88cd3c4665cb6e6bce605c0fa49998c8742beb6f 93d74a79d87ff986b360e1774edc6452962a88f0 Robert Pal <92271019+rj-pal@users.noreply.github.com> 1740020129 -0500	commit: Rename and reorganized Game directory structure. Finalized CLI
