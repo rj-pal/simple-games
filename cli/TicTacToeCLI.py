@@ -1,46 +1,8 @@
 import os
-from enum import Enum
-from itertools import chain
 from time import sleep
 from typing import Optional
-from games.Game import TicTacToe, ConnectFour
-from utils.square import Square
-
-# from colorama import Fore, Style
-
-
-# class Square(Enum):
-#     """Represents a single Tic Tac Toe square: Blank, X, or O."""
-#     BLANK = ["            "] * 5
-    
-#     R = [
-#         Fore.RED + "    ****    " + Style.RESET_ALL, 
-#         Fore.RED + "  ********  " + Style.RESET_ALL, 
-#         Fore.RED + " ********** " + Style.RESET_ALL, 
-#         Fore.RED + "  ********  " + Style.RESET_ALL,
-#         Fore.RED + "    ****    " + Style.RESET_ALL
-#     ]
-    
-#     Y = [
-#     Fore.LIGHTYELLOW_EX + "    ****    " + Style.RESET_ALL, 
-#     Fore.LIGHTYELLOW_EX + "  ********  " + Style.RESET_ALL, 
-#     Fore.LIGHTYELLOW_EX + " ********** " + Style.RESET_ALL, 
-#     Fore.LIGHTYELLOW_EX + "  ********  " + Style.RESET_ALL,
-#     Fore.LIGHTYELLOW_EX + "    ****    " + Style.RESET_ALL
-#    ]
-
-#     O = [
-#         "    *  *    ", "  *      *  ", " *        * ", "  *      *  ", "    *  *    "
-#     ]
-#     X = [
-#         "  *       * ", "    *   *   ", "      *     ", "    *   *   ", "  *       * "
-#     ]
-
-#     def __str__(self) -> str:
-#         return self.name
-
-#     def __repr__(self) -> str:
-#         return f'Name: {self.name}\nValue: {self.value}'
+from utils.display import *
+from games.Game import TicTacToe
 
 
 WELCOME = """
@@ -91,64 +53,62 @@ This is an online version of the classic game. Play multiple games per session
 against and opponent or the computer. X starts the game.
 """
 THINKING = "\nComputer is now thinking."
-DRAW = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
+# DRAW = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
 
-horizontal_line = "* " * 18 + "*" # for Tic Tac Toe
-# horizontal_line = "* " * 44 + "*" # for Tic Tac Toe
-
+LINE = "* " * 18 + "*" # for Tic Tac Toe
 
 
-def set_console_window_size(width: float, height: float) -> None:
-    """Sets the console window to fit the board to the screen better."""
-    # Check the platform (Windows or Unix-based)
-    os.system('cls||clear')
-    if os.name == 'nt':
-        # Windows platform
-        os.system(f'mode con: cols={width} lines={height}')
-    else:
-        # Unix-based platforms (Linux, macOS)
-        os.system(f'printf "\033[8;{height};{width}t"')
+# def set_console_window_size(width: float, height: float) -> None:
+#     """Sets the console window to fit the board to the screen better."""
+#     # Check the platform (Windows or Unix-based)
+#     os.system('cls||clear')
+#     if os.name == 'nt':
+#         # Windows platform
+#         os.system(f'mode con: cols={width} lines={height}')
+#     else:
+#         # Unix-based platforms (Linux, macOS)
+#         os.system(f'printf "\033[8;{height};{width}t"')
 
 
-def clear_screen() -> None:
-    """Clears the terminal screen."""
-    os.system('clear||cls')
+# def clear_screen() -> None:
+#     """Clears the terminal screen."""
+#     os.system('clear||cls')
 
 
-def delay_effect(strings: list[str],
-                 delay: float = 0.025,
-                 word_flush: bool = True) -> None:
-    """Creates the effect of the words or characters printed one letter or line at a time. 
-    Word_flush True delays each character. False delays each complete line in a list. """
-        # Used when testing so that can play the games quicker
-    # if delay != 0:
-    #     delay = 0
-    for string in strings:
-        for char in string:
-            print(char, end='', flush=word_flush)
-            sleep(delay)
-        print()
-        sleep(delay)
+# def delay_effect(strings: list[str],
+#                  delay: float = 0.025,
+#                  word_flush: bool = True) -> None:
+#     """Creates the effect of the words or characters printed one letter or line at a time. 
+#     Word_flush True delays each character. False delays each complete line in a list. """
+#         # Used when testing so that can play the games quicker
+#     # if delay != 0:
+#     #     delay = 0
+#     for string in strings:
+#         for char in string:
+#             print(char, end='', flush=word_flush)
+#             sleep(delay)
+#         print()
+#         sleep(delay)
 
 
-def surround_string(strings: list[str],
-                    symbol: str,
-                    offset: int = 0) -> list[str]:
-    """Creates a border around any group of sentences. Used to create the scoreboard for the players."""
-    string_list = list(
-        chain.from_iterable(
-            string.split("\n") if "\n" in string else [string]
-            for string in strings))
+# def surround_string(strings: list[str],
+#                     symbol: str,
+#                     offset: int = 0) -> list[str]:
+#     """Creates a border around any group of sentences. Used to create the scoreboard for the players."""
+#     string_list = list(
+#         chain.from_iterable(
+#             string.split("\n") if "\n" in string else [string]
+#             for string in strings))
 
-    border = symbol * (len(max(string_list, key=len)) + 2 * offset)
-    output_list = [
-        border, *[string.center(len(border)) for string in string_list], border
-    ]
+#     border = symbol * (len(max(string_list, key=len)) + 2 * offset)
+#     output_list = [
+#         border, *[string.center(len(border)) for string in string_list], border
+#     ]
 
-    return [
-        "\n" + "\n".join([symbol + string + symbol
-                          for string in output_list]) + "\n"
-    ]
+#     return [
+#         "\n" + "\n".join([symbol + string + symbol
+#                           for string in output_list]) + "\n"
+#     ]
 
 
 def get_player_names() -> None:
@@ -168,7 +128,7 @@ def get_player_names() -> None:
 def get_player_name() -> None:
     """Creates two players of the Player class for game play and add the players to the player attribute."""
     name_x = input(
-        "\nPlayer one please enter the name of the player for X or press enter: "
+        "\nPlayer one please enter the name of the player for X or press enter to continue: "
     )
     return name_x
 
@@ -234,19 +194,19 @@ def prompt_move():  # -> Union[tuple[int, int], list[int]]:
 
     return row, column
 
+# MAINFUNCTION
+# def board_translator(raw_board: list[list[int, str]]) -> list[list[Square]]:
+#     """Converts a raw board with 0, 'x', 'o' into Square enum values."""
+#     mapping = {0: Square.BLANK, "x": Square.X, "o": Square.O, "r": Square.R, "y": Square.Y}
+#     return [[mapping[cell] for cell in row] for row in raw_board]
 
-def board_translator(raw_board: list[list[int, str]]) -> list[list[Square]]:
-    """Converts a raw board with 0, 'x', 'o' into Square enum values."""
-    mapping = {0: Square.BLANK, "x": Square.X, "o": Square.O, "r": Square.R, "y": Square.Y}
-    return [[mapping[cell] for cell in row] for row in raw_board]
-
-
-def create_row(row: list[list[Square]]) -> str:
-    """Returns a string of a single row of the board from current state of the board attribute."""
-    return "\n".join([
-        "*".join(line).center(os.get_terminal_size().columns - 1)
-        for line in zip(*row)
-    ])
+# MAIN FUNTION
+# def create_row(row: list[list[Square]]) -> str:
+#     """Returns a string of a single row of the board from current state of the board attribute."""
+#     return "\n".join([
+#         "*".join(line).center(os.get_terminal_size().columns - 1)
+#         for line in zip(*row)
+#     ])
 
 # Function with no centring
 # def create_row(row: list[list[str]]) -> str:
@@ -264,23 +224,23 @@ def create_row(row: list[list[Square]]) -> str:
 #         for line in zip(*row)
 #     ])
 
-
-def create_board(game_board) -> str:
-    """Returns a string of the complete board created row by row using _create_row method for printing."""
-    return f"\n{horizontal_line.center(os.get_terminal_size().columns - 1)}\n".join(
-        [create_row([square.value for square in row]) for row in game_board])
+# MAIN FUNCTION
+# def create_board(game_board) -> str:
+#     """Returns a string of the complete board created row by row using _create_row method for printing."""
+#     return f"\n{LINE.center(os.get_terminal_size().columns - 1)}\n".join(
+#         [create_row([square.value for square in row]) for row in game_board])
 
 # Function with no centring
 # def create_board(game_board) -> str:
 #     """Returns a string of the complete board created row by row using _create_row method for printing."""
-#     return f"\n{horizontal_line}\n".join(
+#     return f"\n{LINE}\n".join(
 #         [create_row([square.value for square in row]) for row in game_board])
 
 
-def print_board(game_board) -> None:
-    """Prints the current state of the game board. Printed line by line."""
-    game_board = board_translator(game_board)
-    delay_effect([create_board(game_board)], 0.00075, False)
+# def print_board(game_board) -> None:
+#     """Prints the current state of the game board. Printed line by line."""
+#     game_board = board_translator(game_board)
+#     delay_effect([create_board(game_board)], 0.00075, False)
 
 
 def print_move(name, row: int, column: int) -> None:
@@ -403,14 +363,14 @@ def play_game(Game) -> None:
 
         clear_screen()
         print_move(name, row, col)
-        print_board(Game.board.get_board())
+        print_board(Game.board.get_board(), LINE)
 
         if i >= 4 and Game.check_winner():
             print_game_over()
+            print_board(Game.board.get_board(), LINE)
             break
-    else:
-        delay_effect(surround_string([DRAW], "#", 9), 0.00075, False)
-    print_board(Game.board.get_board())
+    
+    
     Game.update_winner_info()
     Game.update_players_stats()
     winner = Game.get_winner_attributes()
@@ -440,27 +400,8 @@ def play_again():
             print(message)
 
 
-if __name__ == '__main__':
-    # console width, height
-    set_console_window_size(100, 40)
-
-    # test = ConnectFour()
-    # test.make_move(0, "r")
-    # test.make_move(0, "y")
-    # test.make_move(6, "y")
-    # test.make_move(6, "r")
-    # test.make_move(7, "y")
-    # test.make_move(3, "y")
-    # test.make_move(3, "y")
-    # test.make_move(3, "y")
-    # test.make_move(4, "y")
-    # test.make_move(4, "y")
-    # test.make_move(4, "r")
-
-    # print_board(test.board.get_board())
-
-
-    set_console_window_size(85, 30)
+def run():
+    set_console_window_size(85, 30) # console dimensions: width, height
     Game = set_up_game()
     play_game(Game)
     multiplay = play_again()
@@ -471,5 +412,4 @@ if __name__ == '__main__':
         play_game(Game)
         multiplay = play_again()
         print_scoreboard(Game.players)
-
     exit()
