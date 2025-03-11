@@ -1,61 +1,69 @@
 import os
 from time import sleep
 from typing import Optional
-from utils.display import *
+from utils.display import Display
 from games.Game import TicTacToe
+from utils.strings import BOARDLINE_TICTAC, WELCOME_TICTACTOE, INTRO_TICTACTOE, GAMEOVER, THINKING
 
+class TicTacToeDisplay(Display):
 
-WELCOME = """
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   *                                                                         *
-   *                                                                         *
-   *     *       *   * * *   *       * * *    *  *      *   *     * * *      *
-   *      *  *  *    * *     *      *        *    *    *  *  *    * *        *
-   *       *   *     * * *   * * *   * * *    *  *    *       *   * * *      *
-   *                                                                         *
-   *                                                                         *
-   *      * * *   *  *                                                       *
-   *        *    *    *                                                      *
-   *        *     *  *                                                       *
-   *                                                                         *
-   *                                                                         *
-   *      * * *   *    * *     * * *    *     * *     * * *   * *   * * *    *
-   *        *     *   *          *     * *   *          *    *   *  * *      *
-   *        *     *    * *       *    *   *   * *       *     * *   * * *    *
-   *                                                                         *
-   *                                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-"""
+    WELCOME = WELCOME_TICTACTOE
+    INTRO = INTRO_TICTACTOE
+    GAMEOVER = GAMEOVER
+    ONE = "X"
+    TWO = "O"
 
-GAMEOVER = """
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   *                                                                         *
-   *                                                                         *
-   *               * * *        **        *       *    * * * *               *
-   *              *            *  *       * *   * *    *                     *
-   *              *   * *     *    *      *   *   *    * * *                 * 
-   *              *     *    *      *     *       *    *                     *
-   *               * * *    *        *    *       *    * * * *               *
-   *                                                                         *
-   *                                                                         *
-   *                *  *     *       *    * * * *     *  *  *                *
-   *              *      *    *     *     *           *      *               *
-   *              *      *     *   *      * * *       *  *  *                *
-   *              *      *      * *       *           *      *               *
-   *                *  *         *        * * * *     *       *              *
-   *                                                                         *
-   *                                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-"""
+# WELCOME_TICTACTOE = """
+#    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#    *                                                                         *
+#    *                                                                         *
+#    *     *       *   * * *   *       * * *    *  *      *   *     * * *      *
+#    *      *  *  *    * *     *      *        *    *    *  *  *    * *        *
+#    *       *   *     * * *   * * *   * * *    *  *    *       *   * * *      *
+#    *                                                                         *
+#    *                                                                         *
+#    *      * * *   *  *                                                       *
+#    *        *    *    *                                                      *
+#    *        *     *  *                                                       *
+#    *                                                                         *
+#    *                                                                         *
+#    *      * * *   *    * *     * * *    *     * *     * * *   * *   * * *    *
+#    *        *     *   *          *     * *   *          *    *   *  * *      *
+#    *        *     *    * *       *    *   *   * *       *     * *   * * *    *
+#    *                                                                         *
+#    *                                                                         *
+#    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# """
 
-INTRO = """
-This is an online version of the classic game. Play multiple games per session
-against and opponent or the computer. X starts the game.
-"""
-THINKING = "\nComputer is now thinking."
+# GAMEOVER = """
+#    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#    *                                                                         *
+#    *                                                                         *
+#    *               * * *        **        *       *    * * * *               *
+#    *              *            *  *       * *   * *    *                     *
+#    *              *   * *     *    *      *   *   *    * * *                 * 
+#    *              *     *    *      *     *       *    *                     *
+#    *               * * *    *        *    *       *    * * * *               *
+#    *                                                                         *
+#    *                                                                         *
+#    *                *  *     *       *    * * * *     *  *  *                *
+#    *              *      *    *     *     *           *      *               *
+#    *              *      *     *   *      * * *       *  *  *                *
+#    *              *      *      * *       *           *      *               *
+#    *                *  *         *        * * * *     *       *              *
+#    *                                                                         *
+#    *                                                                         *
+#    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# """
+
+# INTRO = """
+# This is an online version of the classic game. Play multiple games per session
+# against and opponent or the computer. X starts the game.
+# """
+# THINKING = "\nComputer is now thinking."
 # DRAW = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
 
-LINE = "* " * 18 + "*" # for Tic Tac Toe
+# LINE = "* " * 18 + "*" # for Tic Tac Toe
 
 
 # def set_console_window_size(width: float, height: float) -> None:
@@ -111,37 +119,37 @@ LINE = "* " * 18 + "*" # for Tic Tac Toe
 #     ]
 
 
-def get_player_names() -> None:
-    """Creates two players of the Player class for game play and add the players to the player attribute."""
+# def get_player_names() -> None:
+#     """Creates two players of the Player class for game play and add the players to the player attribute."""
 
-    name_x = input(
-        "\nPlayer one please enter the name of the player for X or press enter: "
-    )
+#     name_x = input(
+#         "\nPlayer one please enter the name of the player for X or press enter: "
+#     )
 
-    name_y = input(
-        "\nPlayer two please enter the name of the player for O or press enter: "
-    )
+#     name_y = input(
+#         "\nPlayer two please enter the name of the player for O or press enter: "
+#     )
 
-    return name_x, name_y
-
-
-def get_player_name() -> None:
-    """Creates two players of the Player class for game play and add the players to the player attribute."""
-    name_x = input(
-        "\nPlayer one please enter the name of the player for X or press enter to continue: "
-    )
-    return name_x
+#     return name_x, name_y
 
 
-def one_player() -> bool:
-    """Sets the game to one or two players."""
-    valid_input = {'1', '2', 'one', 'two'}
-    while True:
-        one_player = input("How many players? One or two: ").lower()
-        if one_player in valid_input:
-            return one_player in ['1', 'one']
-        else:
-            print('\nOnly one or two players are allowed.\n')
+# def get_player_name() -> None:
+#     """Creates two players of the Player class for game play and add the players to the player attribute."""
+#     name_x = input(
+#         "\nPlayer one please enter the name of the player for X or press enter: "
+#     )
+#     return name_x
+
+
+# def one_player() -> bool:
+#     """Sets the game to one or two players."""
+#     valid_input = {'1', '2', 'one', 'two'}
+#     while True:
+#         one_player = input("How many players? One or two: ").lower()
+#         if one_player in valid_input:
+#             return one_player in ['1', 'one']
+#         else:
+#             print('\nOnly one or two players are allowed.\n')
 
 
 def select_difficulty_level() -> Optional[bool]:
@@ -152,16 +160,16 @@ def select_difficulty_level() -> Optional[bool]:
             "\nSelect the level of difficult for the AI: Easy, Intermediate or Hard: "
         ).lower()
         if level_of_difficulty in valid_input[:2]:
-            delay_effect(
+            Display.delay_effect(
                 ["\nYou are playing against the computer in easy mode."])
             return None
         elif level_of_difficulty in valid_input[2:4]:
-            delay_effect([
+            Display.delay_effect([
                 "\nYou are playing against the computer in intermediate mode."
             ])
             return False
         elif level_of_difficulty in valid_input[4:]:
-            delay_effect(
+            Display.delay_effect(
                 ["\nYou are playing against the computer in hard mode."])
             return True
         else:
@@ -243,57 +251,63 @@ def prompt_move():  # -> Union[tuple[int, int], list[int]]:
 #     delay_effect([create_board(game_board)], 0.00075, False)
 
 
-def print_move(name, row: int, column: int) -> None:
+# def print_move(name: str, row: int, column: int) -> None:
+#     """Returns a string for printing the last played square on the board by the current player."""
+#     delay_effect([
+#         f"\n{name} played the square in row {row + 1} and column {column + 1}.\n"
+#     ])
+
+
+# def print_start_game():
+#     print(WELCOME_TICTACTOE)
+#     delay_effect([INTRO])
+
+
+# def print_game_over() -> None:
+#     """Prints a flashing "Game Over" when a winner has been declared"""
+#     print()
+#     clear_screen()
+#     for _ in range(5):
+#         print(GAMEOVER.center(os.get_terminal_size().columns - 1), end='\r')
+#         sleep(0.75)
+#         clear_screen()
+#         sleep(0.5)
+#     print()
+
+
+def print_first_player(name: str) -> None:
+    """Prints who is plays first and their marker."""
+    Display.delay_effect([f'\n{name} plays first.'])
+    input('\nPress Enter to start the game.')
+
+
+def print_first_prompt(name: str):
+    Display.delay_effect([f"\nIt is {name}'s turn. Select a row and column\n"])
+
+
+def print_second_prompt(name: str):
+    print("\nThe square is already occupied. Select another square.")
+    Display.delay_effect([f"\nIt is {name}'s turn again. Select a free sqaure.\n"])
+
+def print_move(name: str, row: int, column: int) -> None:
     """Returns a string for printing the last played square on the board by the current player."""
-    delay_effect([
+    Display.delay_effect([
         f"\n{name} played the square in row {row + 1} and column {column + 1}.\n"
     ])
 
 
-def print_start_game():
-    print(WELCOME)
-    delay_effect([INTRO])
-
-
-def print_game_over() -> None:
-    """Prints a flashing "Game Over" when a winner has been declared"""
-    print()
-    clear_screen()
-    for _ in range(5):
-        print(GAMEOVER.center(os.get_terminal_size().columns - 1), end='\r')
-        sleep(0.75)
-        clear_screen()
-        sleep(0.5)
-    print()
-
-
-def print_first_player(name) -> None:
-    """Prints who is plays first and their marker."""
-    delay_effect([f'\n{name} plays first.'])
-    input('\nPress Enter to start the game.')
-
-
-def print_first_prompt(name):
-    delay_effect([f"\nIt is {name}'s turn. Select a row and column\n"])
-
-
-def print_second_prompt(name):
-    print("\nThe square is already occupied. Select another square.")
-    delay_effect([f"\nIt is {name}'s turn again. Select a free sqaure.\n"])
-
-
 def print_scoreboard(player_list) -> None:
     """Shows the player statistics for the game. Printed line by line."""
-    delay_effect(
-        surround_string([player.__str__() for player in player_list], "#", 25),
+    Display.delay_effect(
+        Display.surround_string([player.__str__() for player in player_list], "#", 25),
         0.00075, False)
 
 
-def print_winner_info(name, marker, win_type, win_index) -> None:
+def print_winner_info(name: str, marker: str, win_type: str, win_index: int) -> None:
     """Displays the information of the winner of the game using the winner attributes."""
     if all(info is None for info in (name, marker, win_type)):
         draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
-        delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
+        Display.delay_effect(Display.surround_string([draw_string], "#", 9), 0.00075, False)
     else:
 
         winner_string = f"\nWinner winner chicken dinner. {name} is the winner.\n{marker.upper()} " \
@@ -305,35 +319,33 @@ def print_winner_info(name, marker, win_type, win_index) -> None:
             "left_diagonal": "the left diagonal."
         }
         winner_string = f"{winner_string} {win_type_dict[win_type]}\n"
-        delay_effect(surround_string([winner_string], "#", 9), 0.00075,
+        Display.delay_effect(Display.surround_string([winner_string], "#", 9), 0.00075,
                      False)  # customize the size of the box and speed of delay
 
 
 def set_up_game():
-    print_start_game()
-    if one_player():
+    game = TicTacToe()
+    if Display.one_player():
         difficulty = select_difficulty_level()
-        Game = TicTacToe()
         name_dictionary = {
             None: "CPU Easy",
             False: "CPU Intermediate",
             True: "CPU Hard"
         }
-        Game.create_ai_player(name=name_dictionary[difficulty],
+        game.create_ai_player(name=name_dictionary[difficulty],
                               difficulty=difficulty)
-        x = get_player_name()
-        Game.update_player_name(x, "x")
+        x = Display.get_player_name()
+        game.update_player_name(x, "x")
 
     else:
-        x, y = get_player_names()
-        Game = TicTacToe()
-        Game.update_player_name(x, "x")
-        Game.update_player_name(y, "o")
+        x, y = Display.get_player_names()
+        game.update_player_name(x, "x")
+        game.update_player_name(y, "o")
 
-    return Game
+    return game
 
 
-def play_game(Game) -> None:
+def play_game(Game, display_object) -> None:
     for i in range(Game.board_size):
         # print(Game.round_count)
         if Game.go_first:
@@ -344,7 +356,7 @@ def play_game(Game) -> None:
         name = player.get_player_name()
         if i == 0:
             print_first_player(name)
-            clear_screen()
+            display_object.clear_screen()
 
         if isinstance(player, TicTacToe.TicTacToePlayer):
 
@@ -361,13 +373,13 @@ def play_game(Game) -> None:
             row, col = player.move(Game.board)
             Game.make_move(row, col, player.marker)
 
-        clear_screen()
+        display_object.clear_screen()
         print_move(name, row, col)
-        print_board(Game.board.get_board(), LINE)
+        display_object.print_board(Game.board.get_board(), BOARDLINE_TICTAC)
 
         if i >= 4 and Game.check_winner():
-            print_game_over()
-            print_board(Game.board.get_board(), LINE)
+            display_object.print_game_over()
+            display_object.print_board(Game.board.get_board(), BOARDLINE_TICTAC)
             break
     
     
@@ -389,7 +401,7 @@ def play_again():
             if play_again in ['yes', 'y']:
                 return True
             elif play_again in ['no', 'n']:
-                delay_effect([
+                Display.delay_effect([
                     "\nGame session complete.\n\nThanks for playing Tic-Tac-Toe. See you in the next session.\n"
                 ])
                 return False
@@ -401,15 +413,18 @@ def play_again():
 
 
 def run():
-    set_console_window_size(85, 30) # console dimensions: width, height
-    Game = set_up_game()
-    play_game(Game)
-    multiplay = play_again()
-    print_scoreboard(Game.players)
+    display = TicTacToeDisplay()
+    display.set_console_window_size(85, 30) # console dimensions: width, height
+    display.print_start_game()
+    game = set_up_game()
+    # play_game(Game)
+    # multiplay = play_again()
+    # print_scoreboard(Game.players)
+    multiplay = True
     while multiplay:
-        Game.reset_board()
-        clear_screen()
-        play_game(Game)
+        display.clear_screen()
+        play_game(game, display)
         multiplay = play_again()
-        print_scoreboard(Game.players)
+        print_scoreboard(game.players)
+        game.reset_board()
     exit()
