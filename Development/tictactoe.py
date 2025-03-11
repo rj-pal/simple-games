@@ -637,7 +637,7 @@ class Game:
         """Shows the player statistics for the game. Printed line by line."""
         delay_effect(surround_string([player.__str__() for player in self.players], "#", 25), 0.00075, False)
 
-    def print_move(self, player: Player, row: int, column: int) -> None:
+    def print_current_move(self, player: Player, row: int, column: int) -> None:
         """Returns a string for printing the last played square on the board by the current player."""
         delay_effect([f"\n{player.name} played the square in row {row + 1} and column {column + 1}.\n"])
 
@@ -756,7 +756,7 @@ class Game:
         os.system('clear||cls')
         Game.move_list.append((row, column))
         self.update_board(row, column, player.marker)
-        self.print_move(player, row, column)
+        self.print_current_move(player, row, column)
         self.print_board()
 
     def _prompt_move(self, name: str) -> Union[tuple[int, int], list[int]]:

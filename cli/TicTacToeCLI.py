@@ -1,17 +1,17 @@
 import os
 from time import sleep
 from typing import Optional
-from utils.display import Display
+import utils.display as GameCLI
 from games.Game import TicTacToe
 from utils.strings import BOARDLINE_TICTAC, WELCOME_TICTACTOE, INTRO_TICTACTOE, GAMEOVER, THINKING
 
-class TicTacToeDisplay(Display):
+# class TicTacToeCLI(GameCLI):
 
-    WELCOME = WELCOME_TICTACTOE
-    INTRO = INTRO_TICTACTOE
-    GAMEOVER = GAMEOVER
-    ONE = "X"
-    TWO = "O"
+#     WELCOME = WELCOME_TICTACTOE
+#     INTRO = INTRO_TICTACTOE
+#     GAMEOVER = GAMEOVER
+#     ONE = "X"
+#     TWO = "O"
 
 # WELCOME_TICTACTOE = """
 #    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -160,16 +160,16 @@ def select_difficulty_level() -> Optional[bool]:
             "\nSelect the level of difficult for the AI: Easy, Intermediate or Hard: "
         ).lower()
         if level_of_difficulty in valid_input[:2]:
-            Display.delay_effect(
+            GameCLI.delay_effect(
                 ["\nYou are playing against the computer in easy mode."])
             return None
         elif level_of_difficulty in valid_input[2:4]:
-            Display.delay_effect([
+            GameCLI.delay_effect([
                 "\nYou are playing against the computer in intermediate mode."
             ])
             return False
         elif level_of_difficulty in valid_input[4:]:
-            Display.delay_effect(
+            GameCLI.delay_effect(
                 ["\nYou are playing against the computer in hard mode."])
             return True
         else:
@@ -178,29 +178,29 @@ def select_difficulty_level() -> Optional[bool]:
                 "intermediate or '3' for hard.")
 
 
-def prompt_int(value: str) -> int:
-    """Returns two integers for a row and column move from the player input. Only allows 
-        for 1, 2, or 3 with each integer corresponding to a row and then a column."""
-    valid_input = {1, 2, 3}
-    while True:
-        try:
-            input_value = int(input(f"Enter the {value}: "))
-            if input_value in valid_input:
-                return input_value - 1  # Needed for 0 based index
+# def prompt_int(value: str) -> int:
+#     """Returns two integers for a row and column move from the player input. Only allows 
+#         for 1, 2, or 3 with each integer corresponding to a row and then a column."""
+#     valid_input = {1, 2, 3}
+#     while True:
+#         try:
+#             input_value = int(input(f"Enter the {value}: "))
+#             if input_value in valid_input:
+#                 return input_value - 1  # Needed for 0 based index
 
-            print(f"\nYou must enter 1, 2, or 3 only for the {value}.\n")
+#             print(f"\nYou must enter 1, 2, or 3 only for the {value}.\n")
 
-        except ValueError:
-            print("\nYou must enter a number. Try again.\n")
+#         except ValueError:
+#             print("\nYou must enter a number. Try again.\n")
 
 
-def prompt_move():  # -> Union[tuple[int, int], list[int]]:
-    """Validates and formats the user inputted row and column. Checks if the inputted position is occupied."""
+# def prompt_move():  # -> Union[tuple[int, int], list[int]]:
+#     """Validates and formats the user inputted row and column. Checks if the inputted position is occupied."""
 
-    row = prompt_int('row')
-    column = prompt_int('column')
+#     row = prompt_int('row')
+#     column = prompt_int('column')
 
-    return row, column
+#     return row, column
 
 # MAINFUNCTION
 # def board_translator(raw_board: list[list[int, str]]) -> list[list[Square]]:
@@ -251,7 +251,7 @@ def prompt_move():  # -> Union[tuple[int, int], list[int]]:
 #     delay_effect([create_board(game_board)], 0.00075, False)
 
 
-# def print_move(name: str, row: int, column: int) -> None:
+# def print_current_move(name: str, row: int, column: int) -> None:
 #     """Returns a string for printing the last played square on the board by the current player."""
 #     delay_effect([
 #         f"\n{name} played the square in row {row + 1} and column {column + 1}.\n"
@@ -275,57 +275,56 @@ def prompt_move():  # -> Union[tuple[int, int], list[int]]:
 #     print()
 
 
-def print_first_player(name: str) -> None:
-    """Prints who is plays first and their marker."""
-    Display.delay_effect([f'\n{name} plays first.'])
-    input('\nPress Enter to start the game.')
+# def print_first_player(name: str) -> None:
+#     """Prints who is plays first and their marker."""
+#     Display.delay_effect([f'\n{name} plays first.'])
+#     input('\nPress Enter to start the game.')
 
 
-def print_first_prompt(name: str):
-    Display.delay_effect([f"\nIt is {name}'s turn. Select a row and column\n"])
+# def print_player_turn_prompt(name: str):
+#     Display.delay_effect([f"\nIt is {name}'s turn. Select a row and column\n"])
 
 
-def print_second_prompt(name: str):
-    print("\nThe square is already occupied. Select another square.")
-    Display.delay_effect([f"\nIt is {name}'s turn again. Select a free sqaure.\n"])
+# def print_square_occupied_prompt(name: str):
+#     print("\nThe square is already occupied. Select another square.")
+#     Display.delay_effect([f"\nIt is {name}'s turn again. Select a free sqaure.\n"])
 
-def print_move(name: str, row: int, column: int) -> None:
-    """Returns a string for printing the last played square on the board by the current player."""
-    Display.delay_effect([
-        f"\n{name} played the square in row {row + 1} and column {column + 1}.\n"
-    ])
+# def print_current_move(name: str, row: int, column: int) -> None:
+#     """Returns a string for printing the last played square on the board by the current player."""
+#     Display.delay_effect([
+#         f"\n{name} played the square in row {row + 1} and column {column + 1}.\n"
+#     ])
+
+# def print_scoreboard(player_list) -> None:
+#     """Shows the player statistics for the game. Printed line by line."""
+#     Display.delay_effect(
+#         Display.surround_string([player.__str__() for player in player_list], "#", 25),
+#         0.00075, False)
 
 
-def print_scoreboard(player_list) -> None:
-    """Shows the player statistics for the game. Printed line by line."""
-    Display.delay_effect(
-        Display.surround_string([player.__str__() for player in player_list], "#", 25),
-        0.00075, False)
+# def print_winner_info(name: str, marker: str, win_type: str, win_index: int) -> None:
+#     """Displays the information of the winner of the game using the winner attributes."""
+#     if all(info is None for info in (name, marker, win_type)):
+#         draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
+#         Display.delay_effect(Display.surround_string([draw_string], "#", 9), 0.00075, False)
+#     else:
 
-
-def print_winner_info(name: str, marker: str, win_type: str, win_index: int) -> None:
-    """Displays the information of the winner of the game using the winner attributes."""
-    if all(info is None for info in (name, marker, win_type)):
-        draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
-        Display.delay_effect(Display.surround_string([draw_string], "#", 9), 0.00075, False)
-    else:
-
-        winner_string = f"\nWinner winner chicken dinner. {name} is the winner.\n{marker.upper()} " \
-                        f"wins in"
-        win_type_dict = {
-            "row": f"row {win_index + 1}.",
-            "column": f"column {win_index + 1}.",
-            "right_diagonal": "the right diagonal.",
-            "left_diagonal": "the left diagonal."
-        }
-        winner_string = f"{winner_string} {win_type_dict[win_type]}\n"
-        Display.delay_effect(Display.surround_string([winner_string], "#", 9), 0.00075,
-                     False)  # customize the size of the box and speed of delay
+#         winner_string = f"\nWinner winner chicken dinner. {name} is the winner.\n{marker.upper()} " \
+#                         f"wins in"
+#         win_type_dict = {
+#             "row": f"row {win_index + 1}.",
+#             "column": f"column {win_index + 1}.",
+#             "right_diagonal": "the right diagonal.",
+#             "left_diagonal": "the left diagonal."
+#         }
+#         winner_string = f"{winner_string} {win_type_dict[win_type]}\n"
+#         Display.delay_effect(Display.surround_string([winner_string], "#", 9), 0.00075,
+#                      False)  # customize the size of the box and speed of delay
 
 
 def set_up_game():
     game = TicTacToe()
-    if Display.one_player():
+    if GameCLI.one_player():
         difficulty = select_difficulty_level()
         name_dictionary = {
             None: "CPU Easy",
@@ -334,62 +333,62 @@ def set_up_game():
         }
         game.create_ai_player(name=name_dictionary[difficulty],
                               difficulty=difficulty)
-        x = Display.get_player_name()
+        x = GameCLI.get_player_name()
         game.update_player_name(x, "x")
 
     else:
-        x, y = Display.get_player_names()
+        x, y = GameCLI.get_player_names()
         game.update_player_name(x, "x")
         game.update_player_name(y, "o")
 
     return game
 
 
-def play_game(Game, display_object) -> None:
-    for i in range(Game.board_size):
-        # print(Game.round_count)
-        if Game.go_first:
-            player = Game.players[i % 2]
+def play_game(game) -> None:
+    for i in range(game.board_size):
+        # print(game.round_count)
+        if game.go_first:
+            player = game.players[i % 2]
         else:
-            player = Game.players[i % 2 - 1]
+            player = game.players[i % 2 - 1]
 
         name = player.get_player_name()
         if i == 0:
-            print_first_player(name)
-            display_object.clear_screen()
+            GameCLI.print_first_player(name)
+            GameCLI.clear_screen()
 
         if isinstance(player, TicTacToe.TicTacToePlayer):
 
-            print_first_prompt(name)
+            GameCLI.print_player_turn_prompt(name)
             while True:
-                row, col = prompt_move()
-                if Game.make_move(row, col, player.marker):
+                row, col = GameCLI.prompt_move()
+                if game.make_move(row, col, player.marker):
                     break
                 else:
-                    print_second_prompt(name)
+                    GameCLI.print_square_occupied_prompt(name)
         elif isinstance(player, TicTacToe.AIPlayer):
             print(THINKING)
             sleep(1.5)
-            row, col = player.move(Game.board)
-            Game.make_move(row, col, player.marker)
+            row, col = player.move(game.board)
+            game.make_move(row, col, player.marker)
 
-        display_object.clear_screen()
-        print_move(name, row, col)
-        display_object.print_board(Game.board.get_board(), BOARDLINE_TICTAC)
+        GameCLI.clear_screen()
+        GameCLI.print_current_move(name, row, col)
+        GameCLI.print_board(game.board.get_board(), BOARDLINE_TICTAC)
 
-        if i >= 4 and Game.check_winner():
-            display_object.print_game_over()
-            display_object.print_board(Game.board.get_board(), BOARDLINE_TICTAC)
+        if i >= 4 and game.check_winner():
+            GameCLI.print_game_over(GAMEOVER)
+            GameCLI.print_board(game.board.get_board(), BOARDLINE_TICTAC)
             break
     
     
-    Game.update_winner_info()
-    Game.update_players_stats()
-    winner = Game.get_winner_attributes()
-    print_winner_info(*winner)
-    # Game.print_winner()
-    # print(Game.move_list)
-    Game.reset_game_state()
+    game.update_winner_info()
+    game.update_players_stats()
+    winner = game.get_winner_attributes()
+    GameCLI.print_winner_info(*winner)
+    # game.print_winner()
+    # print(game.move_list)
+    game.reset_game_state()
 
 
 def play_again():
@@ -401,7 +400,7 @@ def play_again():
             if play_again in ['yes', 'y']:
                 return True
             elif play_again in ['no', 'n']:
-                Display.delay_effect([
+                GameCLI.delay_effect([
                     "\nGame session complete.\n\nThanks for playing Tic-Tac-Toe. See you in the next session.\n"
                 ])
                 return False
@@ -413,18 +412,17 @@ def play_again():
 
 
 def run():
-    display = TicTacToeDisplay()
-    display.set_console_window_size(85, 30) # console dimensions: width, height
-    display.print_start_game()
+    GameCLI.set_console_window_size(85, 30) # console dimensions: width, height
+    GameCLI.print_start_game(WELCOME_TICTACTOE, INTRO_TICTACTOE)
     game = set_up_game()
     # play_game(Game)
     # multiplay = play_again()
     # print_scoreboard(Game.players)
     multiplay = True
     while multiplay:
-        display.clear_screen()
-        play_game(game, display)
+        # GameCLI.clear_screen()
+        play_game(game)
         multiplay = play_again()
-        print_scoreboard(game.players)
+        GameCLI.print_scoreboard(game.players)
         game.reset_board()
     exit()

@@ -70,7 +70,7 @@ against and opponent or the computer. X starts the game.
 
 INTRO_CONNECT4 = """
 This is an online version of the classic game. Play multiple games per session
-against and opponent or the computer. X starts the game.
+against and opponent or the computer. Red starts the game.
 """
 
 THINKING = "\nComputer is now thinking."
