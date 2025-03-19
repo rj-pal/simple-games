@@ -2,6 +2,7 @@ from collections import Counter
 from random import choice, randint
 from typing import Tuple, List, Union, Optional
 from core.board import Board, WinChecker
+from core.deck import Deck
 from core.player import Player
 
 def int_converter(number, columns):
@@ -18,6 +19,32 @@ def board(rows: int, columns: int):
         else:
             board.append([0 for _ in range(columns)])
     return board
+
+class Solitare:
+
+    def __init__(self):
+        self.tableau = Board(1, 7)
+        self.foundation_piles = Board(1, 4)
+        self.card_deck = Deck()
+    
+    def make_tableau(self):
+        self.card_deck.shuffle_deck()
+        for i in range(self.tableau.columns):
+            card_stack = self.card_deck.deal_cards(i + 1)
+            
+            card_stack.head.next.value.flip_card()
+            self.tableau.add_to_square(0, i, card_stack)
+            self.card_deck.shuffle_deck()
+
+    def get_tableau(self):
+        return self.tableau.get_rows()[0]
+    
+    def show_tableau(self):
+        for card_stack in self.get_tableau():
+            # print(card_stack.peek())
+            print(card_stack)
+
+
 
 class ConnectFour:
 
@@ -792,6 +819,7 @@ class TicTacToe:
                     if move := self.two_blanks(self.game.board):
                         return move
                 return self.random_ints(self.game.board)
+
 
 
 test = ConnectFour()

@@ -2,7 +2,7 @@ import os
 from time import sleep
 from itertools import chain
 from utils.square import Square
-from typing import Union
+from typing import Union, Optional
 
 # Constants
 WELCOME = "default"
@@ -47,17 +47,46 @@ def board_translator(game_board: list[list[Union[int, str]]]) -> list[list[Squar
     marker_mapping = {0: Square.BLANK, "x": Square.X, "o": Square.O, "r": Square.R, "y": Square.Y}
     return [[marker_mapping[cell] for cell in row] for row in game_board]
 
+# def create_row(row: list[list[Square]]) -> str:
+#     """Returns a formatted string of a single board row."""
+#     return "\n".join([
+#         "*".join(line).center(os.get_terminal_size().columns - 1)
+#         for line in zip(*row)
+#     ])
+
+# def create_board(game_board: list[list[Union[int, str]]], line: str) -> str:
+#     """Returns a formatted string representation of the board."""
+#     return f"\n{line.center(os.get_terminal_size().columns - 1)}\n".join(
+#         [create_row([square.value for square in row]) for row in game_board])
+
+
 def create_row(row: list[list[Square]]) -> str:
-    """Returns a formatted string of a single board row."""
+    """Returns a formatted string of a single board row with proper centering."""
+    
+    # Determine the width of the longest square in the row
+    max_width = max(len(line) for line in zip(*row))
+
+    # Ensure each square is consistently padded to match the max width in the row
     return "\n".join([
-        "*".join(line).center(os.get_terminal_size().columns - 1)
+        "*".join(line).center(max_width)
         for line in zip(*row)
     ])
+    # Center the row based on the terminal width
+    # return row_str.center(os.get_terminal_size().columns - 1)
 
 def create_board(game_board: list[list[Union[int, str]]], line: str) -> str:
     """Returns a formatted string representation of the board."""
-    return f"\n{line.center(os.get_terminal_size().columns - 1)}\n".join(
-        [create_row([square.value for square in row]) for row in game_board])
+    
+    # Create all rows first, ensuring consistency
+    board_rows = [create_row([square.value for square in row]) for row in game_board]
+    # board_rows = [create_row(row) for row in game_board]
+    
+    # Get terminal width for centering
+    terminal_width = os.get_terminal_size().columns - 1
+    
+    # Join rows with a centered separator
+    return f"\n{line.center(terminal_width)}\n".join(board_rows)
+
 
 def print_board(game_board: list[list[Union[int, str]]], line: str) -> None:
     """Prints the game board with a slight delay effect."""
@@ -159,6 +188,31 @@ def prompt_move() -> tuple[int, int]:
     row = prompt_int('row')
     column = prompt_int('column')
     return row, column
+
+def select_difficulty_level() -> Optional[bool]:
+    """Updates the difficulty level boolean when playing against the computer."""
+    valid_input = ['1', 'easy', '2', 'intermediate', '3', 'hard']
+    while True:
+        level_of_difficulty = input(
+            "\nSelect the level of difficult for the AI: Easy, Intermediate or Hard: "
+        ).lower()
+        if level_of_difficulty in valid_input[:2]:
+            delay_effect(
+                ["\nYou are playing against the computer in easy mode."])
+            return None
+        elif level_of_difficulty in valid_input[2:4]:
+            delay_effect([
+                "\nYou are playing against the computer in intermediate mode."
+            ])
+            return False
+        elif level_of_difficulty in valid_input[4:]:
+            delay_effect(
+                ["\nYou are playing against the computer in hard mode."])
+            return True
+        else:
+            print(
+                "\nThere is only easy, intermediate or hard mode.\nPlease select '1' for easy, '2' for "
+                "intermediate or '3' for hard.")
 
 
 # import os
