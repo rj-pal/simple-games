@@ -183,6 +183,7 @@ def prompt_int(value: str) -> int:
         except ValueError:
             print("\nYou must enter a number. Try again.\n")
 
+
 def prompt_move() -> tuple[int, int]:
     """Gets a valid row and column input from the player."""
     row = prompt_int('row')

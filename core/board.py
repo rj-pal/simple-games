@@ -1,4 +1,5 @@
 from typing import Union, Optional
+from copy import deepcopy
 from collections import Counter
 
 def int_converter(number, columns):
@@ -23,7 +24,6 @@ class Board:
 
     def get_board(self) -> list[list[Union[int, str]]]:
         # Return a deep copy to ensure immutability
-        from copy import deepcopy
         return deepcopy(self.board)
     
     def get_rows(self) -> list[list[int]]:

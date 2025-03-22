@@ -1,4 +1,4 @@
-from games.Game import ConnectFour
+from games.game import ConnectFour
 from utils.strings import BOARDLINE_CONNECT4
 from utils.clitools import * #set_console_window_size, print_board
 
