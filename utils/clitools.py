@@ -1,15 +1,149 @@
 import os
 from time import sleep
 from itertools import chain
+from utils.game_options import GameOptions
 from utils.square import Square
 from typing import Union, Optional
 
-# Constants
-WELCOME = "default"
-INTRO = "default"
-GAMEOVER = "go"
-ONE = "one"
-TWO = "two"
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def delay_effect(lines, delay=0.025):
+    for line in lines:
+        for char in line:
+            print(char, end='', flush=True)
+            sleep(delay)
+        print()
+
+def print_menu_screen(delay=0.025):
+    clear_screen()
+    columns, rows = os.get_terminal_size()
+
+    MENU_OPTIONS = {
+        GameOptions.TIC_TAC_TOE.value: "Tic Tac Toe",
+        GameOptions.CONNECT_FOUR.value: "Connect 4",
+        GameOptions.SOLITAIRE.value: "Solitaire"
+    }
+
+    # create menu options dynmically as more games are added
+    menu_text = "Welcome to Simple Games.\n\n"
+    for key, value in MENU_OPTIONS.items():
+        menu_text += f"    {key}. {value}\n"
+
+    horizontal_pos = (columns - len(max(menu_text.splitlines(), key=len))) // 2
+    vertical_pos = (rows - menu_text.count('\n') - 1) // 2
+
+    # centre the menu in the command line screen
+    print('\n' * vertical_pos, end='')
+    for line in menu_text.splitlines():
+        print(' ' * horizontal_pos, end="")
+        delay_effect([line], delay)
+
+def menu_select(valid_selections):
+    print()
+    columns, _ = os.get_terminal_size()
+    prompt = "Select the game you want to play: "
+    error = "Please only select a game from the available options."
+
+    horizontal_pos = (columns - len(prompt)) // 2
+    blank_space = ' ' * horizontal_pos
+
+    while True:
+        print(blank_space + prompt, end="")
+        choice = input().strip()
+
+        if choice in valid_selections:
+            break
+
+        print('\n' + blank_space, end="")
+        delay_effect([error])  
+        print('\n' + blank_space, end="")
+        sleep(1)
+        clear_screen()
+        print_menu_screen(delay=0)
+        print()
+    
+    clear_screen()
+    print('\n' * 20)
+    print(blank_space + " " * 15 + "GAME LOADING")
+    sleep(2)
+    clear_screen()
+
+    return choice
+
+
+
+
+# def print_menu_screen(delay=0.025):
+#     clear_screen()
+#     # Get terminal size
+#     columns, rows = os.get_terminal_size()
+
+#     # Text to print
+#     menu_text = """Welcome to Simple Games.
+    
+#     1. Tic Tac Toe
+#     2. Connect 4
+#     3. Solitaire"""
+
+#     # Calculate horizontal and vertical positions for getting the centre of the terminal 
+#     horizontal_pos = (columns - len(max(menu_text.splitlines(), key=len))) // 2
+#     vertical_pos = (rows - menu_text.count('\n') - 1) // 2
+
+#     # Print empty lines to center the text vertically
+#     for _ in range(vertical_pos):
+#         print()
+
+#     # Print the text, center it horizontally
+#     for line in menu_text.splitlines():
+#         print(' ' * horizontal_pos, end="")
+#         delay_effect([line], delay)
+
+# def menu_select(valid_selections):
+#     print()
+#     # Get terminal size
+#     columns, _ = os.get_terminal_size()
+
+#     # Text to display as the prompt
+#     prompt = "Select the game you want to play: "
+#     error = "Please only select a game from the available options." 
+#     new_screen = "Press enter to select again."
+
+#     # Calculate horizontal position and create blank space string
+#     horizontal_pos = (columns - len(prompt)) // 2
+#     blank_space = ' ' * horizontal_pos
+
+#     # Print the prompt centered horizontally
+
+#     print(blank_space + prompt, end="")
+    
+#     choice = input()
+
+#     while choice not in valid_selections:
+#         print()
+#         print(blank_space, end="")
+#         delay_effect([error])  
+#         print()
+#         print(blank_space, end="")
+#         delay_effect([new_screen])
+#         print(blank_space, end="")
+#         print(input())
+#         clear_screen()
+#         print_menu_screen(delay=0)
+#         print()
+        
+#         return menu_select(valid_selections)
+    
+#     clear_screen()
+#     for _ in range(20):
+#         print()
+#     print(blank_space + " " * 15 + "GAME LOADING")
+#     sleep(2)
+#     clear_screen()
+
+#     return choice
+
 
 def set_console_window_size(width: float, height: float) -> None:
     """Sets the console window size to fit the board better."""
@@ -25,8 +159,8 @@ def clear_screen() -> None:
 
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
     """Creates the effect of printing characters or lines with a delay."""
-    if delay != 0:
-        delay = 0  # Used for testing to speed up output
+    # if delay != 0:
+    #     delay = 0  # Used for testing to speed up output
     for string in strings:
         for char in string:
             print(char, end='', flush=word_flush)

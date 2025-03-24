@@ -1,6 +1,8 @@
 from cli import TicTacToeCLI, ConnectFourCLI
 from games.game import Solitare, ConnectFour
-from utils.clitools import clear_screen
+from utils.gameoptions import GameOptions
+from utils.clitools import clear_screen, delay_effect, print_menu_screen, menu_select
+from utils.strings import SIMPLE_GAMES_START
 import unicodedata
 
 # def get_display_width(text):
@@ -160,7 +162,7 @@ def run_game():
 
 
 
-def main():
+# def main():
 
     # test = ConnectFour()
     # print(test.columns)
@@ -188,17 +190,31 @@ def main():
     # exit()
 
 
-    print("Select a game:")
-    print("1. Tic Tac Toe")
-    print("2. Connect 4")
-    choice = input("Enter your choice (1 or 2): ")
-
-    if choice == '1':
+    # print_menu_screen()
+    # choice = menu_select({'1', '2', '3'})
+    # if choice == '1':
+    #     TicTacToeCLI.run()
+    # elif choice == '2':
+    #     ConnectFourCLI.run()
+    # elif choice == '3':
+    #     run_game()
+    # else:
+    #     raise ValueError("Invalid choice. See you next time.")
+    
+def main():
+    print_menu_screen()
+    valid_game_options  = GameOptions.values()
+    choice = menu_select(valid_game_options)
+    
+    if choice == GameOptions.TIC_TAC_TOE.value:
         TicTacToeCLI.run()
-    elif choice == '2':
+    elif choice == GameOptions.CONNECT_FOUR.value:
         ConnectFourCLI.run()
+    elif choice == GameOptions.SOLITAIRE.value:
+        run_game()
     else:
-        print("Invalid choice. See you next time.")
+        raise ValueError("Invalid choice. See you next time.")
+
 
 if __name__ == '__main__':
     main()
