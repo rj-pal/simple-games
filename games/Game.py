@@ -141,8 +141,6 @@ class Solitare:
             # print(card_stack.peek())
             print(card_queue)
 
-
-
 class ConnectFour:
 
     def __init__(self, connect_value: int=4, rows: int=6, columns: int=7):
@@ -169,11 +167,11 @@ class ConnectFour:
             self.ConnectFourPlayer("Player 1", "r"),
             self.ConnectFourPlayer("Player 2", "y"),
         )
-    # def create_ai_player(self, name: Optional[str], difficulty: Optional[bool]) -> Tuple[Player, Player]:
-    #     self.players = (
-    #         self.TicTacToePlayer("Player 1", "r"),
-    #         self.AIPlayer(name=name, difficulty=difficulty, game=self),
-    #     )
+    def create_ai_player(self, name, difficulty: Optional[bool]=True) -> Tuple[Player, Player]:
+        self.players = (
+            self.ConnectFourPlayer("Player 1", "r"),
+            self.AIPlayer(name=name, difficulty=difficulty, game=self),
+        )
 
     # def add_two_hard_move_ai_players_for_testing(self):
     #     self.players = (
@@ -210,6 +208,7 @@ class ConnectFour:
 
     def make_move(self, col, marker):
         for row in range(self.rows - 1, -1, -1):
+            print(f"ROW {row}, COL {col}")
             if self.is_valid(row, col):
                 self.board.add_to_square(row, col, marker)
                 self.move_list.append((row, col))
@@ -236,7 +235,7 @@ class ConnectFour:
     def update_player_name(self, name: str, marker: str) -> None:
         """Updates a player's name based on their marker ('r' or 'y')."""
         marker = marker.lower()    
-        if marker not in {"x", "o"}:
+        if marker not in {"r", "y"}:
             raise ValueError(f"Invalid marker '{marker}'. Must be 'r' or 'y'.")
         marker_to_index = {"r": 0, "y": 1}
         self.players[marker_to_index[marker.lower()]].name = name
@@ -278,7 +277,7 @@ class ConnectFour:
         
 
     class ConnectFourPlayer(Player):
-        def __init__(self, name: str = None, marker: str = None):
+        def __init__(self, name: str = "Me", marker: str = "r"):
             super().__init__(name, marker)  # Initialize the name first
             self.marker = marker  # Use the property setter for validation
             self.marker_name = self._get_marker_name()
@@ -301,8 +300,30 @@ class ConnectFour:
         def _get_marker_name(self):
             """Determine the marker name based on the marker value."""
             return "Red" if self._marker == "r" else "Yellow"
+        
 
+    class AIPlayer(Player):
 
+        def __init__(self, name: str = "CPU", marker: str = "y", difficulty: bool = False, game: 'ConnectFour' = None):
+            """AIPlayer is a child class of Player"""
+            super().__init__(name, marker)
+            self.game = game
+            self.score = 0
+        
+        def get_col(self): 
+                return randint(0, self.game.columns - 1)
+
+        def random_int(self, board: Board) -> tuple[int, int]:
+            """Selects any open random positions on the board. Returns row and column index."""
+            column = self.get_col()
+            while self.game.board.square_is_occupied(0, column):
+                column = self.get_col()
+
+            return column
+
+        def move(self, board: Board):
+            return self.random_int(board)
+        
 
 
 class TicTacToe:
@@ -919,7 +940,8 @@ class TicTacToe:
 
 
 
-# test = ConnectFour()
+test = ConnectFour()
+# print(test.ConnectFourPlayer.move())
 # print(test.board)
 # test.make_move(0,"r")
 # test.make_move(0,"r")

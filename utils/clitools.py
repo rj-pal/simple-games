@@ -25,8 +25,8 @@ def clear_screen() -> None:
 
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
     """Creates the effect of printing characters or lines with a delay."""
-    # if delay != 0:
-    #     delay = 0  # Used for testing to speed up output
+    if delay != 0:
+        delay = 0  # Used for testing to speed up output
     for string in strings:
         for char in string:
             print(char, end='', flush=word_flush)
@@ -47,51 +47,69 @@ def board_translator(game_board: list[list[Union[int, str]]]) -> list[list[Squar
     marker_mapping = {0: Square.BLANK, "x": Square.X, "o": Square.O, "r": Square.R, "y": Square.Y}
     return [[marker_mapping[cell] for cell in row] for row in game_board]
 
-# def create_row(row: list[list[Square]]) -> str:
-#     """Returns a formatted string of a single board row."""
-#     return "\n".join([
-#         "*".join(line).center(os.get_terminal_size().columns - 1)
-#         for line in zip(*row)
-#     ])
-
-# def create_board(game_board: list[list[Union[int, str]]], line: str) -> str:
-#     """Returns a formatted string representation of the board."""
-#     return f"\n{line.center(os.get_terminal_size().columns - 1)}\n".join(
-#         [create_row([square.value for square in row]) for row in game_board])
-
-
-def create_row(row: list[list[Square]]) -> str:
-    """Returns a formatted string of a single board row with proper centering."""
-    
-    # Determine the width of the longest square in the row
-    max_width = max(len(line) for line in zip(*row))
-
-    # Ensure each square is consistently padded to match the max width in the row
+### Original Works for Tic Tac Toe
+def create_row_tictactoe(row: list[list[Square]]) -> str:
+    """Returns a formatted string of a single board row."""
     return "\n".join([
-        "*".join(line).center(max_width)
+        "*".join(line).center(os.get_terminal_size().columns - 1)
         for line in zip(*row)
     ])
-    # Center the row based on the terminal width
-    # return row_str.center(os.get_terminal_size().columns - 1)
-
-def create_board(game_board: list[list[Union[int, str]]], line: str) -> str:
+### Original Works for Tic Tac Toe
+def create_board_tictactoe(game_board: list[list[Union[int, str]]], line: str) -> str:
     """Returns a formatted string representation of the board."""
-    
-    # Create all rows first, ensuring consistency
-    board_rows = [create_row([square.value for square in row]) for row in game_board]
-    # board_rows = [create_row(row) for row in game_board]
-    
-    # Get terminal width for centering
-    terminal_width = os.get_terminal_size().columns - 1
-    
-    # Join rows with a centered separator
-    return f"\n{line.center(terminal_width)}\n".join(board_rows)
+    return f"\n{line.center(os.get_terminal_size().columns - 1)}\n".join(
+        [create_row_tictactoe([square.value for square in row]) for row in game_board])
 
+def create_row_connect4(row: list[list[Square]]) -> str:
+    """Returns a formatted string of a single board row."""
+    return "\n".join([
+        "|".join(line)
+        for line in zip(*row)
+    ])
+
+def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) -> str:
+    """Returns a formatted string representation of the board."""
+    return f"\n{line}\n".join(
+        [create_row_connect4([square.value for square in row]) for row in game_board])
+
+# ### TESTING
+# def create_row(row: list[list[Square]]) -> str:
+#     """Returns a formatted string of a single board row with proper centering."""
+    
+#     # Determine the width of the longest square in the row
+#     max_width = max(len(line) for line in zip(*row))
+
+#     # Ensure each square is consistently padded to match the max width in the row
+#     return "\n".join([
+#         "*".join(line).center(max_width)
+#         for line in zip(*row)
+#     ])
+#     # Center the row based on the terminal width
+#     # return row_str.center(os.get_terminal_size().columns - 1)
+
+# ### TESTING
+# def create_board(game_board: list[list[Union[int, str]]], line: str) -> str:
+#     """Returns a formatted string representation of the board."""
+    
+#     # Create all rows first, ensuring consistency
+#     board_rows = [create_row([square.value for square in row]) for row in game_board]
+#     # board_rows = [create_row(row) for row in game_board]
+    
+#     # Get terminal width for centering
+#     terminal_width = os.get_terminal_size().columns - 1
+    
+#     # Join rows with a centered separator
+#     return f"\n{line.center(terminal_width)}\n".join(board_rows)
+
+def print_board_conect4(game_board: list[list[Union[int, str]]], line: str) -> None:
+    """Prints the game board with a slight delay effect."""
+    translated_board = board_translator(game_board)
+    delay_effect([create_board_connect4(translated_board, line)], 0.00075, False)
 
 def print_board(game_board: list[list[Union[int, str]]], line: str) -> None:
     """Prints the game board with a slight delay effect."""
     translated_board = board_translator(game_board)
-    delay_effect([create_board(translated_board, line)], 0.00075, False)
+    delay_effect([create_board_tictactoe(translated_board, line)], 0.00075, False)
 
 def print_start_game(welcome: str, intro: str):
     """Prints the welcome message and introduction."""
@@ -189,6 +207,19 @@ def prompt_move() -> tuple[int, int]:
     row = prompt_int('row')
     column = prompt_int('column')
     return row, column
+
+def prompt_column_move():
+    """Gets a valid column input from player."""
+    valid_input = {i + 1 for i in range(7)}
+    while True:
+        try:
+            input_value = int(input(f"Enter the column: "))
+            if input_value in valid_input:
+                return input_value - 1  # Needed for 0-based index
+            print(f"\nYou must enter a free column from 1 to 7 only.\n")
+        except ValueError:
+            print("\nYou must enter a number. Try again.\n")
+
 
 def select_difficulty_level() -> Optional[bool]:
     """Updates the difficulty level boolean when playing against the computer."""

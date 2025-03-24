@@ -22,9 +22,17 @@ class Board:
     def reset_board(self) -> None:
         self.board = self._initialize_board()
 
-    def get_board(self) -> list[list[Union[int, str]]]:
-        # Return a deep copy to ensure immutability
-        return deepcopy(self.board)
+    def get_board(self, mutable: bool = False) -> Union[list[list[Union[int, str]]], "Board"]:
+        """
+        Returns either a deep copy of the board (immutable) or a deep copy of the entire Board object (mutable).
+        
+        :param mutable: If True, returns a full Board copy. Otherwise, returns a deep copy of board data.
+        """
+        return deepcopy(self) if mutable else deepcopy(self.board)
+
+    # def get_board(self) -> list[list[Union[int, str]]]:
+    #     # Return a deep copy to ensure immutability
+    #     return deepcopy(self.board)
     
     def get_rows(self) -> list[list[int]]:
         return self.board
@@ -60,6 +68,24 @@ class Board:
             self.board[row][column] = value  # Allow modification
             return True
         return False  # Invalid index
+    
+    # def __deepcopy__(self, memo):
+    #     """Creates a deep copy of the Board instance."""
+    #     new_board = Board(self.rows, self.columns)
+    #     new_board.board = deepcopy(self.board, memo)
+    #     return new_board
+    
+    def __deepcopy__(self, memo):
+        """Creates a deep copy of the Board instance, avoiding redundant copies."""
+        if id(self) in memo:
+            return memo[id(self)]  # Return existing copy
+
+        new_board = Board(self.rows, self.columns)
+        memo[id(self)] = new_board  # Store in memo
+
+        # Deep copy the board data
+        new_board.board = deepcopy(self.board, memo)
+        return new_board
     
     def __str__(self) -> str:
         return "\n".join([" ".join(str(cell) for cell in row) for row in self.board])

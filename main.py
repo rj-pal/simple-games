@@ -1,5 +1,5 @@
 from cli import TicTacToeCLI, ConnectFourCLI
-from games.game import Solitare
+from games.game import Solitare, ConnectFour
 from utils.clitools import clear_screen
 import unicodedata
 
@@ -162,9 +162,19 @@ def run_game():
 
 def main():
 
+    # test = ConnectFour()
+    # print(test.columns)
+    # test.create_ai_player(True)
 
-    run_game()
-    exit()
+    # # print(test.players[0])
+    # player = test.players[1]
+
+    # print(player.move())
+    # exit()
+
+
+    # run_game()
+    # exit()
 
     # test = Solitare()
     # # test.make_tableau()
