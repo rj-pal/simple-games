@@ -159,8 +159,8 @@ def clear_screen() -> None:
 
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
     """Creates the effect of printing characters or lines with a delay."""
-    # if delay != 0:
-    #     delay = 0  # Used for testing to speed up output
+    if delay != 0:
+        delay = 0  # Used for testing to speed up output
     for string in strings:
         for char in string:
             print(char, end='', flush=word_flush)
@@ -199,7 +199,7 @@ def create_row_connect4(row: list[list[Square]]) -> str:
     return "\n".join([
         "|".join(line)
         for line in zip(*row)
-    ])
+    ] ) 
 
 def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) -> str:
     """Returns a formatted string representation of the board."""
@@ -223,7 +223,7 @@ def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) ->
 
 # ### TESTING
 # def create_board(game_board: list[list[Union[int, str]]], line: str) -> str:
-#     """Returns a formatted string representation of the board."""
+#     """Returns a formatted string representation of the board."""   
     
 #     # Create all rows first, ensuring consistency
 #     board_rows = [create_row([square.value for square in row]) for row in game_board]
@@ -235,10 +235,12 @@ def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) ->
 #     # Join rows with a centered separator
 #     return f"\n{line.center(terminal_width)}\n".join(board_rows)
 
-def print_board_conect4(game_board: list[list[Union[int, str]]], line: str) -> None:
+def print_board_connect4(game_board: list[list[Union[int, str]]], line: str, labels: str) -> None:
     """Prints the game board with a slight delay effect."""
     translated_board = board_translator(game_board)
     delay_effect([create_board_connect4(translated_board, line)], 0, False)
+    print(line)
+    print(labels)
 
 def print_board(game_board: list[list[Union[int, str]]], line: str) -> None:
     """Prints the game board with a slight delay effect."""
@@ -301,9 +303,13 @@ def print_first_player(name: str) -> None:
     delay_effect([f'\n{name} plays first.'])
     input('\nPress Enter to start the game.')
 
-def print_player_turn_prompt(name: str) -> None:
+def print_player_turn_prompt_tictactoe(name: str) -> None:
     """Prints the prompt for the player's turn."""
     delay_effect([f"\nIt is {name}'s turn. Select a row and column\n"])
+
+def print_player_turn_prompt_connect4(name: str) -> None:
+    """Prints the prompt for the player's turn."""
+    delay_effect([f"\nIt is {name}'s turn. Select the column you want to drop your piece in.\n"])
 
 def print_square_occupied_prompt(name: str) -> None:
     """Prints a prompt when the selected square is occupied."""
@@ -519,7 +525,7 @@ def select_difficulty_level() -> Optional[bool]:
 #         input('\nPress Enter to start the game.')
 
 #     @staticmethod
-#     def print_player_turn_prompt(name: str) -> None:
+#     def print_player_turn_prompt_tictactoe(name: str) -> None:
 #         """Prints the prompt for the player's turn."""
 #         GameCLI.delay_effect([f"\nIt is {name}'s turn. Select a row and column\n"])
 

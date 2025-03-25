@@ -5,6 +5,7 @@ from copy import deepcopy
 from core.board import Board, WinChecker
 from core.deck import CardDeck, CardStack, CardQueue
 from core.player import Player
+from time import sleep
 
 
 def int_converter(number, columns):
@@ -149,6 +150,8 @@ class ConnectFour:
          self.columns = columns
          self.board: List[List] = self.create_board()
          self.move_list: List = []
+         self.height_list: List = [self.rows] * self.columns
+         self.size_list: List = [0] * self.rows
          self.round_count: int = 0
          self.go_first: bool = True
          self.winner_name: str = None  # All winner attributes default to None when no winner or based on Winchecker
@@ -156,7 +159,7 @@ class ConnectFour:
          self.win_type: str = None
          self.win_row: int = -1
          self.win_column: int = -1
-         self._win: WinChecker = WinChecker(self.board, self.connect_value)
+         self._win: WinChecker = self.ConnectFourWinChecker(self.board)
          self.players = self.create_human_players() # Default to two player mode
 
     def create_board(self):
@@ -167,10 +170,10 @@ class ConnectFour:
             self.ConnectFourPlayer("Player 1", "r"),
             self.ConnectFourPlayer("Player 2", "y"),
         )
-    def create_ai_player(self, name, difficulty: Optional[bool]=True) -> Tuple[Player, Player]:
+    def create_ai_player(self, difficulty: Optional[bool]=True) -> Tuple[Player, Player]:
         self.players = (
             self.ConnectFourPlayer("Player 1", "r"),
-            self.AIPlayer(name=name, difficulty=difficulty, game=self),
+            self.AIPlayer(difficulty=difficulty, game=self),
         )
 
     # def add_two_hard_move_ai_players_for_testing(self):
@@ -212,6 +215,8 @@ class ConnectFour:
             if self.is_valid(row, col):
                 self.board.add_to_square(row, col, marker)
                 self.move_list.append((row, col))
+                self.height_list[col] = row
+                self.size_list[row] += 1
                 self.round_count += 1
                 return True
         return False
@@ -256,7 +261,7 @@ class ConnectFour:
         for player in self.players:
             if player.marker == winner_info["marker"]:
                 self.winner_name = player.name
-                self.winner_marker = player.marker_name
+                self.winner_marker = player.marker
         self.win_type = winner_info["type"]
         self.win_row = winner_info["row"]
         self.win_column = winner_info["column"]
@@ -275,6 +280,25 @@ class ConnectFour:
         self.win_row = -1
         self.win_column = -1
         
+    class ConnectFourWinChecker(WinChecker):
+        def __init__(self, board):
+            super().__init__(board, win_value=4)
+
+        def _check_rows(self, win_value: int) -> Optional[tuple]:
+            for r, row in enumerate(self.board.get_rows()):
+                for i in range(4):
+                    row_slice = row[i:i + 4]
+                    if winner := self._check_win(row_slice, win_value):
+                        return winner, "row", r, i
+    
+        def _check_columns(self, win_value: int) -> Optional[tuple]:
+            for c, column in enumerate(self.board.get_columns()):
+                for i in range(3):
+                    col_slice = column[i:i + 4]
+                    if winner := self._check_win(col_slice, win_value):
+
+                        return winner, "column", i, c
+
 
     class ConnectFourPlayer(Player):
         def __init__(self, name: str = "Me", marker: str = "r"):
@@ -310,20 +334,81 @@ class ConnectFour:
             self.game = game
             self.score = 0
         
-        def get_col(self): 
+        def get_random_column(self): 
                 return randint(0, self.game.columns - 1)
 
         def random_int(self, board: Board) -> tuple[int, int]:
             """Selects any open random positions on the board. Returns row and column index."""
-            column = self.get_col()
+            column = self.get_random_column()
             while self.game.board.square_is_occupied(0, column):
-                column = self.get_col()
+                column = self.get_random_column()
 
             return column
 
         def move(self, board: Board):
+        
+            if (move:= self.win_or_block(board)) is not None:
+                
+                print("Played WIN or BLOCK")
+                print(f"my move {move}")
+                # sleep(5)
+                return move 
+            print(self.game.height_list)
+            print(self.game.size_list)
+            print("Played RANDOM")
+            # sleep(5)
             return self.random_int(board)
         
+        def win_or_block(self, board: Board):
+            # at height index of 3, it means at least there are 3 pieces in a column; height_index 0 is a full column
+            column_indices = [index for index, height in enumerate(self.game.height_list) if 0 < height <= 3] # only check columns with 3 or more pieces
+            # max_height = max(self.game.height_list)
+            block_position = -1
+            # flat_board = all(height <= max_height for height in self.game.height_list) # only check rows that have a flat or higher columns
+
+            # Column Check for finding a winning move or blocking an opponent's winning move
+            for index in column_indices: 
+                column = self.game.board.get_columns()[index]
+                height_index = self.game.height_list[index]
+                print(column)
+                print(f"CURRENT HEIGHT INDEX {height_index}")
+                column_slice = column[height_index:height_index + 3]
+                print(column_slice)
+                if column_slice and all(marker == column_slice[0] for marker in column_slice):
+                    marker = column_slice[0]
+                    if marker == 'y':
+                        return height_index # return a winning move for AI player
+                    else:
+                        block_position = height_index # update any blocks of a human player
+
+            bottom_row_index = self.game.board.rows - 1
+            if self.game.size_list[bottom_row_index] >= 3:
+                for i in range(self.game.columns):
+                    if self.game.board.square_is_occupied(bottom_row_index, i):
+                        print("OCCUPIED")
+                    else:
+                        print("FREE")
+
+            # block_position = -1  # Makes a list of all possible blocking points on the board of the opponent
+            columns = self.game.board.get_columns()
+
+            
+            print(f"BLCO POSITON {block_position}")
+
+            rows =self.game.board.get_rows()
+            
+        
+
+            if block_position == -1:
+                return None
+        
+            return block_position
+            # lines = [self.game.board.get_rows(),
+            #         self.game.board.get_columns(),
+            #         self.game.board.get_diagonals(3, "right"),
+            #         self.game.board.get_diagonals(3, "left")
+            #         ]
+            # pass
 
 
 class TicTacToe:

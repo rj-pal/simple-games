@@ -42,7 +42,7 @@ def play_game(game) -> None:
 
         if isinstance(player, TicTacToe.TicTacToePlayer):
 
-            GameCLI.print_player_turn_prompt(name)
+            GameCLI.print_player_turn_prompt_tictactoe(name)
             while True:
                 row, col = GameCLI.prompt_move()
                 if game.make_move(row, col, player.marker):

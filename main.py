@@ -202,6 +202,9 @@ def run_game():
     #     raise ValueError("Invalid choice. See you next time.")
     
 def main():
+    ConnectFourCLI.run()
+    exit()
+
     print_menu_screen()
     valid_game_options  = GameOptions.values()
     choice = menu_select(valid_game_options)
