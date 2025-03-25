@@ -63,6 +63,26 @@ GAMEOVER = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
+REDWINS = """
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   *                                                                         *
+   *                                                                         *
+   *             *  *  *            *  *  *         *  * *                   *
+   *             *      *           *               *      *                 *
+   *             *  *  *            * * *           *       *                *
+   *             *      *           *               *      *                 *
+   *             *       *          *  *  *         *  * *                   *
+   *                                                                         *
+   *            *             *     * * *     *       *       * * *          *
+   *            *             *       *       *  *    *      *     *         *
+   *             *     *     *        *       *    *  *        *             *
+   *              *  *   *  *         *       *       *      *    *          *
+   *               *       *        * * *     *       *       * * *          *
+   *                                                                         *
+   *                                                                         *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+"""
+
 INTRO_TICTACTOE = """
 This is an online version of the classic game. Play multiple games per session
 against and opponent or the computer. X starts the game.
@@ -95,5 +115,6 @@ connect4_strings = {
 
 other_strings = {
     "gameover": GAMEOVER,
-    "thinking": THINKING
+    "thinking": THINKING,
+    "redwinner": REDWINS
 }

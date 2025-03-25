@@ -1,6 +1,6 @@
 from cli import TicTacToeCLI, ConnectFourCLI
 from games.game import Solitare, ConnectFour
-from utils.gameoptions import GameOptions
+from utils.game_options import GameOptions
 from utils.clitools import clear_screen, delay_effect, print_menu_screen, menu_select
 from utils.strings import SIMPLE_GAMES_START
 import unicodedata

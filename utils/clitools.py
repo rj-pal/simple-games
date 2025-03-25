@@ -9,12 +9,12 @@ from typing import Union, Optional
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def delay_effect(lines, delay=0.025):
-    for line in lines:
-        for char in line:
-            print(char, end='', flush=True)
-            sleep(delay)
-        print()
+# def delay_effect(lines, delay=0.025):
+#     for line in lines:
+#         for char in line:
+#             print(char, end='', flush=True)
+#             sleep(delay)
+#         print()
 
 def print_menu_screen(delay=0.025):
     clear_screen()
@@ -238,7 +238,7 @@ def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) ->
 def print_board_conect4(game_board: list[list[Union[int, str]]], line: str) -> None:
     """Prints the game board with a slight delay effect."""
     translated_board = board_translator(game_board)
-    delay_effect([create_board_connect4(translated_board, line)], 0.00075, False)
+    delay_effect([create_board_connect4(translated_board, line)], 0, False)
 
 def print_board(game_board: list[list[Union[int, str]]], line: str) -> None:
     """Prints the game board with a slight delay effect."""

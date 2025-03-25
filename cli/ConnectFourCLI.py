@@ -52,7 +52,7 @@ def play_game(game) -> None:
                     GameCLI.print_square_occupied_prompt(name)
         elif isinstance(player, ConnectFour.AIPlayer):
             print(other_strings["thinking"])
-            sleep(2.5)
+            sleep(2)
             col = player.move(game.board)
             game.make_move(col, player.marker)
 
@@ -64,11 +64,25 @@ def play_game(game) -> None:
             temp_board.update_square(current_row, current_col, 0)
             temp_board.add_to_square(j, current_col, player.marker)
             GameCLI.print_board_conect4(temp_board.get_board(), connect4_strings["boardline"])
-            sleep(0.045)
+            sleep(0.05)
             clear_screen()
 
         GameCLI.print_board_conect4(game.board.get_board(), connect4_strings["boardline"])
+        if i >= 6 and game.check_winner():
+            sleep(1)
+            if player.marker == "y":
+                GameCLI.print_game_over(other_strings["gameover"])
+            else:
+                GameCLI.print_game_over(other_strings["redwinner"])
+            GameCLI.print_board_conect4(game.board.get_board(), connect4_strings["boardline"])
+            break
+        print()
         GameCLI.print_current_move(name, *game.move_list[i])
+    game.update_winner_info()
+    game.update_players_stats()
+    game.print_winner()
+    # winner = game.get_winner_attributes()
+    # GameCLI.print_winner_info(*winner)
 
 def run():
     set_console_window_size(100, 40)
