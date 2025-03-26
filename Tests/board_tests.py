@@ -1,4 +1,4 @@
-from core.board import Board, WinChecker, winner_info
+from core.board import Board, LineChecker, winner_info
 
 # Visualizations of the Board Unit Tests
 
@@ -19,13 +19,13 @@ print(B.get_diagonals(1, "left")) # This goes right to left
 
 def print_winner(win_object):
     """Requires Winchecker function. Returns any winner information as string."""
-    result = win_object.check_for_winner() 
+    result = win_object._check_for_winner() 
     if result:
         winner_stats = win_object.get_win_info()
         winner_info(winner_stats)
         print(f"Winning Condition: {win_object.win_value}-in-a-row.")
     else:
-        print("No winner found.")
+        print("No winner found. Only checks if complete row is all the same")
 
 
 # Testing winner condition in standard 6x7 Connect Four board
@@ -33,11 +33,14 @@ test = Board(6, 7)
 
 # Fill the bottom row (row index 5) with "b" to check for a 4-in-a-row win 
 for col in range(7):
-    test.update_square(5, col, "b")
+    if col in range(3):
+        pass
+    else:
+        test.update_square(5, col, "b")
 print(test.board)
 print(test)
 
-win = WinChecker(test, 4)
+win = LineChecker(test, 4)
 print_winner(win)  # Standard Connect 4 win condition of 4 in a row
 
 # Testing winner condition in non-standard boards. This is to make sure the diagonal win checking is functional
@@ -52,7 +55,7 @@ test.update_square(2, 2, "r")
 print(test)
 
 
-win = WinChecker(test, 2)
+win = LineChecker(test, 2)
 print_winner(win)
 win.reset_win_info()
 # print_winner(win, 10)
@@ -67,7 +70,7 @@ print_winner(win)
 
 
 test = Board(6, 7)
-win = WinChecker(test, 4)
+win = LineChecker(test, 4)
 # Right diagonal winner configuration (from top-left to bottom-right)
 test.update_square(0, 0, "b")
 test.update_square(1, 1, "b")

@@ -1,33 +1,33 @@
 import unittest
-import Game
+from games.game import TicTacToe
 
-def play_game(Game, x_first, move_list):
-    Game.reset_game_state()
-    Game.go_first = x_first
-    for i in range(Game.board_size): 
-        if Game.go_first:
-            player = Game.players[i % 2]
+def play_game(test, x_first, move_list):
+    test.reset_game_state()
+    test.go_first = x_first
+    for i in range(test.board_size): 
+        if test.go_first:
+            player = test.players[i % 2]
         else:
-            player = Game.players[i % 2 - 1]
+            player = test.players[i % 2 - 1]
         
         while True:
             move = *move_list[i], player.marker
-            if Game.make_move(*move):
+            if test.make_move(*move):
                 break
             else:
                 i += 1
 
-        if i >= 4 and Game.check_winner():
+        if i >= 4 and test.check_winner():
             break
-    Game.update_winner_info()
-    Game.update_players_stats()
-    print(Game.print_stats())
-    return Game.get_winner_info()
+    test.update_winner_info()
+    test.update_players_stats()
+    print(test.print_stats())
+    return test.get_winner_info()
 
 class TestTicTacToe(unittest.TestCase):
     def setUp(self):
         """Set up a new Tic Tac Toe game instance for each test."""
-        self.Game = Game.TicTacToe()
+        self.test = TicTacToe()
 
 
     def test_x_wins_rows(self):
@@ -39,7 +39,7 @@ class TestTicTacToe(unittest.TestCase):
         ]
         for move_list, expected in moves:
             with self.subTest(move_list=move_list):
-                result = play_game(self.Game, True, move_list)
+                result = play_game(self.test, True, move_list)
                 self.assertEqual(result, expected)
 
     def test_x_wins_columns(self):
@@ -51,7 +51,7 @@ class TestTicTacToe(unittest.TestCase):
         ]
         for move_list, expected in moves:
             with self.subTest(move_list=move_list):
-                result = play_game(self.Game, True, move_list)
+                result = play_game(self.test, True, move_list)
                 self.assertEqual(result, expected)
 
     def test_x_wins_diagonals(self):
@@ -62,7 +62,7 @@ class TestTicTacToe(unittest.TestCase):
         ]
         for move_list, expected in moves:
             with self.subTest(move_list=move_list):
-                result = play_game(self.Game, True, move_list)
+                result = play_game(self.test, True, move_list)
                 self.assertEqual(result, expected)
 
     def test_o_wins_rows(self):
@@ -74,7 +74,7 @@ class TestTicTacToe(unittest.TestCase):
         ]
         for move_list, expected in moves:
             with self.subTest(move_list=move_list):
-                result = play_game(self.Game, False, move_list)
+                result = play_game(self.test, False, move_list)
                 self.assertEqual(result, expected)
 
     def test_o_wins_columns(self):
@@ -86,7 +86,7 @@ class TestTicTacToe(unittest.TestCase):
         ]
         for move_list, expected in moves:
             with self.subTest(move_list=move_list):
-                result = play_game(self.Game, False, move_list)
+                result = play_game(self.test, False, move_list)
                 self.assertEqual(result, expected)
 
     def test_o_wins_diagonals(self):
@@ -97,20 +97,20 @@ class TestTicTacToe(unittest.TestCase):
         ]
         for move_list, expected in moves:
             with self.subTest(move_list=move_list):
-                result = play_game(self.Game, True, move_list)
+                result = play_game(self.test, True, move_list)
                 self.assertEqual(result, expected)
 
     def test_draw(self):
         """Test a game ending in a draw."""
         move_list = [(0, 0), (0, 1), (0, 2), (1, 1), (1, 0), (1, 2), (2, 1), (2, 0), (2, 2)]
         expected = {'marker': None, 'type': None, 'row': None, 'column': None}
-        result = play_game(self.Game, True, move_list)
+        result = play_game(self.test, True, move_list)
         self.assertEqual(result, expected)
 
     def test_one_occupied_square_move(self):
         """Test trying to add a move to an already occupied square."""
         move_list = [(0, 0), (0, 1), (0, 0), (1, 1), (0, 2), (2, 2)]
-        result = play_game(self.Game, True, move_list)
+        result = play_game(self.test, True, move_list)
         # Expect the valid game outcome after ignoring the invalid move
         expected = {'marker': 'x', 'type': 'right_diagonal', 'row': 0, 'column': 0}
         self.assertEqual(result, expected)
@@ -118,13 +118,13 @@ class TestTicTacToe(unittest.TestCase):
     def test_invalid_moves(self):
         """Test trying to add a move to an already occupied square."""
         move_list = [(0, 0), (0, 1), (3, 3),(0, 0), (1, 1), (0, 2), (-3, -3), (2, 2)]
-        result = play_game(self.Game, True, move_list)
+        result = play_game(self.test, True, move_list)
         # Expect the valid game outcome after ignoring the invalid move
         expected = {'marker': 'x', 'type': 'right_diagonal', 'row': 0, 'column': 0}
         self.assertEqual(result, expected)
 
     # def test_x_statistics(self):
-    #     result = self.Game.players[0].win_count
+    #     result = self.test.players[0].win_count
     #     expected = 9
     #     self.assertEqual(result,expected)
 

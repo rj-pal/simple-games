@@ -2,7 +2,7 @@ from collections import Counter
 from random import choice, randint
 from typing import Tuple, List, Union, Optional
 from copy import deepcopy
-from core.board import Board, WinChecker
+from core.board import Board, LineChecker
 from core.deck import CardDeck, CardStack, CardQueue
 from core.player import Player
 from time import sleep
@@ -159,7 +159,7 @@ class ConnectFour:
          self.win_type: str = None
          self.win_row: int = -1
          self.win_column: int = -1
-         self._win: WinChecker = self.ConnectFourWinChecker(self.board)
+         self.__win: LineChecker = self.ConnectFourWinChecker(self.board)
          self.players = self.create_human_players() # Default to two player mode
 
     def create_board(self):
@@ -267,35 +267,35 @@ class ConnectFour:
         self.win_column = winner_info["column"]
 
     def check_winner(self):
-        return self._win.check_for_winner()
+        return self.__win._check_for_winner()
 
     def get_winner_info(self):
-        return self._win.get_win_info()
+        return self.__win.get_win_info()
     
     def reset_winner(self):
-        self._win.reset_win_info()
+        self.__win.reset_win_info()
         self.winner_name = None
         self.winner_marker = None
         self.win_type = None
         self.win_row = -1
         self.win_column = -1
         
-    class ConnectFourWinChecker(WinChecker):
-        def __init__(self, board):
-            super().__init__(board, win_value=4)
+    class ConnectFourWinChecker(LineChecker):
+        def __init__(self, board, win_value=4):
+            super().__init__(board, win_value)
 
-        def _check_rows(self, win_value: int) -> Optional[tuple]:
+        def _check_full_rows(self, win_value: int) -> Optional[tuple]:
             for r, row in enumerate(self.board.get_rows()):
                 for i in range(4):
                     row_slice = row[i:i + 4]
-                    if winner := self._check_win(row_slice, win_value):
+                    if winner := self._check_all_same(row_slice, win_value):
                         return winner, "row", r, i
     
-        def _check_columns(self, win_value: int) -> Optional[tuple]:
+        def _check_full_columns(self, win_value: int) -> Optional[tuple]:
             for c, column in enumerate(self.board.get_columns()):
                 for i in range(3):
                     col_slice = column[i:i + 4]
-                    if winner := self._check_win(col_slice, win_value):
+                    if winner := self._check_all_same(col_slice, win_value):
 
                         return winner, "column", i, c
 
@@ -360,6 +360,7 @@ class ConnectFour:
             return self.random_int(board)
         
         def win_or_block(self, board: Board):
+            pass
             # at height index of 3, it means at least there are 3 pieces in a column; height_index 0 is a full column
             column_indices = [index for index, height in enumerate(self.game.height_list) if 0 < height <= 3] # only check columns with 3 or more pieces
             # max_height = max(self.game.height_list)
@@ -383,11 +384,33 @@ class ConnectFour:
 
             bottom_row_index = self.game.board.rows - 1
             if self.game.size_list[bottom_row_index] >= 3:
+                line_checker = self.game.ConnectFourLineChecker(self.game.board, 3).check_all_same
+                is_same = False
+                has_single_blank =False
                 for i in range(self.game.columns):
                     if self.game.board.square_is_occupied(bottom_row_index, i):
                         print("OCCUPIED")
+                        if self.game.board.get_square_value(bottom_row_index, i) == self.game.board.get_square_value(bottom_row_index, i + 1):
+                            is_same = True
                     else:
                         print("FREE")
+                        has_single_blank = True
+                    
+                        
+                    # else:
+                    #     to_left_index = i - 3
+                    #     while (to_left_index > 0) and (to_left_index < i):
+                    #         row_slice = self.game.board.get_rows()[bottom_row_index]
+                    #         if line_checker(row_slice[to_left_index:to_left_index + 3]):
+                    #             print("FOUND THREE")
+                    #         to_left_index += 1
+                    #     to_right_index = i + 3
+                    #     while (to_right_index < i) and (to_right_index < i):
+
+
+                            
+
+
 
             # block_position = -1  # Makes a list of all possible blocking points on the board of the opponent
             columns = self.game.board.get_columns()
@@ -422,7 +445,7 @@ class TicTacToe:
          self.winner_marker: str = None
          self.win_type: str = None
          self.win_index: int = None
-         self._win: WinChecker = WinChecker(self.board)
+         self.__win: LineChecker = LineChecker(self.board, 3)
          self.players = self.create_human_players() # Default to two player mode
 
     def create_board(self):
@@ -529,13 +552,13 @@ class TicTacToe:
         self.win_index = winner_info.get(self.win_type, -1)
 
     def check_winner(self):
-        return self._win.check_for_winner()
+        return self.__win._check_for_winner()
 
     def get_winner_info(self):
-        return self._win.get_win_info()
+        return self.__win.get_win_info()
     
     def reset_winner(self):
-        self._win.reset_win_info()
+        self.__win.reset_win_info()
         self.winner_name = None
         self.winner_marker = None
         self.win_type = None
@@ -1026,6 +1049,17 @@ class TicTacToe:
 
 
 test = ConnectFour()
+
+test.make_move(0,"r")
+test.make_move(1,"y")
+test.make_move(2,"y")
+test.make_move(3,"y")
+test.make_move(4,"r")
+test.make_move(5,"r")
+test.make_move(6,"y")
+print(test.board)
+# test.make_move(0,"y")
+# test.make_move(0,"y")
 # print(test.ConnectFourPlayer.move())
 # print(test.board)
 # test.make_move(0,"r")

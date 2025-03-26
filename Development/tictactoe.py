@@ -664,35 +664,35 @@ class Game:
         """Updates the board with the last played square."""
         self.game_board.update_square(row, column, marker)
 
-    def _check_win(self, squares: list[Square]) -> Optional[Square]:
+    def check_all_same(self, squares: list[Square]) -> Optional[Square]:
         """Checks if a line has all the same markers to see if the game has been won."""
         marker, count = Counter(squares).most_common(1)[0]
         if count == len(squares) and marker is not Square.BLANK:
             return marker
 
-    def _check_rows(self) -> Optional[bool]:
+    def check_full_rows(self) -> Optional[bool]:
         """Checks for winner in rows. Uses returned Square object to update the winner attributes. False if no Square
         object is assigned. """
         for r, row in enumerate(self.game_board.get_rows()):
-            if winner := self._check_win(row):
+            if winner := self._check_all_same(row):
                 self._update_winner_info(winner, "row", r)
                 return True
 
-    def _check_columns(self) -> Optional[bool]:
+    def check_full_columns(self) -> Optional[bool]:
         """Checks for winner in columns. Uses returned Square object to update winner attributes. False if no Square
         object is assigned. """
         for c, column in enumerate(self.game_board.get_columns()):
-            if winner := self._check_win(column):
+            if winner := self._check_all_same(column):
                 self._update_winner_info(winner, "col", c)
                 return True
 
-    def _check_diagonals(self) -> Optional[bool]:
+    def check_diagonals(self) -> Optional[bool]:
         """Checks for winner in diagonals. Uses returned Square object to update winner attributes. False if no
         Square object is assigned. """
-        if winner := self._check_win(self.game_board.get_right_diagonal()):
+        if winner := self._check_all_same(self.game_board.get_right_diagonal()):
             self._update_winner_info(winner, "right_diag")
             return True
-        if winner := self._check_win(self.game_board.get_left_diagonal()):
+        if winner := self._check_all_same(self.game_board.get_left_diagonal()):
             self._update_winner_info(winner, "left_diag")
             return True
 
@@ -727,9 +727,9 @@ class Game:
         """Checks if the game has been won in a row, column or diagonal if a winning line is found. It will return
         the first found winning line starting by row, column, and then right and left diagonals."""
         check_winner_funcs = (
-            self._check_rows,
-            self._check_columns,
-            self._check_diagonals
+            self.check_full_rows,
+            self.check_full_columns,
+            self.check_diagonals
         )
         for f in check_winner_funcs:
             if winner_found := f():

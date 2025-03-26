@@ -1,4 +1,4 @@
-from games.Game import TicTacToe
+from games.game import TicTacToe
 from core.board import *
 from core.player import *
 from random import randint
@@ -117,7 +117,7 @@ def test_ai_games(number_of_games: int, ai_level1: any, ai_level2: any) -> None:
 
 # Instantiate Game Object for Testing
 Game = TicTacToe()
-number_of_games = 10
+number_of_games = 10000
 
 # Run simulated human vs AI tests
 test_games(number_of_games)

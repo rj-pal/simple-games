@@ -1,5 +1,5 @@
 import unittest
-from core.board import Board, WinChecker
+from core.board import Board, LineChecker
 
 
 class TestBoardFunctionality(unittest.TestCase):
@@ -35,24 +35,24 @@ class TestBoardFunctionality(unittest.TestCase):
         """Test if horizontal win condition is detected."""
         for col in range(7):  # Connect 4 win condition met with multiple wins in one move
             self.board_6x7.update_square(5, col, "b")
-        win_checker = WinChecker(self.board_6x7, 4)
-        self.assertTrue(win_checker.check_for_winner())
+        win_checker = LineChecker(self.board_6x7, 4)
+        self.assertTrue(win_checker._check_for_winner())
 
     def test_diagonal_win_right(self):
         """Test if right diagonal win condition is detected."""
         for i in range(4):
             self.board_6x7.update_square(i, i, "b")
         self.board_6x7.update_square(5, 6, "r")
-        win_checker = WinChecker(self.board_6x7, 4)
-        self.assertTrue(win_checker.check_for_winner())
+        win_checker = LineChecker(self.board_6x7, 4)
+        self.assertTrue(win_checker._check_for_winner())
 
     def test_diagonal_win_right_connect_2_of_4(self):
         """Test if right diagonal win condition is detected."""
         for i in range(4):
             self.board_6x7.update_square(i, i, "b")
         self.board_6x7.update_square(5, 6, "r")
-        win_checker = WinChecker(self.board_6x7, 2)
-        self.assertTrue(win_checker.check_for_winner())
+        win_checker = LineChecker(self.board_6x7, 2)
+        self.assertTrue(win_checker._check_for_winner())
 
     def test_diagonal_win_left(self):
         """Test if left diagonal win condition is detected."""
@@ -60,19 +60,19 @@ class TestBoardFunctionality(unittest.TestCase):
         self.board_6x7.update_square(3, 3, "r")
         self.board_6x7.update_square(4, 2, "r")
         self.board_6x7.update_square(5, 1, "r")
-        win_checker = WinChecker(self.board_6x7, 4)
-        self.assertTrue(win_checker.check_for_winner())
+        win_checker = LineChecker(self.board_6x7, 4)
+        self.assertTrue(win_checker._check_for_winner())
 
     def test_no_false_positives(self):
         """Ensure no false winners are detected when no win condition is met."""
-        win_checker = WinChecker(self.board_6x7, 4)
-        self.assertFalse(win_checker.check_for_winner())
+        win_checker = LineChecker(self.board_6x7, 4)
+        self.assertFalse(win_checker._check_for_winner())
 
     def test_invalid_win_condition(self):
         """Ensure ValueError is raised for win conditions greater than 7."""
-        win_checker = WinChecker(self.board_6x7, 8)
+        win_checker = LineChecker(self.board_6x7, 8)
         with self.assertRaises(ValueError):
-            win_checker.check_for_winner()
+            win_checker._check_for_winner()
 
 if __name__ == "__main__":    
     unittest.main()

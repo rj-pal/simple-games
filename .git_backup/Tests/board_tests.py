@@ -4,7 +4,7 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 sys.path.append(parent_dir)
 
-from Board import Board, WinChecker, winner_info
+from Board import Board, LineChecker, winner_info
 
 # Visualizations of the Board Unit Tests
 
@@ -43,7 +43,7 @@ for col in range(7):
 print(test.board)
 print(test)
 
-win = WinChecker(test)
+win = LineChecker(test)
 print_winner(win, 4)  # Standard Connect 4 win condition of 4 in a row
 
 
@@ -59,7 +59,7 @@ test.update_square(2, 2, "r")
 print(test)
 
 
-win = WinChecker(test)
+win = LineChecker(test)
 print_winner(win, 2)
 win.reset_win_info()
 # print_winner(win, 10)
@@ -74,7 +74,7 @@ print_winner(win, 2)
 
 
 test = Board(6, 7)
-win = WinChecker(test)
+win = LineChecker(test)
 # Right diagonal winner configuration (from top-left to bottom-right)
 test.update_square(0, 0, "b")
 test.update_square(1, 1, "b")
