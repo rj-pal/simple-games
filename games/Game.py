@@ -288,14 +288,14 @@ class ConnectFour:
             for r, row in enumerate(self.board.get_rows()):
                 for i in range(4):
                     row_slice = row[i:i + 4]
-                    if winner := self._check_all_same(row_slice, win_value):
+                    if winner := self.check_all_same(row_slice, win_value):
                         return winner, "row", r, i
     
         def _check_full_columns(self, win_value: int) -> Optional[tuple]:
             for c, column in enumerate(self.board.get_columns()):
                 for i in range(3):
                     col_slice = column[i:i + 4]
-                    if winner := self._check_all_same(col_slice, win_value):
+                    if winner := self.check_all_same(col_slice, win_value):
 
                         return winner, "column", i, c
 
