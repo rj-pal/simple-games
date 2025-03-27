@@ -288,14 +288,14 @@ class ConnectFour:
             for r, row in enumerate(self.board.get_rows()):
                 for i in range(4):
                     row_slice = row[i:i + 4]
-                    if winner := self.check_all_same(row_slice, win_value):
+                    if winner := LineChecker.check_all_same(row_slice, win_value):
                         return winner, "row", r, i
     
         def _check_full_columns(self, win_value: int) -> Optional[tuple]:
             for c, column in enumerate(self.board.get_columns()):
                 for i in range(3):
                     col_slice = column[i:i + 4]
-                    if winner := self.check_all_same(col_slice, win_value):
+                    if winner := LineChecker.check_all_same(col_slice, win_value):
 
                         return winner, "column", i, c
 
@@ -360,79 +360,49 @@ class ConnectFour:
             return self.random_int(board)
         
         def win_or_block(self, board: Board):
-            pass
-            # at height index of 3, it means at least there are 3 pieces in a column; height_index 0 is a full column
-            column_indices = [index for index, height in enumerate(self.game.height_list) if 0 < height <= 3] # only check columns with 3 or more pieces
-            # max_height = max(self.game.height_list)
-            block_position = -1
-            # flat_board = all(height <= max_height for height in self.game.height_list) # only check rows that have a flat or higher columns
-
-            # Column Check for finding a winning move or blocking an opponent's winning move
-            for index in column_indices: 
-                column = self.game.board.get_columns()[index]
-                height_index = self.game.height_list[index]
-                print(column)
-                print(f"CURRENT HEIGHT INDEX {height_index}")
-                column_slice = column[height_index:height_index + 3]
-                print(column_slice)
-                if column_slice and all(marker == column_slice[0] for marker in column_slice):
-                    marker = column_slice[0]
+            """Get column index of any first found win move. Track any block move and return it if no win move is found."""
+            block_position = -1 # keep of the latest 
+            
+            # height index 0 is full column and 6 is empty; only check columns with 3 or more pieces
+            column_indices = [index for index, height in enumerate(self.game.height_list) if 0 < height <= 3] 
+            
+            # Column check for finding a winning move or blocking an opponent's winning move
+            for col_index in column_indices: 
+                height_index = self.game.height_list[col_index] # row of top piece in the column
+                column_top = self.game.board.get_columns()[col_index][height_index:height_index + 3] # top 3 rows of the column with 3 or more pieces
+                
+                if marker := LineChecker.check_all_same(column_top, 3): # check for 3 in a row and assign "y" or "r" if found
                     if marker == 'y':
-                        return height_index # return a winning move for AI player
+                        print(f"Found Win at row{height_index - 1} and col {col_index}.")
+                        return col_index # return a winning move for AI player
                     else:
-                        block_position = height_index # update any blocks of a human player
+                        print(f"Found Block at row{height_index -1} and col {col_index}.")
+                        block_position = col_index # update any blocks of a human player
 
-            bottom_row_index = self.game.board.rows - 1
-            if self.game.size_list[bottom_row_index] >= 3:
-                line_checker = self.game.ConnectFourLineChecker(self.game.board, 3).check_all_same
-                is_same = False
-                has_single_blank =False
-                for i in range(self.game.columns):
-                    if self.game.board.square_is_occupied(bottom_row_index, i):
-                        print("OCCUPIED")
-                        if self.game.board.get_square_value(bottom_row_index, i) == self.game.board.get_square_value(bottom_row_index, i + 1):
-                            is_same = True
-                    else:
-                        print("FREE")
-                        has_single_blank = True
-                    
-                        
-                    # else:
-                    #     to_left_index = i - 3
-                    #     while (to_left_index > 0) and (to_left_index < i):
-                    #         row_slice = self.game.board.get_rows()[bottom_row_index]
-                    #         if line_checker(row_slice[to_left_index:to_left_index + 3]):
-                    #             print("FOUND THREE")
-                    #         to_left_index += 1
-                    #     to_right_index = i + 3
-                    #     while (to_right_index < i) and (to_right_index < i):
-
-
-                            
-
-
-
-            # block_position = -1  # Makes a list of all possible blocking points on the board of the opponent
-            columns = self.game.board.get_columns()
-
+            # Row Check for finding a winning move or blocking an opponent's winning move
+            start_row_index = max(self.game.height_list) - 1 # max indicates which rows are full
+            end_row_index = min(self.game.height_list) - 1   # min indicates the heights row
+            line_checker = LineChecker.line_check
+            for row_index in range(start_row_index, end_row_index, -1): # check only occupied rows bottom up; 
+                row = self.game.board.get_rows()[row_index]
+                check_row = line_checker(row, target_element=0, target_count=1, other_element="any", other_count=3, window_size=4) # checks one blank 3 marker pattern 
+                if check_row:
+                    if "y" in check_row.keys():
+                        col_index = check_row["y"][0]["absolute_indices"][0]
+                        if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
+                            print(f"Found Win at row{row_index} and col {col_index}.")
+                            return col_index # return a winning move for AI player
+                    if "r" in check_row.keys():    
+                        col_index = check_row["r"][0]["absolute_indices"][0]
+                        if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
+                            print(f"Found Block at row{row_index} and col {col_index}.")
+                            block_position = col_index # update any blocks of a human player
             
-            print(f"BLCO POSITON {block_position}")
-
-            rows =self.game.board.get_rows()
-            
+            print(f"BLOCK POSITON {block_position}")            
         
 
-            if block_position == -1:
-                return None
+            return block_position if block_position != -1 else None
         
-            return block_position
-            # lines = [self.game.board.get_rows(),
-            #         self.game.board.get_columns(),
-            #         self.game.board.get_diagonals(3, "right"),
-            #         self.game.board.get_diagonals(3, "left")
-            #         ]
-            # pass
-
 
 class TicTacToe:
 
@@ -712,15 +682,14 @@ class TicTacToe:
             for index, diag in enumerate(diagonals):
                 check_diag = line_checker(diag, "o", 1)
                 if check_diag:
-                    # 0 index indicates right diagonal and 1 index indicates left diagonal
-                    if index == 0:
-                        row = col = choice(check_diag["window_indices"])
-                        return row, col
-                    
-                    elif index == 1:
-                        row = choice(check_diag["o"][0]["window_indices"])
+                    window_indices = check_diag["o"][0]["window_indices"] 
+                    if index == 0:  # Right diagonal
+                        row = col = choice(window_indices)
+                    else:  # Left diagonal
+                        row = choice(window_indices)
                         col = 2 - row
-                        return row, col
+
+                    return row, col
 
         def random_ints(self, board: Board) -> tuple[int, int]:
             """Selects any open random positions on the board. Returns row and column index."""

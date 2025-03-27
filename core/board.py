@@ -298,8 +298,8 @@ class LineChecker:
         self.win_type = win_type 
         self.win_row = win_row
         self.win_column = win_column
-
-    def check_all_same(self, line: list[Union[int, str]], win_value: int) -> Optional[tuple]:
+    @staticmethod
+    def check_all_same(line: list[Union[int, str]], win_value: int) -> Optional[tuple]:
         "Checks if any line has all the same elements that are non-null or zero. Returns the winning marker element."
         if all(element == line[0] for element in line):
             return line[0] if line[0] != 0 else None
@@ -315,23 +315,23 @@ class LineChecker:
     
     def _check_full_rows(self, win_value: int) -> Optional[tuple]:
         for r, row in enumerate(self.board.get_rows()):
-            if winner := self.check_all_same(row, win_value):
+            if winner := LineChecker.check_all_same(row, win_value):
                 c = row.index(winner)
                 return winner, "row", r, c
     
     def _check_full_columns(self, win_value: int) -> Optional[tuple]:
         for c, column in enumerate(self.board.get_columns()):
-            if winner := self.check_all_same(column, win_value):
+            if winner := LineChecker.check_all_same(column, win_value):
                 r = column.index(winner)
                 return winner, "column", r, c
     
     def _check_diagonals(self, win_value: int) -> Optional[tuple]:
         for l, line in enumerate(self.board.get_diagonals(win_value, "right")):
-            if winner := self.check_all_same(line, win_value):
+            if winner := LineChecker.check_all_same(line, win_value):
                 r, c = int_converter(l, self.board.columns - win_value + 1)
                 return winner, "right_diagonal", r, c
         for l, line in enumerate(self.board.get_diagonals(win_value, "left")):
-            if winner := self.check_all_same(line, win_value):
+            if winner := LineChecker.check_all_same(line, win_value):
                 r, c = int_converter(l, self.board.columns - win_value + 1)
                 c = self.board.columns - 1 - c
                 return winner, "left_diagonal", r, c
