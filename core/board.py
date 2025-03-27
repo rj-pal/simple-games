@@ -204,7 +204,90 @@ class LineChecker:
 
             window_index += 1
 
+        return matches if len(matches) > 1 else matches[0]
+    
+    @staticmethod
+    def line_check(sequence, target_element, target_count, other_element, other_count, window_size, all_occurrences=False):
+        """
+        Scans a sequence to find all fixed-size subsets that contain:
+        - `target_element` exactly `target_count` times
+        - `other_element` exactly `other_count` times
+        - If `other_element` is 'any', it allows any non-`target_element` value to match `other_count` times.
+        
+        Parameters:
+        sequence (list): The input list to scan.
+        target_element (any): The specific element that must appear `target_count` times.
+        target_count (int): Number of times `target_element` must appear in each valid subset.
+        other_element (any or "any"): The second required element (or "any" for flexibility).
+        other_count (int): Number of times `other_element` must appear in each valid subset.
+        window_size (int): The fixed size of each subset being checked.
+        all_occurrences (bool): If True, returns **all** indices of `target_element` in each matching subset.
+        
+        Returns:
+        dict: A dictionary where keys are unique `other_element_master` values.
+            Each key maps to a list of dictionaries containing:
+                - `"window"`: The index of the window in the sequence.
+                - `"window_indices"`: The relative indices of `target_element` within the window.
+                - `"absolute_indices"`: The absolute indices of `target_element` in the full sequence.
+                - If `all_occurrences=False`: `"first_index"` and `"absolute_index"` are included.
+        """
+
+        # Validate inputs
+        if window_size > len(sequence):
+            raise ValueError("Window size cannot exceed the length of the sequence.")
+        if target_count + other_count != window_size:
+            raise ValueError("The sum of target_count and other_count must equal the window size.")
+
+        matches = {}  # Dictionary where keys are `other_element_master`
+        window_index = 0
+
+        # Sliding window approach
+        for i in range(len(sequence) - window_size + 1):
+            window = sequence[i: i + window_size]
+
+            target_indices = []
+            target_window_indices = []
+            other_element_master = other_element
+            other_element_count = 0
+            other_element_found = False
+
+            # Scan the window
+            for j, item in enumerate(window):
+                if item == target_element:
+                    target_indices.append(i + j)  # Store absolute index of target element
+                    target_window_indices.append(j)
+                elif other_element == "any":
+                    if not other_element_found:
+                        other_element_found = True
+                        other_element_master = item  # First non-target element becomes the reference
+                    if item == other_element_master:
+                        other_element_count += 1
+                elif item == other_element:
+                    other_element_count += 1
+                else:
+                    break  # Invalid window, stop processing
+
+            # If window is valid, add it to results
+            if len(target_indices) == target_count and other_element_count == other_count:
+                match_data = {
+                    "window": window_index,
+                    "window_indices": target_window_indices,
+                    "absolute_indices": target_indices
+                }
+
+                if not all_occurrences:
+                    match_data["first_index"] = target_window_indices[0]
+                    match_data["absolute_index"] = target_indices[0]
+
+                # Store in dictionary under `other_element_master`
+                if other_element_master not in matches:
+                    matches[other_element_master] = []
+                matches[other_element_master].append(match_data)
+
+            window_index += 1
+
         return matches
+
    
     @staticmethod
     def two_blanks(sequence, marker, size):

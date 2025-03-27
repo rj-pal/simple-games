@@ -692,37 +692,35 @@ class TicTacToe:
             columns = self.game.board.get_columns()
             diagonals = [self.game.board.get_diagonals(3, "right"),
                         self.game.board.get_diagonals(3, "left")]  # right diagonal is index 0, and left is index 1
+            
+            line_checker = LineChecker.two_blanks
 
             # returns the first found unoccupied square in a line with two blanks for intermediate mode
             # or possible win in hard mode
             for index, row in enumerate(rows):
-                if row.count(0) == 2 and row.count("o") == 1:
-                    for col in range(2):
-                        if self.game.board.square_is_occupied(index, col):
-                            continue
-                        else:
-                            return index, col
+                check_row = line_checker(row, "o", 1)
+                if check_row:
+                    col = choice(check_row["o"][0]["window_indices"])
+                    return index, col
+                
             for index, col in enumerate(columns):
-                if col.count(0) == 2 and col.count("o") == 1:
-                    for row in range(2):
-                        if self.game.board.square_is_occupied(row, index):
-                            continue
-                        else:
-                            return row, index
+                check_col = line_checker(col, "o", 1)
+                if check_col:
+                    row = choice(check_col["o"][0]["window_indices"])
+                    return row, index
+                
             for index, diag in enumerate(diagonals):
-                if diag.count(0) == 2 and diag.count("o") == 1:
+                check_diag = line_checker(diag, "o", 1)
+                if check_diag:
+                    # 0 index indicates right diagonal and 1 index indicates left diagonal
                     if index == 0:
-                        for move_index in range(2):
-                            if self.game.board.square_is_occupied(move_index, move_index):
-                                continue
-                            else:
-                                return move_index, move_index
+                        row = col = choice(check_diag["window_indices"])
+                        return row, col
+                    
                     elif index == 1:
-                        for move_index in range(2):
-                            if self.game.board.square_is_occupied(move_index, 2 - move_index):
-                                continue
-                            else:
-                                return move_index, 2 - move_index
+                        row = choice(check_diag["o"][0]["window_indices"])
+                        col = 2 - row
+                        return row, col
 
         def random_ints(self, board: Board) -> tuple[int, int]:
             """Selects any open random positions on the board. Returns row and column index."""

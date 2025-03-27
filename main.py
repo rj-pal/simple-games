@@ -1,5 +1,5 @@
 from cli import TicTacToeCLI, ConnectFourCLI
-from games.game import Solitare, ConnectFour
+from games.game import Solitare, ConnectFour, TicTacToe
 from utils.game_options import GameOptions
 from utils.clitools import clear_screen, delay_effect, print_menu_screen, menu_select
 from utils.strings import SIMPLE_GAMES_START
@@ -203,6 +203,27 @@ def run_game():
     #     raise ValueError("Invalid choice. See you next time.")
     
 def main():
+
+    test = TicTacToe()
+    test.create_ai_player("Testing Robot", None)
+    test.print_stats()
+    test.make_move(0,1,"o")
+    print(test.board)
+    row_1 = test.board.get_rows()[0]
+    print(row_1)
+    print(LineChecker.two_blanks(row_1, "o", 1))
+    robot = test.players[1]
+    
+    test.reset_board()
+    test.make_move(0,2,"o")
+    test.make_move(1,1,"o")
+    test.make_move(2,0,"o")
+    print(robot.two_blanks(test.board))
+    print(test.check_winner())
+    test.update_winner_info()
+    test.print_winner()
+
+    exit()
     test = ConnectFour()
 
     test.make_move(0,"r")
