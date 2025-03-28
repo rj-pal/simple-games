@@ -392,8 +392,7 @@ class ConnectFour:
 
             for row, column in self.get_empty_move_positions():
                 if row == -1: # column is full because height list element is 0 or a piece is occupied in row 0
-                    continue
-                
+                    continue   
                 # height and diagonal check
                 if row < (self.game.board.rows // 2):
                     column_top = self.game.board.get_columns()[column][row + 1: row + 4]
@@ -409,81 +408,86 @@ class ConnectFour:
                     if (move := check_and_update(left_diagonal, row, column)) is not None:
                         print("FOUND LEFT DAG WIN")
                         return move
-
                 # row check
-                horizontal_midpoint = self.game.board.columns // 2
-                if column < horizontal_midpoint:
-                    row_right = self.game.board.get_rows()[row][column + 1: column + 4]
-                    if (move := check_and_update(row_right, row, column)) is not None:
-                        print("FOUND RIGHT ROW WIN")
-                        return move
-                    
-                elif column == horizontal_midpoint:
-                    row_right = self.game.board.get_rows()[row][column + 1: column + 4]
-                    if (move := check_and_update(row_right, row, column)) is not None:
-                        print("FOUND CENTRE ROW WIN")
-                        return move
-
-                    row_left = self.game.board.get_rows()[row][column - 1:: -1]
-                    if (move := check_and_update(row_left, row, column)) is not None:
-                        print("FOUND CENTRE LEFT ROW WIN")
-                        return move
-
-
-                elif column > self.game.board.columns // 2:
-                    row_left = self.game.board.get_rows()[row][column - 1: column - 4: -1]
-                    if (move := check_and_update(row_left, row, column)) is not None:
-                        print("FOUND LEFT ROW WIN")
-                        return move
-                        return move
-
-            return block_position if block_position != -1 else None
-
-        
-        
-        def win_or_block_old(self):
-            """Get column index of any first found win move. Track any block move and return it if no win move is found."""
-            block_position = -1 # keep of the latest 
-            
-            # height index 0 is full column and 6 is empty; only check columns with 3 or more pieces
-            column_indices = [index for index, height in enumerate(self.game.height_list) if 0 < height <= 3] 
-            
-            # Column check for finding a winning move or blocking an opponent's winning move
-            for col_index in column_indices: 
-                height_index = self.game.height_list[col_index] # row of top piece in the column
-                column_top = self.game.board.get_columns()[col_index][height_index:height_index + 3] # top 3 rows of the column with 3 or more pieces
+                # horizontal_midpoint = self.game.board.columns // 2
+                # if column < horizontal_midpoint:
+                #     row_right = self.game.board.get_rows()[row][column + 1: column + 4]
+                #     if (move := check_and_update(row_right, row, column)) is not None:
+                #         print("FOUND RIGHT ROW WIN")
+                #         return move                
+                # elif column == horizontal_midpoint:
+                #     row_right = self.game.board.get_rows()[row][column + 1: column + 4]
+                #     if (move := check_and_update(row_right, row, column)) is not None:
+                #         print("FOUND CENTRE ROW WIN")
+                #         return move
+                #     row_left = self.game.board.get_rows()[row][column - 1:: -1]
+                #     if (move := check_and_update(row_left, row, column)) is not None:
+                #         print("FOUND CENTRE LEFT ROW WIN")
+                #         return move
+                # elif column > self.game.board.columns // 2:
                 
-                if marker := LineChecker.check_all_same(column_top, 3): # check for 3 in a row and assign "y" or "r" if found
-                    if marker == 'y':
-                        print(f"Found Win at row{height_index - 1} and col {col_index}.")
-                        return col_index # return a winning move for AI player
-                    else:
-                        print(f"Found Block at row{height_index -1} and col {col_index}.")
-                        block_position = col_index # update any blocks of a human player
+                #     row_left = self.game.board.get_rows()[row][column - 1: column - 4: -1]
+                #     if (move := check_and_update(row_left, row, column)) is not None:
+                #         print("FOUND LEFT ROW WIN")
+                #         return move
+            # return block_position if block_position != -1 else None
+            print(f"BLOCK POSITION: {block_position}")
+            if block_position == -1:
+                return self.win_or_block_window()
+            else:
+                return block_position
 
-            # Row Check for finding a winning move or blocking an opponent's winning move
-            start_row_index = max(self.game.height_list) - 1 # max indicates which rows are full
-            end_row_index = min(self.game.height_list) - 1   # min indicates the heights row
-            line_checker = LineChecker.line_check
-            for row_index in range(start_row_index, end_row_index, -1): # check only occupied rows bottom up; 
-                row = self.game.board.get_rows()[row_index]
-                check_row = line_checker(row, target_element=0, target_count=1, other_element="any", other_count=3, window_size=4) # checks one blank 3 marker pattern 
-                if check_row:
-                    if "y" in check_row.keys():
-                        col_index = check_row["y"][0]["absolute_indices"][0]
-                        if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
-                            print(f"Found Win at row{row_index} and col {col_index}.")
-                            return col_index # return a winning move for AI player
-                    if "r" in check_row.keys():    
-                        col_index = check_row["r"][0]["absolute_indices"][0]
-                        if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
-                            print(f"Found Block at row{row_index} and col {col_index}.")
-                            block_position = col_index # update any blocks of a human player
-            
-            print(f"BLOCK POSITON {block_position}")            
+
+        ##### ADD THE STAR $$$
         
+        def win_or_block_window(self):
+            """Get column index of any first found win move. Track any block move and return it if no win move is found."""
+
+            block_position = -1  # Track the latest block position
+
+            start_row_index = max(self.game.height_list) - 1  # Bottom most row with a free space
+            end_row_index = min(self.game.height_list) - 1    # Top most row with free space
+            line_checker = LineChecker.line_check
+            print("IN WINDOW FUCTI")
+
+            for row_index in range(start_row_index, end_row_index, -1):  # Check rows from bottom up
+                row = self.game.board.get_rows()[row_index]
+                check_row = line_checker(row, target_element=0, target_count=1, other_element="any", other_count=3, window_size=4)
+
+                for key in ("y", "r"):  # Check for both "y" (win) and "r" (block)
+                    if key in check_row:
+                        col_index = check_row[key][0]["absolute_indices"][0]
+                        if row_index == 5 or self.game.board.square_is_occupied(row_index + 1, col_index):
+                            print(f"Found {'Win' if key == 'y' else 'Block'} at row {row_index} and col {col_index}.")
+                            if key == "y":
+                                return col_index  # Winning move for AI
+                            block_position = col_index  # Block opponent move
 
             return block_position if block_position != -1 else None
+            # block_position = -1 # keep of the latest 
+            
+            # start_row_index = max(self.game.height_list) - 1 # max indicates which rows are full
+            # end_row_index = min(self.game.height_list) - 1   # min indicates the heights row
+            # line_checker = LineChecker.line_check
+            # for row_index in range(start_row_index, end_row_index, -1): # check only occupied rows bottom up; 
+            #     row = self.game.board.get_rows()[row_index]
+            #     check_row = line_checker(row, target_element=0, target_count=1, other_element="any", other_count=3, window_size=4) # checks one blank 3 marker pattern 
+            #     if check_row:
+            #         if "y" in check_row.keys():
+            #             col_index = check_row["y"][0]["absolute_indices"][0]
+            #             if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
+            #                 print(f"Found Win at row{row_index} and col {col_index}.")
+            #                 return col_index # return a winning move for AI player
+            #         if "r" in check_row.keys():    
+            #             col_index = check_row["r"][0]["absolute_indices"][0]
+            #             if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
+            #                 print(f"Found Block at row{row_index} and col {col_index}.")
+            #                 block_position = col_index # update any blocks of a human player
+            
+            # print(f"BLOCK POSITON {block_position}")            
+        
+
+            # return block_position if block_position != -1 else None
         
 
 class TicTacToe:
