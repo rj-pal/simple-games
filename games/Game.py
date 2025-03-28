@@ -211,7 +211,6 @@ class ConnectFour:
 
     def make_move(self, col, marker):
         for row in range(self.rows - 1, -1, -1):
-            print(f"ROW {row}, COL {col}")
             if self.is_valid(row, col):
                 self.board.add_to_square(row, col, marker)
                 self.move_list.append((row, col))

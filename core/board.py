@@ -24,15 +24,12 @@ class Board:
 
     def get_board(self, mutable: bool = False) -> Union[list[list[Union[int, str]]], "Board"]:
         """
-        Returns either a deep copy of the board (immutable) or a deep copy of the entire Board object (mutable).
+        Returns either a deep copy of the board that is immutable, used for displaying the board,  or a deep copy of 
+        the entire Board object that is mutable, that is used to create a snap shot of the board for flash displaying.
         
-        :param mutable: If True, returns a full Board copy. Otherwise, returns a deep copy of board data.
+        parametre- mutable: If True, returns a full Board copy. Otherwise, returns a deep copy of board data.
         """
         return deepcopy(self) if mutable else deepcopy(self.board)
-
-    # def get_board(self) -> list[list[Union[int, str]]]:
-    #     # Return a deep copy to ensure immutability
-    #     return deepcopy(self.board)
     
     def get_rows(self) -> list[list[int]]:
         return self.board
@@ -66,35 +63,28 @@ class Board:
             if not self.square_is_occupied(row, column):
                 self.board[row][column] = value
                 return True
-        return False
+        return False  # Invalid index was passe
     
     def update_square(self, row: int, column: int, value: Union[int, str]) -> bool:
         """Updates a square regardless of occupancy. Returns True if successful, False otherwise."""
         if 0 <= row < self.rows and 0 <= column < self.columns:
-            self.board[row][column] = value  # Allow modification
+            self.board[row][column] = value  # Allows modification even if square is occupied
             return True
-        return False  # Invalid index
-    
-    # def __deepcopy__(self, memo):
-    #     """Creates a deep copy of the Board instance."""
-    #     new_board = Board(self.rows, self.columns)
-    #     new_board.board = deepcopy(self.board, memo)
-    #     return new_board
+        return False  # Invalid index was passed
     
     def __deepcopy__(self, memo):
-        """Creates a deep copy of the Board instance, avoiding redundant copies."""
+        """Creates a deep copy of the Board instance, avoiding redundant copies using memo."""
         if id(self) in memo:
             return memo[id(self)]  # Return existing copy
 
         new_board = Board(self.rows, self.columns)
         memo[id(self)] = new_board  # Store in memo
-
-        # Deep copy the board data
-        new_board.board = deepcopy(self.board, memo)
+ 
+        new_board.board = deepcopy(self.board, memo) # Deep copy the board data that is immutable so as not to affect game play
         return new_board
     
     def __str__(self) -> str:
-        return "\n".join([" ".join(str(cell) for cell in row) for row in self.board])
+        return "\n".join([" ".join(str(cell) for cell in row) for row in self.board]) # basic string matrix representation of the board
     
     def __repr__(self) -> str:
         return f"Board({self.rows}x{self.columns})\n{self.__str__()}"
@@ -102,7 +92,7 @@ class Board:
 class LineChecker:
     def __init__(self, board: Board, win_value: int=3):
         self.board = board
-        self.win_checker = self._check_for_winner
+        self.win_checker = self._check_for_winner # win_checker attribute used to help encapsulate the methods used for win checking
 
         self.win_value = win_value
         self.win_marker = None
@@ -124,87 +114,11 @@ class LineChecker:
     def reset_win_info(self):
         self._update_win_info()
 
-    @staticmethod
-    def line_check(sequence, target_element, target_count, other_element, other_count, window_size, all_occurrences=False):
-        """
-        Scans a sequence to find all fixed-size subsets that contain:
-        - `target_element` exactly `target_count` times
-        - `other_element` exactly `other_count` times
-        - If `other_element` is 'any', it allows any non-`target_element` value to match `other_count` times.
-        
-        Parameters:
-        sequence (list): The input list to scan.
-        target_element (any): The specific element that must appear `target_count` times.
-        target_count (int): Number of times `target_element` must appear in each valid subset.
-        other_element (any or "any"): The second required element (or "any" for flexibility).
-        other_count (int): Number of times `other_element` must appear in each valid subset.
-        window_size (int): The fixed size of each subset being checked.
-        all_occurrences (bool): If True, returns **all** indices of `target_element` in each matching subset.
-        
-        Returns:
-        list of dicts: Each dictionary contains:
-            - `"window"`: The index of the window in the sequence.
-            - `"window_indices"`: The relative indices of `target_element` within the window.
-            - `"absolute_indices"`: The absolute indices of `target_element` in the full sequence.
-            - `"other_element"`: The value of `other_element` or `"any"`.
-            - If `all_occurrences=False`: The dictionary will include `"first_index"` and `"absolute_index"`.
-        """
-
-        # Validate inputs
-        if window_size > len(sequence):
-            raise ValueError("Window size cannot exceed the length of the sequence.")
-        if target_count + other_count != window_size:
-            raise ValueError("The sum of target_count and other_count must equal the window size.")
-
-        matches = []
-        window_index = 0
-
-        # Sliding window approach
-        for i in range(len(sequence) - window_size + 1):
-            window = sequence[i: i + window_size]
-
-            target_indices = []
-            target_window_indices = []
-            other_element_master = other_element
-            other_element_count = 0
-            other_element_found = False
-
-            # Scan the window
-            for j, item in enumerate(window):
-                if item == target_element:
-                    target_indices.append(i + j)  # Store absolute index of target element
-                    target_window_indices.append(j)
-                elif other_element == "any":
-                    if not other_element_found:
-                        other_element_found = True
-                        other_element_master = item  # First non-target element becomes the reference
-                    if item == other_element_master:
-                        other_element_count += 1
-                elif item == other_element:
-                    other_element_count += 1
-                else:
-                    break  # Invalid window, stop processing
-
-            # If window is valid, add it to results
-            if len(target_indices) == target_count and other_element_count == other_count:
-                if all_occurrences:
-                    matches.append({
-                        "window": window_index,
-                        "window_indices": target_window_indices,
-                        "absolute_indices": target_indices,
-                        "other_element": other_element_master
-                    })
-                else:
-                    matches.append({
-                        "window": window_index,
-                        "first_index": target_window_indices[0],
-                        "absolute_index": target_indices[0],
-                        "other_element": other_element_master
-                    })  # Only first occurrence
-
-            window_index += 1
-
-        return matches if len(matches) > 1 else matches[0]
+    def _update_win_info(self, marker: Union[int, str]=None, win_type: str=None, win_row: int=None, win_column: int=None):
+        self.win_marker = marker
+        self.win_type = win_type 
+        self.win_row = win_row
+        self.win_column = win_column
     
     @staticmethod
     def line_check(sequence, target_element, target_count, other_element, other_count, window_size, all_occurrences=False):
@@ -279,7 +193,7 @@ class LineChecker:
                     match_data["first_index"] = target_window_indices[0]
                     match_data["absolute_index"] = target_indices[0]
 
-                # Store in dictionary under `other_element_master`
+                # Store in dictionary under `other_element_master` as key for quick look up based on the marker
                 if other_element_master not in matches:
                     matches[other_element_master] = []
                 matches[other_element_master].append(match_data)
@@ -292,26 +206,12 @@ class LineChecker:
     @staticmethod
     def two_blanks(sequence, marker, size):
         return LineChecker.line_check(sequence, 0, 2, marker, size, size + 2, True)
-
-    def _update_win_info(self, marker: Union[int, str]=None, win_type: str=None, win_row: int=None, win_column: int=None):
-        self.win_marker = marker
-        self.win_type = win_type 
-        self.win_row = win_row
-        self.win_column = win_column
+    
     @staticmethod
     def check_all_same(line: list[Union[int, str]], win_value: int) -> Optional[tuple]:
         "Checks if any line has all the same elements that are non-null or zero. Returns the winning marker element."
         if all(element == line[0] for element in line):
             return line[0] if line[0] != 0 else None
-
-    # def check_all_same(self, line: list[Union[int, str]], win_value: int) -> Optional[Union[int, str]]:
-    #     counter = Counter(line)
-    #     print(counter)
-    #     # print(line)
-    #     for key, value in counter.items():
-    #         if value >= win_value and key != 0:
-    #             return key
-    #     return None
     
     def _check_full_rows(self, win_value: int) -> Optional[tuple]:
         for r, row in enumerate(self.board.get_rows()):
