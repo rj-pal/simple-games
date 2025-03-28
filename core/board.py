@@ -46,7 +46,7 @@ class Board:
                 return []
             return [self.board[row + n][column + n] for n in range(length)]
         elif direction == "left":
-            if column < self.columns - length:
+            if column < self.columns - (length + 2): # compensate since going backwards.
                 return []
             return [self.board[row + n][column - n] for n in range(length)]
     

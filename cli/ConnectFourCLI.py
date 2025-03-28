@@ -45,19 +45,19 @@ def play_game(game) -> None:
         elif isinstance(player, ConnectFour.AIPlayer):
             print(other_strings["thinking"])
             GameCLI.sleep(2)
-            col = player.move(game.board)
+            col = player.move()
             game.make_move(col, player.marker)
 
-        # GameCLI.clear_screen()
+        GameCLI.clear_screen()
         current_row, current_col = game.move_list[i]
-        # GameCLI.clear_screen()
-        # for j in range(current_row):
-        #     temp_board = game.board.get_board(True)
-        #     temp_board.update_square(current_row, current_col, 0)
-        #     temp_board.add_to_square(j, current_col, player.marker)
-        #     GameCLI.print_board_connect4(temp_board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
-        #     GameCLI.sleep(0.05)
-            # GameCLI.clear_screen()
+        GameCLI.clear_screen()
+        for j in range(current_row):
+            temp_board = game.board.get_board(True)
+            temp_board.update_square(current_row, current_col, 0)
+            temp_board.add_to_square(j, current_col, player.marker)
+            GameCLI.print_board_connect4(temp_board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
+            GameCLI.sleep(0.05)
+            GameCLI.clear_screen()
 
         GameCLI.print_board_connect4(game.board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
         if i >= 6 and game.check_winner():

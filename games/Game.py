@@ -336,7 +336,7 @@ class ConnectFour:
         def get_random_column(self): 
                 return randint(0, self.game.columns - 1)
 
-        def random_int(self, board: Board) -> tuple[int, int]:
+        def random_int(self) -> tuple[int, int]:
             """Selects any open random positions on the board. Returns row and column index."""
             column = self.get_random_column()
             while self.game.board.square_is_occupied(0, column):
@@ -344,21 +344,104 @@ class ConnectFour:
 
             return column
 
-        def move(self, board: Board):
+        def move(self):
         
-            if (move:= self.win_or_block(board)) is not None:
-                
-                print("Played WIN or BLOCK")
-                print(f"my move {move}")
+            if (move:= self.win_or_block()) is not None:
+                # print("Played WIN or BLOCK")
+                # print(f"Computer's move {move}")
                 # sleep(5)
                 return move 
             print(self.game.height_list)
             print(self.game.size_list)
-            print("Played RANDOM")
+            # print("Played RANDOM")
             # sleep(5)
-            return self.random_int(board)
+            return self.random_int()
         
-        def win_or_block(self, board: Board):
+
+        def get_empty_move_positions(self):
+            for column in range(self.game.board.columns):
+                return [(self.game.height_list[column] - 1, column) for column in range(self.game.board.columns)]
+             
+        
+        
+        def win_or_block(self):
+            block_position = -1
+
+            def three_square_check(line, row, column):
+                if marker := LineChecker.check_all_same(line, 3): 
+                    if marker == 'y':
+                        print(line)
+                        print(f"Found Win at row {row} and col {column}.")
+                        return True
+                    elif marker == 'r':
+                        print(line)
+                        print(f"Found Block at row {row} and col {column}.")
+                        return False
+                return None
+            
+            def check_and_update(line, row, column):
+                if not line:
+                    return None
+                nonlocal block_position
+                result = three_square_check(line, row, column)
+                if result is True:
+                    return column  # Winning move
+                elif result is False:
+                    block_position = column  # Possible block move
+                return None
+
+            for row, column in self.get_empty_move_positions():
+                if row == -1: # column is full because height list element is 0 or a piece is occupied in row 0
+                    continue
+                
+                # height and diagonal check
+                if row < (self.game.board.rows // 2):
+                    column_top = self.game.board.get_columns()[column][row + 1: row + 4]
+                    if (move := check_and_update(column_top, row, column)) is not None:
+                        print("FOUND COL WIN")
+                        return move
+                    
+                    right_diagonal = self.game.board.get_diagonal_line(row + 1, column + 1, 3, "right")
+                    if (move := check_and_update(right_diagonal, row, column)) is not None:
+                        print("FOUND RIGHT DAG WIN")
+                        return move
+                    left_diagonal = self.game.board.get_diagonal_line(row + 1, column - 1, 3, "left")
+                    if (move := check_and_update(left_diagonal, row, column)) is not None:
+                        print("FOUND LEFT DAG WIN")
+                        return move
+
+                # row check
+                horizontal_midpoint = self.game.board.columns // 2
+                if column < horizontal_midpoint:
+                    row_right = self.game.board.get_rows()[row][column + 1: column + 4]
+                    if (move := check_and_update(row_right, row, column)) is not None:
+                        print("FOUND RIGHT ROW WIN")
+                        return move
+                    
+                elif column == horizontal_midpoint:
+                    row_right = self.game.board.get_rows()[row][column + 1: column + 4]
+                    if (move := check_and_update(row_right, row, column)) is not None:
+                        print("FOUND CENTRE ROW WIN")
+                        return move
+
+                    row_left = self.game.board.get_rows()[row][column - 1:: -1]
+                    if (move := check_and_update(row_left, row, column)) is not None:
+                        print("FOUND CENTRE LEFT ROW WIN")
+                        return move
+
+
+                elif column > self.game.board.columns // 2:
+                    row_left = self.game.board.get_rows()[row][column - 1: column - 4: -1]
+                    if (move := check_and_update(row_left, row, column)) is not None:
+                        print("FOUND LEFT ROW WIN")
+                        return move
+                        return move
+
+            return block_position if block_position != -1 else None
+
+        
+        
+        def win_or_block_old(self):
             """Get column index of any first found win move. Track any block move and return it if no win move is found."""
             block_position = -1 # keep of the latest 
             
