@@ -37,19 +37,32 @@ class Board:
     def get_columns(self) -> list[list[int]]:
         return [list(col) for col in zip(*self.board)]
     
-    def get_diagonals(self, dimension: int, direction: str) -> list[list[int]]:
-        """Gets every diagonal from the board of a fixed size (dimension) starting from left to right 
-        if direction is 'right' and right to left if direction is 'left'. Diagonal dimension must fit 
+
+    def get_diagonal_line(self, row, column, length, direction):
+        if row + length > self.rows:
+            return []
+        if direction == "right":
+            if column + length > self.columns:
+                return []
+            return [self.board[row + n][column + n] for n in range(length)]
+        elif direction == "left":
+            if column < self.columns - length:
+                return []
+            return [self.board[row + n][column - n] for n in range(length)]
+    
+    def get_diagonals(self, length: int, direction: str) -> list[list[int]]:
+        """Gets every diagonal from the board of a fixed size (length) starting from left to right 
+        if direction is 'right' and right to left if direction is 'left'. Diagonal length must fit 
         on the board."""
-        if dimension > min(self.rows, self.columns):
+        if length > min(self.rows, self.columns):
             return []
         diagonals = []
-        for i in range(self.rows - dimension + 1):
-            for j in range(self.columns - dimension + 1):
+        for i in range(self.rows - length + 1):
+            for j in range(self.columns - length + 1):
                 if direction == "right":
-                    diagonals.append([self.board[i + n][j + n] for n in range(dimension)])
+                    diagonals.append([self.board[i + n][j + n] for n in range(length)])
                 elif direction == "left":
-                    diagonals.append([self.board[i + n][(self.columns - 1) - (j + n)] for n in range(dimension)])
+                    diagonals.append([self.board[i + n][(self.columns - 1) - (j + n)] for n in range(length)])
         return diagonals
     
     def square_is_occupied(self, row: int, column: int) -> bool:
@@ -206,6 +219,8 @@ class LineChecker:
     @staticmethod
     def two_blanks(sequence, marker, size):
         return LineChecker.line_check(sequence, 0, 2, marker, size, size + 2, True)
+    
+
     
     @staticmethod
     def check_all_same(line: list[Union[int, str]], win_value: int) -> Optional[tuple]:

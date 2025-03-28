@@ -1,3 +1,34 @@
+from games.game import ConnectFour
+
+test = ConnectFour()
+# test.create_ai_player()
+# print(test.height_list)
+
+# test.make_move(0,"r")
+test.make_move(1,"y")
+test.make_move(2,"y")
+test.make_move(3,"y")
+test.make_move(4,"r")
+test.make_move(5,"r")
+test.make_move(6,"y")
+test.make_move(0,"r")
+# test.make_move(1,"r")
+test.make_move(2,"r")
+test.make_move(2,"r")
+test.make_move(2,"r")
+test.make_move(3,"r")
+test.make_move(4,"r")
+# test.make_move(5,"r")
+# test.make_move(6,"r")
+print(test.board)
+# for i in range(test.board.rows):
+#     print(test.board.get_diagonal_line(i,0,4,"right"))
+# print(test.board.get_diagonal_line(2, 5,4,"left"))
+# print(test.board.get_diagonal_line(2, 5,5,"left"))
+print("LEFT TEST")
+for i in range(test.board.columns):
+    print(test.board.get_diagonal_line(2,i,4,"right"))
+
     # test = TicTacToe()
     # test.create_ai_player("Testing Robot", None)
     # # test.print_stats()
