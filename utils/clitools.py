@@ -18,6 +18,7 @@ def clear_screen():
 
 def print_menu_screen(delay=0.025):
     clear_screen()
+    # set_console_window_size(100, 40)
     columns, rows = os.get_terminal_size()
 
     MENU_OPTIONS = {
@@ -65,7 +66,7 @@ def menu_select(valid_selections):
         print()
     
     clear_screen()
-    print('\n' * 20)
+    print('\n' * 15)
     print(blank_space + " " * 15 + "GAME LOADING")
     sleep(2)
     clear_screen()

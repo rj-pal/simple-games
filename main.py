@@ -188,7 +188,6 @@ def run_game():
     # exit()
     
 def main():
-
     print_menu_screen()
     valid_game_options  = GameOptions.values()
     choice = menu_select(valid_game_options)
