@@ -38,8 +38,8 @@ class Board:
         return [list(col) for col in zip(*self.board)]
     
 
-    def get_diagonal_line(self, row, column, length, direction):
-        if row + length > self.rows:
+    def get_diagonal_line_down(self, row, column, length, direction):
+        if (row + length > self.rows) or (row < 0):
             return []
         if direction == "right":
             if column + length > self.columns:
@@ -49,6 +49,24 @@ class Board:
             if column < self.columns - (length + 2): # compensate since going backwards.
                 return []
             return [self.board[row + n][column - n] for n in range(length)]
+        
+
+    
+    def get_diagonal_line_up(self, row, column, length, direction):
+        if (row < length - 1) or (row >= self.rows):  # Ensuring we don't go out of bounds upwards
+            return []
+        
+        if direction == "right":
+            if (column + length > self.columns) or (column < 0):  # Ensure we don't go out of bounds right
+                return []
+            return [self.board[row - n][column + n] for n in range(length)]
+        
+        elif direction == "left":
+            if (column < length - 1) or (column >= self.columns):  # Ensure we don't go out of bounds left
+                return []
+            print(row, column )
+            return [self.board[row - n][column - n] for n in range(length)]
+
     
     def get_diagonals(self, length: int, direction: str) -> list[list[int]]:
         """Gets every diagonal from the board of a fixed size (length) starting from left to right 

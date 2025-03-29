@@ -399,12 +399,16 @@ class ConnectFour:
                     if (move := check_and_update(column_top, row, column)) is not None:
                         print("FOUND COL WIN")
                         return move
-                    
-                    right_diagonal = self.game.board.get_diagonal_line(row + 1, column + 1, 3, "right")
+                # Diagonal Check Anywhere Since diagonal function in board makes sure nothing is out of bounds    
+                right_diagonals = [self.game.board.get_diagonal_line_down(row + 1, column + 1, 3, "right"), 
+                                    self.game.board.get_diagonal_line_up(row - 1, column + 1, 3, "right")]
+                for right_diagonal in right_diagonals:
                     if (move := check_and_update(right_diagonal, row, column)) is not None:
                         print("FOUND RIGHT DAG WIN")
                         return move
-                    left_diagonal = self.game.board.get_diagonal_line(row + 1, column - 1, 3, "left")
+                left_diagonals = [self.game.board.get_diagonal_line_down(row + 1, column - 1, 3, "left"), 
+                                    self.game.board.get_diagonal_line_up(row + 1, column - 1, 3, "left")]
+                for left_diagonal in left_diagonals:
                     if (move := check_and_update(left_diagonal, row, column)) is not None:
                         print("FOUND LEFT DAG WIN")
                         return move
