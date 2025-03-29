@@ -31,7 +31,7 @@ def play_game(game) -> None:
         if i == 0:
             GameCLI.print_first_player(name)
             GameCLI.print_board_connect4(game.board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
-            # GameCLI.clear_screen()
+            GameCLI.clear_screen()
 
         if isinstance(player, ConnectFour.ConnectFourPlayer):
 
@@ -45,30 +45,33 @@ def play_game(game) -> None:
         elif isinstance(player, ConnectFour.AIPlayer):
             print(other_strings["thinking"])
             GameCLI.sleep(2)
-            col = player.move(game.board)
+            col = player.move()
             game.make_move(col, player.marker)
 
-        # GameCLI.clear_screen()
+        GameCLI.clear_screen()
         current_row, current_col = game.move_list[i]
-        # GameCLI.clear_screen()
-        # for j in range(current_row):
-        #     temp_board = game.board.get_board(True)
-        #     temp_board.update_square(current_row, current_col, 0)
-        #     temp_board.add_to_square(j, current_col, player.marker)
-        #     GameCLI.print_board_connect4(temp_board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
-        #     GameCLI.sleep(0.05)
-            # GameCLI.clear_screen()
-
+        GameCLI.clear_screen()
+        print()
+        for j in range(current_row):
+            temp_board = game.board.get_board(True)
+            temp_board.update_square(current_row, current_col, 0)
+            temp_board.add_to_square(j, current_col, player.marker)
+            GameCLI.print_board_connect4(temp_board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
+            GameCLI.sleep(0.05)
+            GameCLI.clear_screen()
+            print()
+            
+        # print("\n" * 3)
         GameCLI.print_board_connect4(game.board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
         if i >= 6 and game.check_winner():
             GameCLI.sleep(0.75)
-            # if player.marker == "y":
-            #     GameCLI.print_game_over(other_strings["yellowwinner"])
-            # elif player.marker == "r":
-            #     GameCLI.print_game_over(other_strings["redwinner"])
+            if player.marker == "y":
+                GameCLI.print_game_over(other_strings["yellowwinner"])
+            elif player.marker == "r":
+                GameCLI.print_game_over(other_strings["redwinner"])
 
-            # else:
-            #     GameCLI.print_game_over(other_strings["gameover"])
+            else:
+                GameCLI.print_game_over(other_strings["gameover"])
             GameCLI.print_board_connect4(game.board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
             break
         print()
@@ -81,49 +84,8 @@ def play_game(game) -> None:
 
 def run():
     test = ConnectFour()
-    # print(test.height_list)
-    # exit()
-    GameCLI.set_console_window_size(100, 40)
+    GameCLI.set_console_window_size(100, 48)
     GameCLI.print_start_game(connect4_strings["welcome"], connect4_strings["intro"])
     play_game(set_up_game())
     exit()
-
-    test = ConnectFour()
-    test.create_ai_player()
-    print(test.players[1])
-    test.print_stats()
-    exit()
-    test.make_move(0, "r")
-    test.make_move(0, "y")
-    test.make_move(0, "y")
-    
-    test.make_move(6, "y")
-    test.make_move(6, "r")
-    test.make_move(6, "r")
-    test.make_move(6, "r")
-    test.make_move(7, "y")
-    test.make_move(3, "r")
-    test.make_move(3, "y")
-    test.make_move(3, "y")
-    test.make_move(3, "y")
-    test.make_move(4, "y")
-    test.make_move(4, "y")
-    test.make_move(4, "r")
-    test.make_move(1, "r")
-    test.make_move(2, "r")
-    test.make_move(5, "r")
-    test.make_move(5, "r")
-    test.make_move(5, "r")
-    print(test.height_list)
-    print(test.board)
-    print(test.players[1].win_or_block(test.board))
-    exit()
-
-    GameCLI.print_board_connect4(test.board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
-    # print(test.board.get_rows())   # testboard = board_translator(test.board.get_board())
-    # print(len(testboard[-1]))
-    # print(testboard[-1][0].value)
-    # for sq  in testboard[-2][0].value:
-    #     print(len(sq))
-    # print(len(BOARDLINE_CONNECT4))
 

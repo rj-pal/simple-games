@@ -55,7 +55,7 @@ def play_game(game) -> None:
             row, col = player.move(game.board)
             game.make_move(row, col, player.marker)
 
-        GameCLI.clear_screen()
+        # GameCLI.clear_screen()
         GameCLI.print_current_move(name, row, col)
         GameCLI.print_board(game.board.get_board(), tictactoe_strings["boardline"])
 

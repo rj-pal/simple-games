@@ -674,7 +674,7 @@ class Game:
         """Checks for winner in rows. Uses returned Square object to update the winner attributes. False if no Square
         object is assigned. """
         for r, row in enumerate(self.game_board.get_rows()):
-            if winner := self.check_all_same(row):
+            if winner := LineChecker.check_all_same(row):
                 self._update_winner_info(winner, "row", r)
                 return True
 
@@ -682,17 +682,17 @@ class Game:
         """Checks for winner in columns. Uses returned Square object to update winner attributes. False if no Square
         object is assigned. """
         for c, column in enumerate(self.game_board.get_columns()):
-            if winner := self.check_all_same(column):
+            if winner := LineChecker.check_all_same(column):
                 self._update_winner_info(winner, "col", c)
                 return True
 
     def check_diagonals(self) -> Optional[bool]:
         """Checks for winner in diagonals. Uses returned Square object to update winner attributes. False if no
         Square object is assigned. """
-        if winner := self.check_all_same(self.game_board.get_right_diagonal()):
+        if winner := LineChecker.check_all_same(self.game_board.get_right_diagonal()):
             self._update_winner_info(winner, "right_diag")
             return True
-        if winner := self.check_all_same(self.game_board.get_left_diagonal()):
+        if winner := LineChecker.check_all_same(self.game_board.get_left_diagonal()):
             self._update_winner_info(winner, "left_diag")
             return True
 

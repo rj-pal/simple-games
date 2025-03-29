@@ -1,5 +1,5 @@
 from cli import TicTacToeCLI, ConnectFourCLI
-from games.game import Solitare, ConnectFour
+from games.game import Solitare, ConnectFour, TicTacToe
 from utils.game_options import GameOptions
 from utils.clitools import clear_screen, delay_effect, print_menu_screen, menu_select
 from utils.strings import SIMPLE_GAMES_START
@@ -156,15 +156,12 @@ def run_game():
             else:
                 print("Invalid move")
 
-
-
         clear_screen()    
 
 
 
-
+# Solitaire Testing
 # def main():
-
     # test = ConnectFour()
     # print(test.columns)
     # test.create_ai_player(True)
@@ -189,51 +186,8 @@ def run_game():
     # test.show_draw_disard_piles()
     # # print(test.card_deck.size)
     # exit()
-
-
-    # print_menu_screen()
-    # choice = menu_select({'1', '2', '3'})
-    # if choice == '1':
-    #     TicTacToeCLI.run()
-    # elif choice == '2':
-    #     ConnectFourCLI.run()
-    # elif choice == '3':
-    #     run_game()
-    # else:
-    #     raise ValueError("Invalid choice. See you next time.")
     
 def main():
-    test = ConnectFour()
-
-    test.make_move(0,"r")
-    test.make_move(1,"y")
-    test.make_move(2,"y")
-    test.make_move(3,"y")
-    test.make_move(4,"r")
-    test.make_move(5,"r")
-    test.make_move(6,"y")
-    # test.make_move(0,"r")
-    # test.make_move(1,"r")
-    test.make_move(2,"r")
-    test.make_move(3,"r")
-    test.make_move(4,"r")
-    # test.make_move(5,"r")
-    # test.make_move(6,"r")
-    print(test.board)
-    # print(test.board.get_diagonals(7, 'right'))
-    print(test.check_winner())
-    line = LineChecker(test.board)
-    last_row = test.board.get_rows()[-2]
-    print(last_row)
-    print(line.two_blanks(last_row, "r", 2))
-    # print(test._win.check_rows(4))
-    
-    exit()
-
-
-    ConnectFourCLI.run()
-    exit()
-
     print_menu_screen()
     valid_game_options  = GameOptions.values()
     choice = menu_select(valid_game_options)
@@ -246,7 +200,7 @@ def main():
         run_game()
     else:
         raise ValueError("Invalid choice. See you next time.")
-
+    exit()
 
 if __name__ == '__main__':
     main()

@@ -211,7 +211,6 @@ class ConnectFour:
 
     def make_move(self, col, marker):
         for row in range(self.rows - 1, -1, -1):
-            print(f"ROW {row}, COL {col}")
             if self.is_valid(row, col):
                 self.board.add_to_square(row, col, marker)
                 self.move_list.append((row, col))
@@ -288,14 +287,14 @@ class ConnectFour:
             for r, row in enumerate(self.board.get_rows()):
                 for i in range(4):
                     row_slice = row[i:i + 4]
-                    if winner := self.check_all_same(row_slice, win_value):
+                    if winner := LineChecker.check_all_same(row_slice, win_value):
                         return winner, "row", r, i
     
         def _check_full_columns(self, win_value: int) -> Optional[tuple]:
             for c, column in enumerate(self.board.get_columns()):
                 for i in range(3):
                     col_slice = column[i:i + 4]
-                    if winner := self.check_all_same(col_slice, win_value):
+                    if winner := LineChecker.check_all_same(col_slice, win_value):
 
                         return winner, "column", i, c
 
@@ -337,7 +336,7 @@ class ConnectFour:
         def get_random_column(self): 
                 return randint(0, self.game.columns - 1)
 
-        def random_int(self, board: Board) -> tuple[int, int]:
+        def random_int(self) -> tuple[int, int]:
             """Selects any open random positions on the board. Returns row and column index."""
             column = self.get_random_column()
             while self.game.board.square_is_occupied(0, column):
@@ -345,94 +344,155 @@ class ConnectFour:
 
             return column
 
-        def move(self, board: Board):
+        def move(self):
         
-            if (move:= self.win_or_block(board)) is not None:
-                
-                print("Played WIN or BLOCK")
-                print(f"my move {move}")
+            if (move:= self.win_or_block()) is not None:
+                # print("Played WIN or BLOCK")
+                # print(f"Computer's move {move}")
                 # sleep(5)
                 return move 
             print(self.game.height_list)
             print(self.game.size_list)
-            print("Played RANDOM")
+            # print("Played RANDOM")
             # sleep(5)
-            return self.random_int(board)
+            return self.random_int()
         
-        def win_or_block(self, board: Board):
-            pass
-            # at height index of 3, it means at least there are 3 pieces in a column; height_index 0 is a full column
-            column_indices = [index for index, height in enumerate(self.game.height_list) if 0 < height <= 3] # only check columns with 3 or more pieces
-            # max_height = max(self.game.height_list)
+
+        def get_empty_move_positions(self):
+            for column in range(self.game.board.columns):
+                return [(self.game.height_list[column] - 1, column) for column in range(self.game.board.columns)]
+             
+        
+        
+        def win_or_block(self):
             block_position = -1
-            # flat_board = all(height <= max_height for height in self.game.height_list) # only check rows that have a flat or higher columns
 
-            # Column Check for finding a winning move or blocking an opponent's winning move
-            for index in column_indices: 
-                column = self.game.board.get_columns()[index]
-                height_index = self.game.height_list[index]
-                print(column)
-                print(f"CURRENT HEIGHT INDEX {height_index}")
-                column_slice = column[height_index:height_index + 3]
-                print(column_slice)
-                if column_slice and all(marker == column_slice[0] for marker in column_slice):
-                    marker = column_slice[0]
+            def three_square_check(line, row, column):
+                if marker := LineChecker.check_all_same(line, 3): 
                     if marker == 'y':
-                        return height_index # return a winning move for AI player
-                    else:
-                        block_position = height_index # update any blocks of a human player
-
-            bottom_row_index = self.game.board.rows - 1
-            if self.game.size_list[bottom_row_index] >= 3:
-                line_checker = self.game.ConnectFourLineChecker(self.game.board, 3).check_all_same
-                is_same = False
-                has_single_blank =False
-                for i in range(self.game.columns):
-                    if self.game.board.square_is_occupied(bottom_row_index, i):
-                        print("OCCUPIED")
-                        if self.game.board.get_square_value(bottom_row_index, i) == self.game.board.get_square_value(bottom_row_index, i + 1):
-                            is_same = True
-                    else:
-                        print("FREE")
-                        has_single_blank = True
-                    
-                        
-                    # else:
-                    #     to_left_index = i - 3
-                    #     while (to_left_index > 0) and (to_left_index < i):
-                    #         row_slice = self.game.board.get_rows()[bottom_row_index]
-                    #         if line_checker(row_slice[to_left_index:to_left_index + 3]):
-                    #             print("FOUND THREE")
-                    #         to_left_index += 1
-                    #     to_right_index = i + 3
-                    #     while (to_right_index < i) and (to_right_index < i):
-
-
-                            
-
-
-
-            # block_position = -1  # Makes a list of all possible blocking points on the board of the opponent
-            columns = self.game.board.get_columns()
-
-            
-            print(f"BLCO POSITON {block_position}")
-
-            rows =self.game.board.get_rows()
-            
-        
-
-            if block_position == -1:
+                        print(line)
+                        print(f"Found Win at row {row} and col {column}.")
+                        return True
+                    elif marker == 'r':
+                        print(line)
+                        print(f"Found Block at row {row} and col {column}.")
+                        return False
                 return None
-        
-            return block_position
-            # lines = [self.game.board.get_rows(),
-            #         self.game.board.get_columns(),
-            #         self.game.board.get_diagonals(3, "right"),
-            #         self.game.board.get_diagonals(3, "left")
-            #         ]
-            # pass
+            
+            def check_and_update(line, row, column):
+                if not line:
+                    return None
+                nonlocal block_position
+                result = three_square_check(line, row, column)
+                if result is True:
+                    return column  # Winning move
+                elif result is False:
+                    block_position = column  # Possible block move
+                return None
 
+            for row, column in self.get_empty_move_positions():
+                if row == -1: # column is full because height list element is 0 or a piece is occupied in row 0
+                    continue   
+                # height and diagonal check
+                if row < (self.game.board.rows // 2):
+                    column_top = self.game.board.get_columns()[column][row + 1: row + 4]
+                    if (move := check_and_update(column_top, row, column)) is not None:
+                        print("FOUND COL WIN")
+                        return move
+                # Diagonal Check Anywhere Since diagonal function in board makes sure nothing is out of bounds    
+                right_diagonals = [self.game.board.get_diagonal_line_down(row + 1, column + 1, 3, "right"), 
+                                    self.game.board.get_diagonal_line_up(row - 1, column + 1, 3, "right")]
+                for right_diagonal in right_diagonals:
+                    if (move := check_and_update(right_diagonal, row, column)) is not None:
+                        print("FOUND RIGHT DAG WIN")
+                        return move
+                left_diagonals = [self.game.board.get_diagonal_line_down(row + 1, column - 1, 3, "left"), 
+                                    self.game.board.get_diagonal_line_up(row + 1, column - 1, 3, "left")]
+                for left_diagonal in left_diagonals:
+                    if (move := check_and_update(left_diagonal, row, column)) is not None:
+                        print("FOUND LEFT DAG WIN")
+                        return move
+                # row check
+                # horizontal_midpoint = self.game.board.columns // 2
+                # if column < horizontal_midpoint:
+                #     row_right = self.game.board.get_rows()[row][column + 1: column + 4]
+                #     if (move := check_and_update(row_right, row, column)) is not None:
+                #         print("FOUND RIGHT ROW WIN")
+                #         return move                
+                # elif column == horizontal_midpoint:
+                #     row_right = self.game.board.get_rows()[row][column + 1: column + 4]
+                #     if (move := check_and_update(row_right, row, column)) is not None:
+                #         print("FOUND CENTRE ROW WIN")
+                #         return move
+                #     row_left = self.game.board.get_rows()[row][column - 1:: -1]
+                #     if (move := check_and_update(row_left, row, column)) is not None:
+                #         print("FOUND CENTRE LEFT ROW WIN")
+                #         return move
+                # elif column > self.game.board.columns // 2:
+                
+                #     row_left = self.game.board.get_rows()[row][column - 1: column - 4: -1]
+                #     if (move := check_and_update(row_left, row, column)) is not None:
+                #         print("FOUND LEFT ROW WIN")
+                #         return move
+            # return block_position if block_position != -1 else None
+            print(f"BLOCK POSITION: {block_position}")
+            if block_position == -1:
+                return self.win_or_block_window()
+            else:
+                return block_position
+
+
+        ##### ADD THE STAR $$$
+        
+        def win_or_block_window(self):
+            """Get column index of any first found win move. Track any block move and return it if no win move is found."""
+
+            block_position = -1  # Track the latest block position
+
+            start_row_index = max(self.game.height_list) - 1  # Bottom most row with a free space
+            end_row_index = min(self.game.height_list) - 1    # Top most row with free space
+            line_checker = LineChecker.line_check
+            print("IN WINDOW FUCTI")
+
+            for row_index in range(start_row_index, end_row_index, -1):  # Check rows from bottom up
+                row = self.game.board.get_rows()[row_index]
+                check_row = line_checker(row, target_element=0, target_count=1, other_element="any", other_count=3, window_size=4)
+
+                for key in ("y", "r"):  # Check for both "y" (win) and "r" (block)
+                    if key in check_row:
+                        col_index = check_row[key][0]["absolute_indices"][0]
+                        if row_index == 5 or self.game.board.square_is_occupied(row_index + 1, col_index):
+                            print(f"Found {'Win' if key == 'y' else 'Block'} at row {row_index} and col {col_index}.")
+                            if key == "y":
+                                return col_index  # Winning move for AI
+                            block_position = col_index  # Block opponent move
+
+            return block_position if block_position != -1 else None
+            # block_position = -1 # keep of the latest 
+            
+            # start_row_index = max(self.game.height_list) - 1 # max indicates which rows are full
+            # end_row_index = min(self.game.height_list) - 1   # min indicates the heights row
+            # line_checker = LineChecker.line_check
+            # for row_index in range(start_row_index, end_row_index, -1): # check only occupied rows bottom up; 
+            #     row = self.game.board.get_rows()[row_index]
+            #     check_row = line_checker(row, target_element=0, target_count=1, other_element="any", other_count=3, window_size=4) # checks one blank 3 marker pattern 
+            #     if check_row:
+            #         if "y" in check_row.keys():
+            #             col_index = check_row["y"][0]["absolute_indices"][0]
+            #             if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
+            #                 print(f"Found Win at row{row_index} and col {col_index}.")
+            #                 return col_index # return a winning move for AI player
+            #         if "r" in check_row.keys():    
+            #             col_index = check_row["r"][0]["absolute_indices"][0]
+            #             if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
+            #                 print(f"Found Block at row{row_index} and col {col_index}.")
+            #                 block_position = col_index # update any blocks of a human player
+            
+            # print(f"BLOCK POSITON {block_position}")            
+        
+
+            # return block_position if block_position != -1 else None
+        
 
 class TicTacToe:
 
@@ -690,39 +750,35 @@ class TicTacToe:
             integers and allows for possibility of victory. Returns row and column index else None."""
             rows = self.game.board.get_rows()
             columns = self.game.board.get_columns()
-            diagonals = [self.game.board.get_diagonals(3, "right"),
-                        self.game.board.get_diagonals(3, "left")]  # right diagonal is index 0, and left is index 1
+            diagonals = [self.game.board.get_diagonals(3, "right")[0],
+                        self.game.board.get_diagonals(3, "left")[0]]  # right diagonal is index 0, and left is index 1
+            
+            line_checker = LineChecker.two_blanks # use static method that finds a row with two blanks and an 'o' marker
 
-            # returns the first found unoccupied square in a line with two blanks for intermediate mode
-            # or possible win in hard mode
+            # returns the first found unoccupied square in a line with two blanks for intermediate mode or for possible hard mode win
             for index, row in enumerate(rows):
-                if row.count(0) == 2 and row.count("o") == 1:
-                    for col in range(2):
-                        if self.game.board.square_is_occupied(index, col):
-                            continue
-                        else:
-                            return index, col
+                check_row = line_checker(row, "o", 1)
+                if check_row:
+                    col = choice(check_row["o"][0]["window_indices"])
+                    return index, col
+                
             for index, col in enumerate(columns):
-                if col.count(0) == 2 and col.count("o") == 1:
-                    for row in range(2):
-                        if self.game.board.square_is_occupied(row, index):
-                            continue
-                        else:
-                            return row, index
+                check_col = line_checker(col, "o", 1)
+                if check_col:
+                    row = choice(check_col["o"][0]["window_indices"])
+                    return row, index
+                
             for index, diag in enumerate(diagonals):
-                if diag.count(0) == 2 and diag.count("o") == 1:
-                    if index == 0:
-                        for move_index in range(2):
-                            if self.game.board.square_is_occupied(move_index, move_index):
-                                continue
-                            else:
-                                return move_index, move_index
-                    elif index == 1:
-                        for move_index in range(2):
-                            if self.game.board.square_is_occupied(move_index, 2 - move_index):
-                                continue
-                            else:
-                                return move_index, 2 - move_index
+                check_diag = line_checker(diag, "o", 1)
+                if check_diag:
+                    window_indices = check_diag["o"][0]["window_indices"] 
+                    if index == 0:  # Right diagonal
+                        row = col = choice(window_indices)
+                    else:  # Left diagonal
+                        row = choice(window_indices)
+                        col = 2 - row
+
+                    return row, col
 
         def random_ints(self, board: Board) -> tuple[int, int]:
             """Selects any open random positions on the board. Returns row and column index."""
@@ -931,40 +987,45 @@ class TicTacToe:
                     self.game.board.get_diagonals(3, "right"),
                     self.game.board.get_diagonals(3, "left")
                     ]
-            for indicator, line in enumerate(lines):
+            
+            line_checker = LineChecker.line_check
 
-                for index_1, squares in enumerate(line):
-                    marker, count = Counter(squares).most_common(1)[0]
-                    if count == (len(squares) - 1) and marker !=  0:
-                        for index_2, square in enumerate(squares):
-                            if indicator == 0:
-                                if not self.game.board.square_is_occupied(index_1, index_2):
-                                    if marker !=  "o":
-                                        block_positions.append([index_1, index_2])
-                                    else:
-                                        return index_1, index_2
+            def get_blank_index(line_checker_dictionary): # guarantees the index for each function call below
+                if found_blank := line_checker_dictionary.get("o"):
+                    return found_blank[0]["first_index"]
+                return line_checker_dictionary.get("x")[0]["first_index"]
+            
 
-                            elif indicator == 1:
-                                if not self.game.board.square_is_occupied(index_2, index_1):
-                                    if marker !=  "o":
-                                        block_positions.append([index_2, index_1])
-                                    else:
-                                        return index_2, index_1
+            for indicator, line in enumerate(lines): # check top to bottom rows, columns, right and left diagonals
 
-                            elif indicator == 2:
-                                if not self.game.board.square_is_occupied(index_2, index_2):
-                                    if marker !=  "o":
-                                        block_positions.append([index_2, index_2])
+                for index, squares in enumerate(line):
+                    # check for one blank and two marker pattern 
+                    check_line = line_checker(squares, target_element=0, target_count=1, other_element="any", other_count=2, window_size=3)  
+                    if check_line: # if line checker dictionary is not empty, it must have found either an 'o' or 'x' only 
+                        blank_index = get_blank_index(check_line)
+                        if indicator == 0: # 0 indicates the line of squares is a row, so index is row index and blank_index is the column index
+                            if "o" in check_line.keys():
+                                return index, blank_index
+                            else:  
+                                block_positions.append([index, blank_index])
 
-                                    else:
-                                        return index_2, index_2
-                            else:
-                                if not self.game.board.square_is_occupied(index_2, 2 - index_2):
-                                    if marker !=  "o":
-                                        block_positions.append([index_2, 2 - index_2])
+                        elif indicator == 1: # 1 indicates the line of squares is a column
+                                if "o" in check_line.keys():
+                                    return blank_index, index
+                                else: 
+                                    block_positions.append([blank_index, index])
+                        
+                        elif indicator == 2: # 2 indicates the line of squares is a right diagonal
+                                if "o" in check_line.keys():
+                                    return blank_index, blank_index
+                                else:
+                                    block_positions.append([blank_index, blank_index])
 
-                                    else:
-                                        return index_2, 2 - index_2
+                        else: # 3 or else indicates the line of squares is a left diagonal
+                                if "o" in check_line.keys():
+                                    return blank_index, 2 - blank_index
+                                else: 
+                                    block_positions.append([blank_index, 2 - blank_index])
             if block_positions:
                 # Use randomly selected block position from max of three for variety sake
                 return block_positions[randint(0, len(block_positions) - 1)]
@@ -1045,37 +1106,4 @@ class TicTacToe:
                     if move := self.two_blanks(self.game.board):
                         return move
                 return self.random_ints(self.game.board)
-
-
-
-test = ConnectFour()
-
-test.make_move(0,"r")
-test.make_move(1,"y")
-test.make_move(2,"y")
-test.make_move(3,"y")
-test.make_move(4,"r")
-test.make_move(5,"r")
-test.make_move(6,"y")
-print(test.board)
-# test.make_move(0,"y")
-# test.make_move(0,"y")
-# print(test.ConnectFourPlayer.move())
-# print(test.board)
-# test.make_move(0,"r")
-# test.make_move(0,"r")
-# test.make_move(0,"y")
-# test.make_move(3,"y")
-# test.make_move(0,"y")
-# test.make_move(0,"y")
-# test.make_move(0,"y")
-# test.make_move(0,"y")
-# test.make_move(0,"y")
-# test.make_move(0,"y")
-# print()
-# print(test.board)
-# if test.check_winner():
-#     test.update_winner_info()
-#     test.get_winner_attributes()
-#     test.print_winner()
-# print(test.board.columns)
+            
