@@ -155,7 +155,9 @@ class Board:
         return self.board[row][column] != 0
     
     def get_square_value(self, row: int, column: int) -> Union[int, str]:
-        return self.board[row][column]
+        if self.is_on_board(row, column):
+            return self.board[row][column]
+        return None
     
     def add_to_square(self, row: int, column: int, value: Union[int, str]) -> bool:
         if 0 <= row < self.rows and 0 <= column < self.columns:
@@ -324,23 +326,23 @@ class LineChecker:
     
     def _check_full_rows(self, win_value: int) -> Optional[tuple]:
         for r, row in enumerate(self.board.get_rows()):
-            if winner := LineChecker.check_all_same(row, win_value):
+            if winner := LineChecker.check_all_same(row):
                 c = row.index(winner)
                 return winner, "row", r, c
     
     def _check_full_columns(self, win_value: int) -> Optional[tuple]:
         for c, column in enumerate(self.board.get_columns()):
-            if winner := LineChecker.check_all_same(column, win_value):
+            if winner := LineChecker.check_all_same(column):
                 r = column.index(winner)
                 return winner, "column", r, c
     
     def _check_diagonals(self, win_value: int) -> Optional[tuple]:
         for l, line in enumerate(self.board.get_diagonals(win_value, "right")):
-            if winner := LineChecker.check_all_same(line, win_value):
+            if winner := LineChecker.check_all_same(line):
                 r, c = int_converter(l, self.board.columns - win_value + 1)
                 return winner, "right_diagonal", r, c
         for l, line in enumerate(self.board.get_diagonals(win_value, "left")):
-            if winner := LineChecker.check_all_same(line, win_value):
+            if winner := LineChecker.check_all_same(line):
                 r, c = int_converter(l, self.board.columns - win_value + 1)
                 c = self.board.columns - 1 - c
                 return winner, "left_diagonal", r, c

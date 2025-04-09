@@ -48,30 +48,30 @@ def play_game(game) -> None:
             col = player.move()
             game.make_move(col, player.marker)
 
-        GameCLI.clear_screen()
+        # GameCLI.clear_screen()
         current_row, current_col = game.move_list[i]
-        GameCLI.clear_screen()
+        # GameCLI.clear_screen()
         print()
-        for j in range(current_row):
-            temp_board = game.board.get_board(True)
-            temp_board.update_square(current_row, current_col, 0)
-            temp_board.add_to_square(j, current_col, player.marker)
-            GameCLI.print_board_connect4(temp_board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
-            GameCLI.sleep(0.05)
-            GameCLI.clear_screen()
-            print()
+        # for j in range(current_row):
+        #     temp_board = game.board.get_board(True)
+        #     temp_board.update_square(current_row, current_col, 0)
+        #     temp_board.add_to_square(j, current_col, player.marker)
+        #     GameCLI.print_board_connect4(temp_board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
+        #     GameCLI.sleep(0.05)
+        #     GameCLI.clear_screen()
+        #     print()
             
         # print("\n" * 3)
         GameCLI.print_board_connect4(game.board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
         if i >= 6 and game.check_winner():
-            GameCLI.sleep(0.75)
-            if player.marker == "y":
-                GameCLI.print_game_over(other_strings["yellowwinner"])
-            elif player.marker == "r":
-                GameCLI.print_game_over(other_strings["redwinner"])
+            # GameCLI.sleep(0.75)
+            # if player.marker == "y":
+            #     GameCLI.print_game_over(other_strings["yellowwinner"])
+            # elif player.marker == "r":
+            #     GameCLI.print_game_over(other_strings["redwinner"])
 
-            else:
-                GameCLI.print_game_over(other_strings["gameover"])
+            # else:
+            #     GameCLI.print_game_over(other_strings["gameover"])
             GameCLI.print_board_connect4(game.board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
             break
         print()

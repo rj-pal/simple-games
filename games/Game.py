@@ -287,16 +287,27 @@ class ConnectFour:
             for r, row in enumerate(self.board.get_rows()):
                 for i in range(4):
                     row_slice = row[i:i + 4]
-                    if winner := LineChecker.check_all_same(row_slice, win_value):
+                    if winner := LineChecker.check_all_same(row_slice):
                         return winner, "row", r, i
     
         def _check_full_columns(self, win_value: int) -> Optional[tuple]:
             for c, column in enumerate(self.board.get_columns()):
                 for i in range(3):
                     col_slice = column[i:i + 4]
-                    if winner := LineChecker.check_all_same(col_slice, win_value):
+                    if winner := LineChecker.check_all_same(col_slice):
 
                         return winner, "column", i, c
+        
+        def _check_diagonals(self, win_value: int) -> Optional[tuple]:
+            for l, line in enumerate(self.board.get_diagonals(win_value, "right")):
+                if winner := LineChecker.check_all_same(line):
+                    r, c = int_converter(l, self.board.columns - win_value + 1)
+                    return winner, "right_diagonal", r, c
+            for l, line in enumerate(self.board.get_diagonals(win_value, "left")):
+                if winner := LineChecker.check_all_same(line):
+                    r, c = int_converter(l, self.board.columns - win_value + 1)
+                    c = self.board.columns - 1 - c
+                    return winner, "left_diagonal", r, c
 
 
     class ConnectFourPlayer(Player):
@@ -345,7 +356,7 @@ class ConnectFour:
             return column
 
         def move(self):
-        
+ 
             if (move:= self.win_or_block()) is not None:
                 # print("Played WIN or BLOCK")
                 # print(f"Computer's move {move}")
@@ -356,13 +367,12 @@ class ConnectFour:
             # print("Played RANDOM")
             # sleep(5)
             return self.random_int()
-        
 
         def get_empty_move_positions(self):
             for column in range(self.game.board.columns):
                 return [(self.game.height_list[column] - 1, column) for column in range(self.game.board.columns)]
              
-        def win_or_bloack(self):
+        def win_or_block(self):
             block_position = -1
             horizontal_midpoint = self.game.board.columns // 2
 
@@ -388,35 +398,96 @@ class ConnectFour:
                 elif win_or_block is False:
                     block_position = column  # Possible block move
                 return None
-            def check_one_two_pattern():
+            
+            def left_right_pattern(line, square):
+                if not line:
+                    return None
+                line.append(square)
+                return line
 
-            for column, row in enumerate(self.game.height_list):
-                # looking right zone
-                if (self.game.board.get_square_value(row, column) != 0) and (column <= horizontal_midpoint ):
-                    row_line = self.game.board.get_row_segment
-                    diag_up_line = self.game.board.get_diagonal_right_segment
-                    if (move := check_and_update(row_line(row=row, col=column + 1, length = 3), row, column)) is not None:
+            for column, row_height in enumerate(self.game.height_list):
+                # Check if column is full; height list at -1 means the top row is occupied
+                if row_height == -1:
+                    continue 
+    
+                print(self.game.height_list)
+                # Update the row to the current open position in the column
+                row = row_height - 1
+                # Check if both neighbors of current open position in the column are either out of bounds or empty
+                left_value = self.game.board.get_square_value(row, column - 1)
+                right_value = self.game.board.get_square_value(row, column + 1)
+
+
+                print(f"ROW {row} COL {column}")
+                print(f"Current square value {self.game.board.get_square_value(row, column)}")
+                if row_height <= self.game.board.rows // 2: # vertical mid-point
+                    # Check down
+                    column_line = self.game.board.get_column_segment
+                    if (move := check_and_update(column_line(row=row_height, col=column, length = 3), row, column)) is not None:
                         return move
-                    if (move := check_and_update(diag_up_line(row=row - 1, col=column + 1, length = 3), row, column)) is not None:
+                    # Check down-right and down-left diagonally
+                    diag_down_line = self.game.board.get_diagonal_right_segment
+                    if (move := check_and_update(diag_down_line(row=row_height, col=column + 1, length = 3, up=False), row, column)) is not None:
+                        return move
+                    diag_down_line = self.game.board.get_diagonal_left_segment
+                    if (move := check_and_update(diag_down_line(row=row_height, col=column - 1, length = 3, up=False), row, column)) is not None:
                         return move
                     
-                    if column >= 1:
-                        # One-two pattern here
-                        if self.game.board.get_square_value(row, column - 1) != 0:
-                            if (move := check_and_update(row_line(row=row, col=column + 1, length = 2).append(self.game.board.get_square_value(row, column - 1)), row, column)) is not None:
-                                return move
-                    if column >= 2:
-                        # Two-one pattern here
-                        if self.game.board.get_square_value(row, column - 1) != 0:
-                            if (move := check_and_update(row_line(row=row, col=column + 1, length = 2).append(self.game.board.get_square_value(row, column - 1)), row, column)) is not None:
-                                return move
+                if (left_value == 0 or left_value is None) and (right_value == 0 or right_value is None):
+                    continue
+                    
+                if column <= horizontal_midpoint: 
+                    row_line = self.game.board.get_row_segment
+                    diag_up_line = self.game.board.get_diagonal_right_segment
+
+                    # First check row right and up-right diagonal
+                    if (move := check_and_update(row_line(row=row, col=column + 1, length=3), row, column)):
+                        return move
+                    if (move := check_and_update(diag_up_line(row=row - 1, col=column + 1, length=3), row, column)):
+                        return move
+                    
+                    # One-two pattern
+                    one_two_pattern = left_right_pattern(
+                        row_line(row=row, col=column + 1, length = 2), 
+                        left_value
+                    )
+                    if (move := check_and_update(one_two_pattern, row, column)):
+                        return move
+
+                    # Two-one pattern
+                    two_one_pattern = left_right_pattern(
+                        row_line(row=row, col=column - 2, length=2),
+                        right_value
+                    )
+                    if (move := check_and_update(two_one_pattern, row, column)):
+                        return move
+
+                if column >= horizontal_midpoint:
+                    diag_up_line = self.game.board.get_diagonal_left_segment
+                    if (move := check_and_update(row_line(row=row, col=column - 1, length = 3, right=False), row, column)) is not None:
+                        return move
+                    if (move := check_and_update(diag_up_line(row=row - 1, col=column - 1, length = 3), row, column)) is not None:
+                        return move
+                    # One-two pattern here
+                    one_two_pattern = left_right_pattern(
+                        row_line(row=row, col=column + 1, length = 2), 
+                        left_value
+                    )
+                    print("HERE in ONE TWO PATTERN LEFT")
+                    print(row_line(row=row, col=column + 1, length = 2))
+                    print(one_two_pattern)
+                    if (move := check_and_update(one_two_pattern, row, column)) is not None:
+                        return move
+                    # Two-one pattern here
+                    two_one_pattern = left_right_pattern(
+                        row_line(row=row, col=column - 2, length = 2), 
+                        right_value
+                    )
+                    if (move := check_and_update(two_one_pattern, row, column)) is not None:
+                            return move
+            return block_position if block_position != -1 else None
 
 
-
-
-
-
-        
         def win_or_block_working(self):
             block_position = -1
 
