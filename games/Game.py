@@ -362,9 +362,62 @@ class ConnectFour:
             for column in range(self.game.board.columns):
                 return [(self.game.height_list[column] - 1, column) for column in range(self.game.board.columns)]
              
+        def win_or_bloack(self):
+            block_position = -1
+            horizontal_midpoint = self.game.board.columns // 2
+
+            def marker_check(line):
+                if marker := LineChecker.check_all_same(line):
+                    if marker == 'y':
+                            print(line)
+                            # print(f"Found Win at row {row} and col {column}.")
+                            return True
+                    elif marker == 'r':
+                        print(line)
+                        # print(f"Found Block at row {row} and col {column}.")
+                        return False
+                return None
+
+            def check_and_update(line, row, column):
+                if not line:
+                    return None
+                nonlocal block_position
+                win_or_block = marker_check(line)
+                if win_or_block is True:
+                    return column  # Winning move
+                elif win_or_block is False:
+                    block_position = column  # Possible block move
+                return None
+            def check_one_two_pattern():
+
+            for column, row in enumerate(self.game.height_list):
+                # looking right zone
+                if (self.game.board.get_square_value(row, column) != 0) and (column <= horizontal_midpoint ):
+                    row_line = self.game.board.get_row_segment
+                    diag_up_line = self.game.board.get_diagonal_right_segment
+                    if (move := check_and_update(row_line(row=row, col=column + 1, length = 3), row, column)) is not None:
+                        return move
+                    if (move := check_and_update(diag_up_line(row=row - 1, col=column + 1, length = 3), row, column)) is not None:
+                        return move
+                    
+                    if column >= 1:
+                        # One-two pattern here
+                        if self.game.board.get_square_value(row, column - 1) != 0:
+                            if (move := check_and_update(row_line(row=row, col=column + 1, length = 2).append(self.game.board.get_square_value(row, column - 1)), row, column)) is not None:
+                                return move
+                    if column >= 2:
+                        # Two-one pattern here
+                        if self.game.board.get_square_value(row, column - 1) != 0:
+                            if (move := check_and_update(row_line(row=row, col=column + 1, length = 2).append(self.game.board.get_square_value(row, column - 1)), row, column)) is not None:
+                                return move
+
+
+
+
+
+
         
-        
-        def win_or_block(self):
+        def win_or_block_working(self):
             block_position = -1
 
             def three_square_check(line, row, column):
@@ -391,7 +444,7 @@ class ConnectFour:
                 return None
 
             for row, column in self.get_empty_move_positions():
-                if row == -1: # column is full because height list element is 0 or a piece is occupied in row 0
+                if row == -1: # column is full because height list element is -1 or a piece is occupied in row 0
                     continue   
                 # height and diagonal check
                 if row < (self.game.board.rows // 2):

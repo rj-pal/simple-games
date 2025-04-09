@@ -49,7 +49,6 @@ class Board:
             if column < self.columns - (length + 2): # compensate since going backwards.
                 return []
             return [self.board[row + n][column - n] for n in range(length)]
-        
 
     
     def get_diagonal_line_up(self, row, column, length, direction):
@@ -83,6 +82,75 @@ class Board:
                     diagonals.append([self.board[i + n][(self.columns - 1) - (j + n)] for n in range(length)])
         return diagonals
     
+    def is_valid_line_segment(self, row, col, length, direction='horizontal'):
+        if direction == 'right':
+            return col + length <= self.columns
+        
+        elif direction == 'left':
+            return col - length >= 0
+        
+        elif direction == 'down':
+            return row + length <= self.rows
+
+        elif direction == 'up':
+            return row - length >= 0
+
+        else:
+            raise ValueError("Direction must be 'right', 'left', 'up', or 'down'")
+
+    
+    def is_on_board(self, row, col):
+        return (0 <= row < self.rows) and (0 <= col < self.columns)
+
+    
+    def get_row_segment(self, row, col, length, right=True):
+        """Returns a segment from the row starting at (row, col) of the specified length."""
+        if not self.is_on_board(row, col):
+            return None
+        if right:
+            if self.is_valid_line_segment(row, col, length, 'right'):
+                return [self.get_square_value(row, col + i) for i in range(length)]
+        else:
+            if self.is_valid_line_segment(row, col, length, 'left'):
+                return [self.get_square_value(row, col - i) for i in range(length)]
+        return None
+
+    def get_column_segment(self, row, col, length, down=True):
+        """Returns a segment from the column starting at (row, col) of the specified length."""
+        if not self.is_on_board(row, col):
+            return None
+        if down:
+            if self.is_valid_line_segment(row, col, length, 'down'):
+                return [self.get_square_value(row + i, col) for i in range(length)]
+        else:
+            if self.is_valid_line_segment(row, col, length, 'up'):
+                return [self.get_square_value(row - i, col) for i in range(length)]
+        return None
+        
+     
+    def get_diagonal_right_segment(self, row, col, length, up=True):
+        if not self.is_on_board(row, col) or not self.is_valid_line_segment(row, col, length, 'right'):
+            return None
+        if up:
+            if self.is_valid_line_segment(row, col, length, 'up'):
+                return [self.get_square_value(row - i, col + i) for i in range(length)]
+        else:
+            if self.is_valid_line_segment(row, col, length, 'down'):
+                return [self.get_square_value(row + i, col + i) for i in range(length)]
+        return None
+    
+    def get_diagonal_left_segment(self, row, col, length, up=True):
+        if not self.is_on_board(row, col) or not self.is_valid_line_segment(row, col, length, 'left'):
+            return None
+        if up:
+            if self.is_valid_line_segment(row, col, length, 'up'):
+                return [self.get_square_value(row - i, col - i) for i in range(length)]
+        else:
+            if self.is_valid_line_segment(row, col, length, 'down'):
+                return [self.get_square_value(row + i, col - i) for i in range(length)]
+        return None
+
+
     def square_is_occupied(self, row: int, column: int) -> bool:
         return self.board[row][column] != 0
     
@@ -239,12 +307,20 @@ class LineChecker:
         return LineChecker.line_check(sequence, 0, 2, marker, size, size + 2, True)
     
 
+    def check_all_same(segment):
+        """Checks if all elements in the given segment are the same and non-zero."""
+        if all(element == segment[0] for element in segment) and segment[0] != 0:
+            return segment[0]
+        return None
+
     
     @staticmethod
-    def check_all_same(line: list[Union[int, str]], win_value: int) -> Optional[tuple]:
+    def check_all_same(line: list[Union[int, str]]) -> Optional[tuple]:
         "Checks if any line has all the same elements that are non-null or zero. Returns the winning marker element."
-        if all(element == line[0] for element in line):
-            return line[0] if line[0] != 0 else None
+        if line[0] != 0 and all(element == line[0] for element in line):
+            return line[0]
+        else:
+            return None
     
     def _check_full_rows(self, win_value: int) -> Optional[tuple]:
         for r, row in enumerate(self.board.get_rows()):
