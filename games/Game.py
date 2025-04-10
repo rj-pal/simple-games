@@ -358,8 +358,8 @@ class ConnectFour:
         def move(self):
  
             if (move:= self.win_or_block()) is not None:
-                # print("Played WIN or BLOCK")
-                # print(f"Computer's move {move}")
+                print("Played WIN or BLOCK")
+                print(f"Computer's move {move}")
                 # sleep(5)
                 return move 
             print(self.game.height_list)
@@ -368,9 +368,9 @@ class ConnectFour:
             # sleep(5)
             return self.random_int()
 
-        def get_empty_move_positions(self):
-            for column in range(self.game.board.columns):
-                return [(self.game.height_list[column] - 1, column) for column in range(self.game.board.columns)]
+        # def get_empty_move_positions(self):
+        #     for column in range(self.game.board.columns):
+        #         return [(self.game.height_list[column] - 1, column) for column in range(self.game.board.columns)]
              
         def win_or_block(self):
             block_position = -1
@@ -379,12 +379,8 @@ class ConnectFour:
             def marker_check(line):
                 if marker := LineChecker.check_all_same(line):
                     if marker == 'y':
-                            print(line)
-                            # print(f"Found Win at row {row} and col {column}.")
                             return True
                     elif marker == 'r':
-                        print(line)
-                        # print(f"Found Block at row {row} and col {column}.")
                         return False
                 return None
 
@@ -400,223 +396,152 @@ class ConnectFour:
                 return None
             
             def left_right_pattern(line, square):
-                if not line:
+                if not (line and square):
                     return None
                 line.append(square)
                 return line
+            
+            def star_pattern_check(row, row_height, column):
+                diagonal_line = self.game.board.get_diagonal_segment
+                down_left = self.game.board.get_square_value(row_height, column - 1)
+                one_two_pattern = left_right_pattern(
+                        diagonal_line(row=row - 1, col=column + 1, length = 2, up=True, right=True), 
+                        down_left
+                    )
+                if move := check_and_update(one_two_pattern, row, column):
+                        return move
+                down_right = self.game.board.get_square_value(row_height, column + 1)
+                one_two_pattern = left_right_pattern(
+                        diagonal_line(row=row - 1, col=column - 1, length = 2, up=True, right=False), 
+                        down_right
+                    )
+                if move := check_and_update(one_two_pattern, row, column):
+                        return move
+                up_right = self.game.board.get_square_value(row - 1, column + 1)
+                one_two_pattern = left_right_pattern(
+                        diagonal_line(row=row_height, col=column - 1, length = 2, up=False, right=False), 
+                        up_right
+                    )
+                if move := check_and_update(one_two_pattern, row, column):
+                        return move
+                up_left = self.game.board.get_square_value(row - 1, column - 1)
+                one_two_pattern = left_right_pattern(
+                        diagonal_line(row=row_height, col=column + 1, length = 2, up=False, right=True), 
+                        up_left
+                    )
+                if move := check_and_update(one_two_pattern, row, column):
+                        return move
+                return None
+            
+            def down_check(row_height, column):
+                column_line = self.game.board.get_column_segment
+                if (move := check_and_update(column_line(row=row_height, col=column, length = 3), row, column)) is not None:
+                    print(f"WON in DOWN COL at move {move}")
+                    return move
+                
+                diagonal_line = self.game.board.get_diagonal_segment
+                if (move := check_and_update(diagonal_line(row=row_height, col=column + 1, length = 3, up=False, right=True), row, column)) is not None:
+                    print(f"WON in DOWN Diag Right {move}")
+                    return move
+                if (move := check_and_update(diagonal_line(row=row_height, col=column - 1, length = 3, up=False, right=False), row, column)) is not None:
+                    print(f"WON in DOWN Diag Left {move}")
+                    return move
+                return None
+            
+            def right_and_up_check(row, column):
+                row_line = self.game.board.get_row_segment
+                if (move := check_and_update(row_line(row=row, col=column + 1, length=3), row, column)):
+                    return move
+                
+                # One-two pattern
+                one_two_pattern = left_right_pattern(
+                    row_line(row=row, col=column + 1, length = 2), 
+                    left_value
+                )
+                if (move := check_and_update(one_two_pattern, row, column)):
+                    return move
+
+                # Two-one pattern
+                two_one_pattern = left_right_pattern(
+                    row_line(row=row, col=column - 2, length=2),
+                    right_value
+                )
+                if (move := check_and_update(two_one_pattern, row, column)):
+                    return move
+                
+                diagonal_line = self.game.board.get_diagonal_segment
+                if (move := check_and_update(diagonal_line(row=row - 1, col=column + 1, length=3, up=True, right=True), row, column)):
+                    return move
+                
+                return None
+                
+            def left_and_up_check(row, column):
+                row_line = self.game.board.get_row_segment
+                if (move := check_and_update(row_line(row=row, col=column - 1, length = 3, right=False), row, column)) is not None:
+                    return move
+                
+                # One-two pattern here
+                one_two_pattern = left_right_pattern(
+                    row_line(row=row, col=column + 1, length = 2), 
+                    left_value
+                )
+                
+                if (move := check_and_update(one_two_pattern, row, column)) is not None:
+                    return move
+                # Two-one pattern here
+                two_one_pattern = left_right_pattern(
+                    row_line(row=row, col=column - 2, length = 2), 
+                    right_value
+                )
+                if (move := check_and_update(two_one_pattern, row, column)) is not None:
+                        return move
+                
+                diagonal_line = self.game.board.get_diagonal_segment
+                if (move := check_and_update(diagonal_line(row=row - 1, col=column - 1, length = 3, up=True, right=False), row, column)) is not None:
+                    return move
+                
+                return None
 
             for column, row_height in enumerate(self.game.height_list):
-                # Check if column is full; height list at -1 means the top row is occupied
-                if row_height == -1:
+                # Check if column is full; height list at 0 means the top row is occupied and there are no moves in the column
+                if row_height == 0:
                     continue 
     
-                print(self.game.height_list)
                 # Update the row to the current open position in the column
                 row = row_height - 1
-                # Check if both neighbors of current open position in the column are either out of bounds or empty
+    
+                # Check for three in a row down, down-right and down left starting from vertical mid-point
+                if row_height <= self.game.board.rows // 2:
+                    if move := down_check(row_height, column):
+                        print(f"WON in DOWN {move}")
+                        return move
+                
+                # Check all diagonal directions with one-two or two-one patterns
+                if move:= star_pattern_check(row, row_height, column):
+                    print(f"Won in a Star at {move}")
+                    return move
+                
                 left_value = self.game.board.get_square_value(row, column - 1)
                 right_value = self.game.board.get_square_value(row, column + 1)
 
-
-                print(f"ROW {row} COL {column}")
-                print(f"Current square value {self.game.board.get_square_value(row, column)}")
-                if row_height <= self.game.board.rows // 2: # vertical mid-point
-                    # Check down
-                    column_line = self.game.board.get_column_segment
-                    if (move := check_and_update(column_line(row=row_height, col=column, length = 3), row, column)) is not None:
-                        return move
-                    # Check down-right and down-left diagonally
-                    diag_down_line = self.game.board.get_diagonal_right_segment
-                    if (move := check_and_update(diag_down_line(row=row_height, col=column + 1, length = 3, up=False), row, column)) is not None:
-                        return move
-                    diag_down_line = self.game.board.get_diagonal_left_segment
-                    if (move := check_and_update(diag_down_line(row=row_height, col=column - 1, length = 3, up=False), row, column)) is not None:
-                        return move
-                    
+                # Check if both neighbors of current open position in the column are either out of bounds or empty to avoid unnecessary checks
                 if (left_value == 0 or left_value is None) and (right_value == 0 or right_value is None):
                     continue
                     
                 if column <= horizontal_midpoint: 
-                    row_line = self.game.board.get_row_segment
-                    diag_up_line = self.game.board.get_diagonal_right_segment
-
-                    # First check row right and up-right diagonal
-                    if (move := check_and_update(row_line(row=row, col=column + 1, length=3), row, column)):
+                    # Check row right combinations and up-right diagonal
+                    if move := right_and_up_check(row, column):
+                        print(f"WON in ROW RIGHT at Col {move}")
                         return move
-                    if (move := check_and_update(diag_up_line(row=row - 1, col=column + 1, length=3), row, column)):
-                        return move
-                    
-                    # One-two pattern
-                    one_two_pattern = left_right_pattern(
-                        row_line(row=row, col=column + 1, length = 2), 
-                        left_value
-                    )
-                    if (move := check_and_update(one_two_pattern, row, column)):
-                        return move
-
-                    # Two-one pattern
-                    two_one_pattern = left_right_pattern(
-                        row_line(row=row, col=column - 2, length=2),
-                        right_value
-                    )
-                    if (move := check_and_update(two_one_pattern, row, column)):
-                        return move
-
+        
                 if column >= horizontal_midpoint:
-                    diag_up_line = self.game.board.get_diagonal_left_segment
-                    if (move := check_and_update(row_line(row=row, col=column - 1, length = 3, right=False), row, column)) is not None:
+                    # Check row left combinations and up-left diagonal
+                    if (move := left_and_up_check(row, column)) is not None:
+                        print(f"WON in ROW LEFT at Col {move}")
                         return move
-                    if (move := check_and_update(diag_up_line(row=row - 1, col=column - 1, length = 3), row, column)) is not None:
-                        return move
-                    # One-two pattern here
-                    one_two_pattern = left_right_pattern(
-                        row_line(row=row, col=column + 1, length = 2), 
-                        left_value
-                    )
-                    print("HERE in ONE TWO PATTERN LEFT")
-                    print(row_line(row=row, col=column + 1, length = 2))
-                    print(one_two_pattern)
-                    if (move := check_and_update(one_two_pattern, row, column)) is not None:
-                        return move
-                    # Two-one pattern here
-                    two_one_pattern = left_right_pattern(
-                        row_line(row=row, col=column - 2, length = 2), 
-                        right_value
-                    )
-                    if (move := check_and_update(two_one_pattern, row, column)) is not None:
-                            return move
+       
             return block_position if block_position != -1 else None
-
-
-        def win_or_block_working(self):
-            block_position = -1
-
-            def three_square_check(line, row, column):
-                if marker := LineChecker.check_all_same(line, 3): 
-                    if marker == 'y':
-                        print(line)
-                        print(f"Found Win at row {row} and col {column}.")
-                        return True
-                    elif marker == 'r':
-                        print(line)
-                        print(f"Found Block at row {row} and col {column}.")
-                        return False
-                return None
             
-            def check_and_update(line, row, column):
-                if not line:
-                    return None
-                nonlocal block_position
-                result = three_square_check(line, row, column)
-                if result is True:
-                    return column  # Winning move
-                elif result is False:
-                    block_position = column  # Possible block move
-                return None
-
-            for row, column in self.get_empty_move_positions():
-                if row == -1: # column is full because height list element is -1 or a piece is occupied in row 0
-                    continue   
-                # height and diagonal check
-                if row < (self.game.board.rows // 2):
-                    column_top = self.game.board.get_columns()[column][row + 1: row + 4]
-                    if (move := check_and_update(column_top, row, column)) is not None:
-                        print("FOUND COL WIN")
-                        return move
-                # Diagonal Check Anywhere Since diagonal function in board makes sure nothing is out of bounds    
-                right_diagonals = [self.game.board.get_diagonal_line_down(row + 1, column + 1, 3, "right"), 
-                                    self.game.board.get_diagonal_line_up(row - 1, column + 1, 3, "right")]
-                for right_diagonal in right_diagonals:
-                    if (move := check_and_update(right_diagonal, row, column)) is not None:
-                        print("FOUND RIGHT DAG WIN")
-                        return move
-                left_diagonals = [self.game.board.get_diagonal_line_down(row + 1, column - 1, 3, "left"), 
-                                    self.game.board.get_diagonal_line_up(row + 1, column - 1, 3, "left")]
-                for left_diagonal in left_diagonals:
-                    if (move := check_and_update(left_diagonal, row, column)) is not None:
-                        print("FOUND LEFT DAG WIN")
-                        return move
-                # row check
-                # horizontal_midpoint = self.game.board.columns // 2
-                # if column < horizontal_midpoint:
-                #     row_right = self.game.board.get_rows()[row][column + 1: column + 4]
-                #     if (move := check_and_update(row_right, row, column)) is not None:
-                #         print("FOUND RIGHT ROW WIN")
-                #         return move                
-                # elif column == horizontal_midpoint:
-                #     row_right = self.game.board.get_rows()[row][column + 1: column + 4]
-                #     if (move := check_and_update(row_right, row, column)) is not None:
-                #         print("FOUND CENTRE ROW WIN")
-                #         return move
-                #     row_left = self.game.board.get_rows()[row][column - 1:: -1]
-                #     if (move := check_and_update(row_left, row, column)) is not None:
-                #         print("FOUND CENTRE LEFT ROW WIN")
-                #         return move
-                # elif column > self.game.board.columns // 2:
-                
-                #     row_left = self.game.board.get_rows()[row][column - 1: column - 4: -1]
-                #     if (move := check_and_update(row_left, row, column)) is not None:
-                #         print("FOUND LEFT ROW WIN")
-                #         return move
-            # return block_position if block_position != -1 else None
-            print(f"BLOCK POSITION: {block_position}")
-            if block_position == -1:
-                return self.win_or_block_window()
-            else:
-                return block_position
-
-
-        ##### ADD THE STAR $$$
-        
-        def win_or_block_window(self):
-            """Get column index of any first found win move. Track any block move and return it if no win move is found."""
-
-            block_position = -1  # Track the latest block position
-
-            start_row_index = max(self.game.height_list) - 1  # Bottom most row with a free space
-            end_row_index = min(self.game.height_list) - 1    # Top most row with free space
-            line_checker = LineChecker.line_check
-            print("IN WINDOW FUCTI")
-
-            for row_index in range(start_row_index, end_row_index, -1):  # Check rows from bottom up
-                row = self.game.board.get_rows()[row_index]
-                check_row = line_checker(row, target_element=0, target_count=1, other_element="any", other_count=3, window_size=4)
-
-                for key in ("y", "r"):  # Check for both "y" (win) and "r" (block)
-                    if key in check_row:
-                        col_index = check_row[key][0]["absolute_indices"][0]
-                        if row_index == 5 or self.game.board.square_is_occupied(row_index + 1, col_index):
-                            print(f"Found {'Win' if key == 'y' else 'Block'} at row {row_index} and col {col_index}.")
-                            if key == "y":
-                                return col_index  # Winning move for AI
-                            block_position = col_index  # Block opponent move
-
-            return block_position if block_position != -1 else None
-            # block_position = -1 # keep of the latest 
-            
-            # start_row_index = max(self.game.height_list) - 1 # max indicates which rows are full
-            # end_row_index = min(self.game.height_list) - 1   # min indicates the heights row
-            # line_checker = LineChecker.line_check
-            # for row_index in range(start_row_index, end_row_index, -1): # check only occupied rows bottom up; 
-            #     row = self.game.board.get_rows()[row_index]
-            #     check_row = line_checker(row, target_element=0, target_count=1, other_element="any", other_count=3, window_size=4) # checks one blank 3 marker pattern 
-            #     if check_row:
-            #         if "y" in check_row.keys():
-            #             col_index = check_row["y"][0]["absolute_indices"][0]
-            #             if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
-            #                 print(f"Found Win at row{row_index} and col {col_index}.")
-            #                 return col_index # return a winning move for AI player
-            #         if "r" in check_row.keys():    
-            #             col_index = check_row["r"][0]["absolute_indices"][0]
-            #             if (row_index == 5) or (self.game.board.square_is_occupied(row_index + 1, col_index)):
-            #                 print(f"Found Block at row{row_index} and col {col_index}.")
-            #                 block_position = col_index # update any blocks of a human player
-            
-            # print(f"BLOCK POSITON {block_position}")            
-        
-
-            # return block_position if block_position != -1 else None
-        
 
 class TicTacToe:
 

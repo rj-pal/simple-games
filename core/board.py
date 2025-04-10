@@ -82,7 +82,7 @@ class Board:
                     diagonals.append([self.board[i + n][(self.columns - 1) - (j + n)] for n in range(length)])
         return diagonals
     
-    def is_valid_line_segment(self, row, col, length, direction='horizontal'):
+    def is_valid_line_segment(self, row, col, length, direction):
         if direction == 'right':
             return col + length <= self.columns
         
@@ -100,7 +100,7 @@ class Board:
 
     
     def is_on_board(self, row, col):
-        return (0 <= row < self.rows) and (0 <= col < self.columns)
+        return 0 <= row < self.rows and 0 <= col < self.columns
 
     
     def get_row_segment(self, row, col, length, right=True):
@@ -128,27 +128,38 @@ class Board:
         return None
         
      
-    def get_diagonal_right_segment(self, row, col, length, up=True):
-        if not self.is_on_board(row, col) or not self.is_valid_line_segment(row, col, length, 'right'):
+    def get_diagonal_segment(self, row, col, length, up=True, right=True):
+        if right:
+            if not self.is_on_board(row, col) or not self.is_valid_line_segment(row, col, length, 'right'):
+                return None
+            if up:
+                if self.is_valid_line_segment(row, col, length, 'up'):
+                    return [self.get_square_value(row - i, col + i) for i in range(length)]
+            else:
+                if self.is_valid_line_segment(row, col, length, 'down'):
+                    return [self.get_square_value(row + i, col + i) for i in range(length)]
             return None
-        if up:
-            if self.is_valid_line_segment(row, col, length, 'up'):
-                return [self.get_square_value(row - i, col + i) for i in range(length)]
         else:
-            if self.is_valid_line_segment(row, col, length, 'down'):
-                return [self.get_square_value(row + i, col + i) for i in range(length)]
-        return None
+            if not self.is_on_board(row, col) or not self.is_valid_line_segment(row, col, length, 'left'):
+                return None
+            if up:
+                if self.is_valid_line_segment(row, col, length, 'up'):
+                    return [self.get_square_value(row - i, col - i) for i in range(length)]
+            else:
+                if self.is_valid_line_segment(row, col, length, 'down'):
+                    return [self.get_square_value(row + i, col - i) for i in range(length)]
+            return None
     
-    def get_diagonal_left_segment(self, row, col, length, up=True):
-        if not self.is_on_board(row, col) or not self.is_valid_line_segment(row, col, length, 'left'):
-            return None
-        if up:
-            if self.is_valid_line_segment(row, col, length, 'up'):
-                return [self.get_square_value(row - i, col - i) for i in range(length)]
-        else:
-            if self.is_valid_line_segment(row, col, length, 'down'):
-                return [self.get_square_value(row + i, col - i) for i in range(length)]
-        return None
+    # def get_diagonal_left_segment(self, row, col, length, up=True):
+    #     if not self.is_on_board(row, col) or not self.is_valid_line_segment(row, col, length, 'left'):
+    #         return None
+    #     if up:
+    #         if self.is_valid_line_segment(row, col, length, 'up'):
+    #             return [self.get_square_value(row - i, col - i) for i in range(length)]
+    #     else:
+    #         if self.is_valid_line_segment(row, col, length, 'down'):
+    #             return [self.get_square_value(row + i, col - i) for i in range(length)]
+    #     return None
 
 
     def square_is_occupied(self, row: int, column: int) -> bool:
