@@ -3,7 +3,7 @@ from games.game import Solitare, ConnectFour, TicTacToe
 from utils.game_options import GameOptions
 from utils.clitools import clear_screen, delay_effect, print_menu_screen, menu_select
 from utils.strings import SIMPLE_GAMES_START
-from core.board import LineChecker
+from core.board import LineChecker, Board
 import unicodedata
 
 # def get_display_width(text):
@@ -188,6 +188,32 @@ def run_game():
     # exit()
     
 def main():
+    test = Board(5,8)
+    # print(test._board)
+    b = test.get_columns()
+
+    # b = test.get_board(mutable=True)
+    test.add_to_square(0,2,56)
+    test.add_to_square(1,1,4)
+    test.add_to_square(4,3,678)
+    print(test)
+    print(test.get_diagonal_line_up(2,0,3,'right'))
+    print(test.get_diagonal_segment(2,0,3))
+    print(test.get_diagonal_line_down(2,1,3,'right'))
+    print(test.get_diagonal_segment(2,1,3, False, True))
+
+    # print(b)
+    # b[4][2] = 56
+    # test.rows = 20
+    # print(b)
+    # b = test.get_rows()
+    # b[4][2] = 56
+    # print(b)
+    # print(test)
+    # print(test.get_diagonals(3, 'left')[10:])
+    exit()
+
+
     ConnectFourCLI.run()
     exit()
     print_menu_screen()

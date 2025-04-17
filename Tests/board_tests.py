@@ -37,7 +37,7 @@ for col in range(7):
         pass
     else:
         test.update_square(5, col, "b")
-print(test.board)
+# print(test.board)
 print(test)
 
 win = LineChecker(test, 4)
@@ -104,3 +104,47 @@ test.update_square(4, 4, "x")  # Fourth "x" in the diagonal
 test.update_square(5, 0, "o")  # Just a random "o" in another spot
 print(test)
 print_winner(win)
+
+# Diagonal Tests after Refactoring
+test = Board(6, 7)
+test.add_to_square(3, 0, "r")
+test.add_to_square(4, 1, "r")
+test.add_to_square(5, 2, "r")
+test.add_to_square(4, 3, "y")
+test.add_to_square(3, 4, "y")
+print(test)
+print("Next Line should be a valid line.")
+print(test.get_diagonal_segment(3, 0, 3, False))
+print("Next Line should be None")
+print(test.get_diagonal_segment(3, 0, 4, False))
+print("Next Line should be a valid line.")
+print(test.get_diagonal_line_down(3, 0, 3, "right"))
+print("Next Line should be an empty list")
+print(test.get_diagonal_line_down(3, 0, 4, "right"))
+
+print("Next Line should be a valid line.")
+print(test.get_diagonal_segment(3, 4, 3, False, False))
+print("Next Line should be None")
+print(test.get_diagonal_segment(3, 4, 4, False, False))
+print("Next Line should be a valid line.")
+print(test.get_diagonal_line_down(3, 4, 3, "left"))
+print("Next Line should be an empty list")
+print(test.get_diagonal_line_down(3, 4, 4, "left"))
+
+print("Next Line should be a valid line.")
+print(test.get_diagonal_segment(3, 0, 4))
+print("Next Line should be None")
+print(test.get_diagonal_segment(3, 0, 5))
+print("Next Line should be a valid line.")
+print(test.get_diagonal_line_up(3, 0, 4, "right"))
+print("Next Line should be an empty list")
+print(test.get_diagonal_line_up(3, 0, 5, "right"))
+
+print("Next Line should be a valid line.")
+print(test.get_diagonal_segment(3, 4, 4, True, False))
+print("Next Line should be None")
+print(test.get_diagonal_segment(3, 4, 5, True, False))
+print("Next Line should be a valid line.")
+print(test.get_diagonal_line_up(3, 4, 4, "left"))
+print("Next Line should be an empty list")
+print(test.get_diagonal_line_up(3, 4, 5, "left"))

@@ -52,7 +52,7 @@ def play_game(game) -> None:
         elif isinstance(player, TicTacToe.AIPlayer):
             print(other_strings["thinking"])
             sleep(1.5)
-            row, col = player.move(game.board)
+            row, col = player.move(game.board.get_board())
             game.make_move(row, col, player.marker)
 
         # GameCLI.clear_screen()

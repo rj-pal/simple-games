@@ -7,7 +7,6 @@ from core.deck import CardDeck, CardStack, CardQueue
 from core.player import Player
 from time import sleep
 
-
 def int_converter(number, columns):
     return divmod(number, columns)
 
@@ -284,14 +283,14 @@ class ConnectFour:
             super().__init__(board, win_value)
 
         def _check_full_rows(self, win_value: int) -> Optional[tuple]:
-            for r, row in enumerate(self.board.get_rows()):
+            for r, row in enumerate(self._board.get_rows()):
                 for i in range(4):
                     row_slice = row[i:i + 4]
                     if winner := LineChecker.check_all_same(row_slice):
                         return winner, "row", r, i
     
         def _check_full_columns(self, win_value: int) -> Optional[tuple]:
-            for c, column in enumerate(self.board.get_columns()):
+            for c, column in enumerate(self._board.get_columns()):
                 for i in range(3):
                     col_slice = column[i:i + 4]
                     if winner := LineChecker.check_all_same(col_slice):
@@ -299,14 +298,14 @@ class ConnectFour:
                         return winner, "column", i, c
         
         def _check_diagonals(self, win_value: int) -> Optional[tuple]:
-            for l, line in enumerate(self.board.get_diagonals(win_value, "right")):
+            for l, line in enumerate(self._board.get_diagonals(win_value, "right")):
                 if winner := LineChecker.check_all_same(line):
-                    r, c = int_converter(l, self.board.columns - win_value + 1)
+                    r, c = int_converter(l, self._board.columns - win_value + 1)
                     return winner, "right_diagonal", r, c
-            for l, line in enumerate(self.board.get_diagonals(win_value, "left")):
+            for l, line in enumerate(self._board.get_diagonals(win_value, "left")):
                 if winner := LineChecker.check_all_same(line):
-                    r, c = int_converter(l, self.board.columns - win_value + 1)
-                    c = self.board.columns - 1 - c
+                    r, c = int_converter(l, self._board.columns - win_value + 1)
+                    c = self._board.columns - 1 - c
                     return winner, "left_diagonal", r, c
 
 
@@ -542,7 +541,6 @@ class ConnectFour:
        
             return block_position if block_position != -1 else None
             
-
 class TicTacToe:
 
     def __init__(self):
@@ -834,6 +832,7 @@ class TicTacToe:
             row = randint(0, 2)
             column = randint(0, 2)
             while self.game.board.square_is_occupied(row, column):
+                # print(f"Row {row}, Col {column}")
                 row = randint(0, 2)
                 column = randint(0, 2)
 
@@ -940,10 +939,11 @@ class TicTacToe:
                     return move
 
                 else:
-                    # print("IM HERE!!!!")
-                    # print(self.game.move_list)
-                    # print(self.game.board)
+                    print("IM HERE!!!!")
+                    print(self.game.move_list)
+                    print(self.game.board)
                     move = self.random_ints(self.game.board)
+                    print(f"MOVE {move}")
                 return move
             
             else:
@@ -1100,7 +1100,7 @@ class TicTacToe:
                 if self.game.go_first:  # strategy is based on if human player plays first or not (go_first is for human player
                     
                     result = self.defence_mode(self.game.board)
-                    # assert result is not None 
+                    assert result is not None 
                     return result
                     # return self.defence_mode(self.game.board)
                 else:
