@@ -44,7 +44,10 @@ class Solitare:
         for foundation in self.get_foundation_piles():
             if card.suit == foundation.suit:
                 if foundation.is_empty():
+                    print("PUSHED ACE TO FOUNDATION")
                     foundation.push(card)
+                    
+                    print(foundation)
                     return True
                 elif foundation.peek().value == card.value - 1:
                     foundation.push(card)
@@ -119,12 +122,14 @@ class Solitare:
         # return deepcopy(self.tableau.get_rows()[0])
         
     def get_foundation_piles(self):
+        # for pile in self.foundation_piles.get_board(mutable=False):
+        # print(self.foundation_piles.get_rows()[0])
         return self.foundation_piles.get_rows()[0]
-        # return deepcopy(self.foundation_piles.get_rows()[0])
     
     def get_stock_pile(self):
-        return self.draw_pile.get_rows()[0]
-        # return deepcopy(self.draw_pile)
+        return self.draw_pile.get_square_value()
+        # return self.draw_pile.get_board(mutable=True)
+        # return self.draw_pile.get_rows()[0]
     
     def show_tableau(self):
         for card_stack in self.get_tableau():

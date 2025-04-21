@@ -123,7 +123,7 @@ class Board:
 
 
     def get_rows(self) -> list[list[Union[int, str]]]:
-        return self.get_board()
+        return self.get_board(mutable=True)
 
     def get_columns(self) -> list[list[Union[int, str]]]:
         board_copy = self.get_board()
