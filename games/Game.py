@@ -40,23 +40,37 @@ class Solitare:
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
     
     def move_to_foundation(self, card):
+        current_card_suit = card.suit
+        current_foundation_pile = self.foundation_piles[current_card_suit]
+        if current_foundation_pile.is_empty() and card.value == 1:
+            current_foundation_pile.push(card)
+            print("PUSHED ACE TO FOUNDATION")
+            return True
+        elif current_foundation_pile.peek().value == card.value - 1:
+            current_foundation_pile.push(card)
+            print(f"PUSHED {card} to foundation.")
+            return True
+        else:
+            print("Cannot Add to foundation pile")
+            return False
+
         # pass
-        for foundation in self.get_foundation_piles():
-            if card.suit == foundation.suit:
-                if foundation.is_empty():
-                    print("PUSHED ACE TO FOUNDATION")
-                    foundation.push(card)
+        # for foundation in self.get_foundation_piles():
+        #     if card.suit == foundation.suit:
+        #         if foundation.is_empty():
+        #             print("PUSHED ACE TO FOUNDATION")
+        #             foundation.push(card)
                     
-                    print(foundation)
-                    return True
-                elif foundation.peek().value == card.value - 1:
-                    foundation.push(card)
-                    return True
-                else:
-                    print("Cannot Add to foundation pile")
-                    return False
-        print("That foundation pile does not exist yet.")
-        return False
+        #             print(foundation)
+        #             return True
+        #         elif foundation.peek().value == card.value - 1:
+        #             foundation.push(card)
+        #             return True
+        #         else:
+        #             print("Cannot Add to foundation pile")
+        #             return False
+        # print("That foundation pile does not exist yet.")
+        # return False
 
     def build(self, position, stock_card):
         if 0 <= position < self.size:
@@ -85,30 +99,42 @@ class Solitare:
 
     
     def make_tableau(self):
-        tableau = Board(1, 7)
+        # tableau = Board(1, 7)
+        tableau = []
         self.card_deck.shuffle_deck()
-        for i in range(tableau.columns):
+        for i in range(7):
             card_stack = self.card_deck.deal_cards(i + 1)
             card_stack.head.next.value.flip_card()
-            tableau.add_to_square(0, i, card_stack)
+            tableau.append(card_stack)
             self.card_deck.shuffle_deck()
+        # for i in range(tableau.columns):
+        #     card_stack = self.card_deck.deal_cards(i + 1)
+        #     card_stack.head.next.value.flip_card()
+        #     tableau.add_to_square(0, i, card_stack)
+        #     self.card_deck.shuffle_deck()
         return tableau
 
     def make_foundation_piles(self):
         SUITS = ("S", "H", "D", "C")
-        foundation_piles = Board(1, 4)
-        for i in range(foundation_piles.columns):
+        foundation_piles = {}
+        # foundation_piles = Board(1, 4)
+        for suit in SUITS:
             card_stack = self.card_deck.get_empty_card_stack()
-            card_stack.suit = SUITS[i]
-            foundation_piles.add_to_square(0, i, card_stack)
+            card_stack.suit = suit
+            foundation_piles[suit] = card_stack
         return foundation_piles
+        # for i in range(foundation_piles.columns):
+        #     card_stack = self.card_deck.get_empty_card_stack()
+        #     card_stack.suit = SUITS[i]
+        #     foundation_piles.add_to_square(0, i, card_stack)
+        # return foundation_piles
 
     def make_draw_pile(self):
-        stock_pile = Board(1,1)
+        # stock_pile = Board(1,1)
         draw_pile = self.card_deck.pile()
         draw_pile.head.next.value.flip_card()
-        stock_pile.add_to_square(0, 0, draw_pile)
-        return stock_pile
+        # stock_pile.add_to_square(0, 0, draw_pile)
+        return draw_pile
         # discard_pile = self.card_deck.get_empty_card_queue()
         # self.draw_discard_piles.add_to_square(0, 0, draw_pile)
         # self.draw_discard_piles.add_to_square(0, 1, discard_pile)
@@ -118,16 +144,16 @@ class Solitare:
         # return deepcopy(self.card_deck)
     
     def get_tableau(self):
-        return self.tableau.get_rows()[0]
+        return self.tableau
         # return deepcopy(self.tableau.get_rows()[0])
         
     def get_foundation_piles(self):
         # for pile in self.foundation_piles.get_board(mutable=False):
         # print(self.foundation_piles.get_rows()[0])
-        return self.foundation_piles.get_rows()[0]
+        return self.foundation_piles
     
     def get_stock_pile(self):
-        return self.draw_pile.get_square_value()
+        return self.draw_pile
         # return self.draw_pile.get_board(mutable=True)
         # return self.draw_pile.get_rows()[0]
     
@@ -141,10 +167,10 @@ class Solitare:
             # print(card_stack.peek())
             print(card_stack)
 
-    def show_draw_disard_piles(self):
-        for card_queue in self.get_stock_pile():
+    def show_stock_pile(self):
+        print(self.get_stock_pile())
             # print(card_stack.peek())
-            print(card_queue)
+            # print(card_queue)
 
 class ConnectFour:
 

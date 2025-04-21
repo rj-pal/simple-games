@@ -58,7 +58,8 @@ def print_tableau(tableau):
 
 
 def print_foundation_piles(piles):
-    top_cards = [card_stack.peek() if card_stack.is_empty() else card_stack.peek().face for card_stack in piles]
+    top_cards = [card_stack.peek() if card_stack.is_empty() else card_stack.peek().face for card_stack in piles.values()]
+    # top_cards = [card_stack.peek() if card_stack.is_empty() else card_stack.peek().face for card_stack in piles]
     print(" | ".join(top_cards))
 
 def print_draw_pile(pile):
@@ -143,9 +144,7 @@ def run_game():
                     print("Invalid move")
                     test.get_tableau()[column].push(card)
                 
-                # draw.head.next.value.flip_card()
-
-            
+                # draw.head.next.value.flip_card() 
             
         elif move == 3:
             test.card_deck.add_card(draw.pop())
@@ -166,49 +165,37 @@ def run_game():
 
 
 # Solitaire Testing
-# def main():
-    # test = ConnectFour()
-    # print(test.columns)
-    # test.create_ai_player(True)
-
-    # # print(test.players[0])
-    # player = test.players[1]
-
-    # print(player.move())
-    # exit()
-
-
-    # run_game()
-    # exit()
-
-    # test = Solitare()
-    # # test.make_tableau()
-    # test.show_tableau()
-    # # print(test.card_deck.size)
-    # # test.make_foundation_piles()
-    # test.show_foundation_piles()
-    # # test.make_draw_pile()
-    # test.show_draw_disard_piles()
-    # # print(test.card_deck.size)
-    # exit()
-    
 def main():
-    # ConnectFourCLI.run()
     run_game()
     exit()
-    print_menu_screen()
-    valid_game_options  = GameOptions.values()
-    choice = menu_select(valid_game_options)
-    
-    if choice == GameOptions.TIC_TAC_TOE.value:
-        TicTacToeCLI.run()
-    elif choice == GameOptions.CONNECT_FOUR.value:
-        ConnectFourCLI.run()
-    elif choice == GameOptions.SOLITAIRE.value:
-        run_game()
-    else:
-        raise ValueError("Invalid choice. See you next time.")
+    test = Solitare()
+    # test.make_tableau()
+    test.show_tableau()
+    # print(test.card_deck.size)
+    # test.make_foundation_piles()
+    test.show_foundation_piles()
+    # test.make_draw_pile()
+    test.show_stock_pile()
+    # print(test.card_deck.size)
     exit()
+    
+# def main():
+#     # ConnectFourCLI.run()
+#     run_game()
+#     exit()
+#     print_menu_screen()
+#     valid_game_options  = GameOptions.values()
+#     choice = menu_select(valid_game_options)
+    
+#     if choice == GameOptions.TIC_TAC_TOE.value:
+#         TicTacToeCLI.run()
+#     elif choice == GameOptions.CONNECT_FOUR.value:
+#         ConnectFourCLI.run()
+#     elif choice == GameOptions.SOLITAIRE.value:
+#         run_game()
+#     else:
+#         raise ValueError("Invalid choice. See you next time.")
+#     exit()
 
 if __name__ == '__main__':
     main()
