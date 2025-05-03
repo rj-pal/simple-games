@@ -24,20 +24,28 @@ def board(rows: int, columns: int):
 
 class Solitare:
 
-    def __init__(self):
+    def __init__(self, size: int=7):
+        self._size = size
         self.card_deck = CardDeck()
         self.tableau = self.make_tableau()
         self.foundation_piles = self.make_foundation_piles()
         self.draw_pile = self.make_draw_pile()
+
         
 
     @property
     def size(self):
-        return self.tableau.columns
+        return self._size
     
     
     def add_card(self, from_card, to_card):
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
+    
+    def draw(self):
+        self.card_deck.add_card(self.draw_pile.pop())
+        self.flip_card_draw_pile()
+        return True
+
     
     def move_to_foundation(self, card):
         current_card_suit = card.suit
@@ -72,29 +80,59 @@ class Solitare:
         # print("That foundation pile does not exist yet.")
         # return False
 
-    def build(self, position, stock_card):
+    def build(self, position):
         if 0 <= position < self.size:
             card_stack = self.get_tableau()[position]
             table_card = card_stack.peek()
+            stock_card = self.draw_pile.peek()
             if self.add_card(stock_card, table_card):
-                card_stack.push(stock_card)
+                card_stack.push(self.draw_pile.pop())
                 return True
         
         return False
     
-    def transfer(self, from_position, to_position):
+    def transfer(self, from_position, to_position, number_of_cards=1):
         if 0 <= from_position < self.size and 0 <= to_position < self.size:
             from_card_stack = self.get_tableau()[from_position]
-            from_card = from_card_stack.peek()
+            temp_card = from_card_stack.head.next
+
+            for _ in range(number_of_cards - 1):
+                if temp_card.next.value.visible:
+                    temp_card = temp_card.next
+                else:
+                    print("Invalid move. The card you are attempting to move is hidden.")
+                    print(input())
+                    return False
+                
+            print(temp_card.value)
+            print(input("ENTER TO CONTINUE"))
             to_card_stack = self.get_tableau()[to_position]
             to_card = to_card_stack.peek()
+            from_card = temp_card.value
+            
             if self.add_card(from_card, to_card):
-                to_card_stack.push(from_card_stack.pop())
+                temp_stack = CardStack()
+                for _ in range(number_of_cards):
+                    temp_stack.push(from_card_stack.pop())
+                while not temp_stack.is_empty():
+                    to_card_stack.push(temp_stack.pop())
                 from_card_stack.head.next.value.flip_card()
-                # self.get_stock_pile()[0].head.next.value.flip_card()
                 return True
+            else:
+                return False
+
+
+
+        #     from_card = from_card_stack.peek()
+        #     #######################
+        #     
+        #     
+        #         to_card_stack.push(from_card_stack.pop())
+        #         from_card_stack.head.next.value.flip_card()
+        #         # self.get_stock_pile()[0].head.next.value.flip_card()
+        #         return True
         
-        return False
+        # return False
             
 
     
@@ -102,7 +140,7 @@ class Solitare:
         # tableau = Board(1, 7)
         tableau = []
         self.card_deck.shuffle_deck()
-        for i in range(7):
+        for i in range(self.size):
             card_stack = self.card_deck.deal_cards(i + 1)
             card_stack.head.next.value.flip_card()
             tableau.append(card_stack)
@@ -161,6 +199,7 @@ class Solitare:
         for card_stack in self.get_tableau():
             # print(card_stack.peek())
             print(card_stack)
+            # print()
 
     def show_foundation_piles(self):
         for card_stack in self.get_foundation_piles():
@@ -171,6 +210,9 @@ class Solitare:
         print(self.get_stock_pile())
             # print(card_stack.peek())
             # print(card_queue)
+
+    def flip_card_draw_pile(self):
+        self.draw_pile.head.next.value.flip_card()
 
 class ConnectFour:
 

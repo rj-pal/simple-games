@@ -74,6 +74,15 @@ def print_card_table(tableau, piles, pile):
 
 def run_game():
     test = Solitare()
+    # print(test.size)
+    # exit()
+    def stack_validator():
+        while True:
+            position = int(input("Enter the card stack number: ")) - 1
+            if position in range(7):
+                return position
+            print("Invalid entry. Enter only 1 to 7. Try again.\n")
+
     
     for _ in range(15):
         tab = test.get_tableau()
@@ -87,24 +96,25 @@ def run_game():
         print()
         move = int(input("\nPress 1 to build\nPress 2 to move an Ace to a foundation pile\nPress 3 to draw\nPress 4 to move stock to tableau\nEnter your response: "))
         if move == 1:
-            while True:
-                position = int(input("Enter the card stack number: "))
-                if position in range(9):
-                    break
-                print("Invalid entry. Try again.\n")
+            stack_number = stack_validator()
+            # while True:
+            #     position = int(input("Enter the card stack number: ")) - 1
+            #     if position in range(7):
+            #         break
+            #     print("Invalid entry. Try again.\n")
 
            
-            card = draw.pop()
+            # card = draw.pop()
             # print(type(card))
-            if test.build(position, card):
+            if test.build(stack_number):
                 print("Move successful")
                 
             else:
                 print("Invalid move")
-                draw.push(card)
+                # draw.push(card)
                 # test.card_deck.add_card(card)
                     
-            draw.head.next.value.flip_card()
+            test.flip_card_draw_pile()
             input("ENTER to Continue")
         elif move == 2:
             while True:
@@ -147,15 +157,29 @@ def run_game():
                 # draw.head.next.value.flip_card() 
             
         elif move == 3:
-            test.card_deck.add_card(draw.pop())
-            draw.head.next.value.flip_card()
-            input("ENTER to Continue")
+            if test.draw():
+                input("ENTER to Continue")
+            else:
+                print("ERROR OCCURRED")
+            
 
         elif move == 4:
-            from_stack = int(input("Move card from stack number: "))
-            to_stack = int(input("Move card from stack number: "))
-            if test.transfer(from_stack, to_stack):
+            print("\nFirst enter the stack you wish to move from.")
+            from_stack = stack_validator()
+
+            print("\nNext, enter the stack you wish to move to.")
+            to_stack = stack_validator()
+            
+            print(f"Now, how many cards you wish to move from stack {from_stack + 1} to stack {to_stack + 1}.")
+            while True:
+                number_of_cards = int(input())
+                if number_of_cards in range(1, 15):
+                    break
+                print("There are only 14 cards possible in a stack. Please enter only 1 to 14.")
+            
+            if test.transfer(from_stack, to_stack, number_of_cards):
                 print("Move successful")
+                print(input("Press Enter to Continue."))
                 # draw.head.next.value.flip_card()
             else:
                 print("Invalid move")
@@ -177,6 +201,12 @@ def main():
     # test.make_draw_pile()
     test.show_stock_pile()
     # print(test.card_deck.size)
+    test_card = test.get_tableau()[0].pop()
+    print(test_card)
+    print(test_card.value)
+    print(test_card.visible)
+    print(test_card.suit)
+    print(test_card.is_black)
     exit()
     
 # def main():
