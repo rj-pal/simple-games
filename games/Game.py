@@ -38,16 +38,52 @@ class Solitare:
         return self._size
     
     
-    def add_card(self, from_card, to_card):
+    def check_move(self, from_card, to_card):
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
     
     def draw(self):
-        self.card_deck.add_card(self.draw_pile.pop())
+        if self.card_deck.peek().visible:
+            self.card_deck.add_card(self.draw_pile.pop())
         self.flip_card_draw_pile()
         return True
 
     
-    def move_to_foundation(self, card):
+    def move_to_foundation(self, stack_number: int=-1, from_stock_pile: bool=True):
+
+        def check_foundation_move(from_pile, foundation_pile, card):
+            if foundation_pile.is_empty():
+                if card.value == 1:
+                    foundation_pile.push(from_pile.pop())
+                    return True
+            elif card.value == foundation_pile.peek().value + 1:
+                foundation_pile.push(from_pile.pop())
+                return True      
+            return False
+
+        if from_stock_pile:
+            stock_pile = self.get_stock_pile()
+            card = stock_pile.peek()
+            foundation_pile = self.foundation_piles[card.suit]
+
+            return check_foundation_move(stock_pile, foundation_pile, card)
+            
+        else:
+            ### ADD ERROR HANDLING MAYBE???
+            # if stack_number < 0 or stack_number >= len(self.get_tableau()):
+            #     print(f"Error: Invalid stack number: {stack_number}")
+            #     return False  # Or raise an exception, depending on your error handling strategy
+
+            tableau_stack = self.get_tableau()[stack_number]
+            card = tableau_stack.peek()
+            foundation_pile = self.foundation_piles[card.suit]
+
+            return check_foundation_move(tableau_stack, foundation_pile, card)
+
+
+
+
+
+
         current_card_suit = card.suit
         current_foundation_pile = self.foundation_piles[current_card_suit]
         if current_foundation_pile.is_empty() and card.value == 1:
@@ -85,7 +121,7 @@ class Solitare:
             card_stack = self.get_tableau()[position]
             table_card = card_stack.peek()
             stock_card = self.draw_pile.peek()
-            if self.add_card(stock_card, table_card):
+            if self.check_move(stock_card, table_card):
                 card_stack.push(self.draw_pile.pop())
                 return True
         
@@ -110,7 +146,7 @@ class Solitare:
             to_card = to_card_stack.peek()
             from_card = temp_card.value
             
-            if self.add_card(from_card, to_card):
+            if self.check_move(from_card, to_card):
                 temp_stack = CardStack()
                 for _ in range(number_of_cards):
                     temp_stack.push(from_card_stack.pop())
@@ -213,6 +249,9 @@ class Solitare:
 
     def flip_card_draw_pile(self):
         self.draw_pile.head.next.value.flip_card()
+
+    def flip_card_tableau(self, stack_number):
+        self.tableau[stack_number].head.next.value.flip_card()
 
 class ConnectFour:
 

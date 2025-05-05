@@ -47,6 +47,7 @@ def print_tableau(tableau):
     max_card_length = max(len(card) for stack in tableau_lists for card in stack)
     print(max_card_length)
     padded_tableau = [stack + [" "] * (max_height - len(stack)) for stack in tableau_lists]
+    # padded_tableau.insert(0, ["Stack 1", "Stack 2", "Stack 3", "Stack 4", "Stack 5", "Stack 6", "Stack 7"])
    
     
 
@@ -94,70 +95,49 @@ def run_game():
         print_card_table(tab, fp, draw)
         
         print()
-        move = int(input("\nPress 1 to build\nPress 2 to move an Ace to a foundation pile\nPress 3 to draw\nPress 4 to move stock to tableau\nEnter your response: "))
+        move = int(input("\nPress 1: To build to the tableau.\nPress 2: To build to the foundation piles.\n" \
+                         "Press 3: To turn top card from the stock pile to the waste pile.\nPress 4: To move stock to tableau\nEnter your response: "))
         if move == 1:
             stack_number = stack_validator()
-            # while True:
-            #     position = int(input("Enter the card stack number: ")) - 1
-            #     if position in range(7):
-            #         break
-            #     print("Invalid entry. Try again.\n")
-
-           
-            # card = draw.pop()
-            # print(type(card))
+            
             if test.build(stack_number):
                 print("Move successful")
                 
             else:
                 print("Invalid move")
-                # draw.push(card)
-                # test.card_deck.add_card(card)
                     
-            test.flip_card_draw_pile()
+            # test.flip_card_draw_pile()
             input("ENTER to Continue")
         elif move == 2:
             while True:
-                location = int(input("Press 1 to move from stock pile or press 2 to move from the board: "))
+                location = int(input("Press 1 to move a card from stock pile or press 2 to move from the tableau: "))
                 if location not in {1,2}:
                     print("Invalid entry. Try again.\n")
                 else:
                     break
             if location == 1:
-                if draw.peek().value != 1:
-                    print("Cannot move a card that is not an Ace")
-                    break
-               
-                card = draw.pop()
-                if test.move_to_foundation(card):
+
+                if test.move_to_foundation():
                     print("Move successful")
                     draw.head.next.value.flip_card()
-                # test.show_foundation_piles()
-                    input("ENTER to Continue")
+                    
                 else:
-                    print("Invalid move")
-                    test.draw.push(card)
+                    print("Invalid move.")
                           
             elif location == 2:
-                column = int(input("Enter the column of the card where there is an Ace: "))
-                ### NEEDS VALIDATION
-                if test.get_tableau()[column].peek().value != 1:
-                    print("Cannot move a card that is not an Ace")
-                    break
-                card = test.get_tableau()[column].pop()
-                if test.move_to_foundation(card):
+                column = stack_validator()
+                if test.move_to_foundation(column, False):
                     print("Move successful")
-                    test.get_tableau()[column].head.next.value.flip_card()
-                # test.show_foundation_piles()
-                    input("ENTER to Continue")
+                    test.flip_card_tableau(column)
+                    # draw.head.next.value.flip_card()
                 else:
                     print("Invalid move")
-                    test.get_tableau()[column].push(card)
-                
-                # draw.head.next.value.flip_card() 
-            
+            input("ENTER to Continue")
+                       
         elif move == 3:
             if test.draw():
+                test.flip_card_draw_pile()
+                
                 input("ENTER to Continue")
             else:
                 print("ERROR OCCURRED")
