@@ -47,6 +47,7 @@ def print_tableau(tableau):
     max_card_length = max(len(card) for stack in tableau_lists for card in stack)
     print(max_card_length)
     padded_tableau = [stack + [" "] * (max_height - len(stack)) for stack in tableau_lists]
+    # padded_tableau.insert(0, ["Stack 1", "Stack 2", "Stack 3", "Stack 4", "Stack 5", "Stack 6", "Stack 7"])
    
     
 
@@ -58,7 +59,8 @@ def print_tableau(tableau):
 
 
 def print_foundation_piles(piles):
-    top_cards = [card_stack.peek() if card_stack.is_empty() else card_stack.peek().face for card_stack in piles]
+    top_cards = [card_stack.peek() if card_stack.is_empty() else card_stack.peek().face for card_stack in piles.values()]
+    # top_cards = [card_stack.peek() if card_stack.is_empty() else card_stack.peek().face for card_stack in piles]
     print(" | ".join(top_cards))
 
 def print_draw_pile(pile):
@@ -73,6 +75,15 @@ def print_card_table(tableau, piles, pile):
 
 def run_game():
     test = Solitare()
+    # print(test.size)
+    # exit()
+    def stack_validator():
+        while True:
+            position = int(input("Enter the card stack number: ")) - 1
+            if position in range(7):
+                return position
+            print("Invalid entry. Enter only 1 to 7. Try again.\n")
+
     
     for _ in range(15):
         tab = test.get_tableau()
@@ -84,79 +95,71 @@ def run_game():
         print_card_table(tab, fp, draw)
         
         print()
-        move = int(input("\nPress 1 to build\nPress 2 to move an Ace to a foundation pile\nPress 3 to draw\nPress 4 to move stock to tableau\nEnter your response: "))
+        move = int(input("\nPress 1: To build to the tableau.\nPress 2: To build to the foundation piles.\n" \
+                         "Press 3: To turn top card from the stock pile to the waste pile.\nPress 4: To move stock to tableau\nEnter your response: "))
         if move == 1:
-            while True:
-                position = int(input("Enter the card stack number: "))
-                if position in range(9):
-                    break
-                print("Invalid entry. Try again.\n")
-
-           
-            card = draw.pop()
-            # print(type(card))
-            if test.build(position, card):
+            stack_number = stack_validator()
+            
+            if test.build(stack_number):
                 print("Move successful")
                 
             else:
                 print("Invalid move")
-                draw.push(card)
-                # test.card_deck.add_card(card)
                     
-            draw.head.next.value.flip_card()
+            # test.flip_card_draw_pile()
             input("ENTER to Continue")
         elif move == 2:
             while True:
-                location = int(input("Press 1 to move from stock pile or press 2 to move from the board: "))
+                location = int(input("Press 1 to move a card from stock pile or press 2 to move from the tableau: "))
                 if location not in {1,2}:
                     print("Invalid entry. Try again.\n")
                 else:
                     break
             if location == 1:
-                if draw.peek().value != 1:
-                    print("Cannot move a card that is not an Ace")
-                    break
-               
-                card = draw.pop()
-                if test.move_to_foundation(card):
+
+                if test.move_to_foundation():
                     print("Move successful")
                     draw.head.next.value.flip_card()
-                # test.show_foundation_piles()
-                    input("ENTER to Continue")
+                    
                 else:
-                    print("Invalid move")
-                    test.draw.push(card)
+                    print("Invalid move.")
                           
             elif location == 2:
-                column = int(input("Enter the column of the card where there is an Ace: "))
-                ### NEEDS VALIDATION
-                if test.get_tableau()[column].peek().value != 1:
-                    print("Cannot move a card that is not an Ace")
-                    break
-                card = test.get_tableau()[column].pop()
-                if test.move_to_foundation(card):
+                column = stack_validator()
+                if test.move_to_foundation(column, False):
                     print("Move successful")
-                    test.get_tableau()[column].head.next.value.flip_card()
-                # test.show_foundation_piles()
-                    input("ENTER to Continue")
+                    test.flip_card_tableau(column)
+                    # draw.head.next.value.flip_card()
                 else:
                     print("Invalid move")
-                    test.get_tableau()[column].push(card)
-                
-                # draw.head.next.value.flip_card()
-
-            
-            
-        elif move == 3:
-            test.card_deck.add_card(draw.pop())
-            draw.head.next.value.flip_card()
             input("ENTER to Continue")
+                       
+        elif move == 3:
+            if test.draw():
+                test.flip_card_draw_pile()
+                
+                input("ENTER to Continue")
+            else:
+                print("ERROR OCCURRED")
+            
 
         elif move == 4:
-            from_stack = int(input("Move card from stack number: "))
-            to_stack = int(input("Move card from stack number: "))
-            if test.transfer(from_stack, to_stack):
+            print("\nFirst enter the stack you wish to move from.")
+            from_stack = stack_validator()
+
+            print("\nNext, enter the stack you wish to move to.")
+            to_stack = stack_validator()
+            
+            print(f"Now, how many cards you wish to move from stack {from_stack + 1} to stack {to_stack + 1}.")
+            while True:
+                number_of_cards = int(input())
+                if number_of_cards in range(1, 15):
+                    break
+                print("There are only 14 cards possible in a stack. Please enter only 1 to 14.")
+            
+            if test.transfer(from_stack, to_stack, number_of_cards):
                 print("Move successful")
+                print(input("Press Enter to Continue."))
                 # draw.head.next.value.flip_card()
             else:
                 print("Invalid move")
@@ -166,49 +169,43 @@ def run_game():
 
 
 # Solitaire Testing
-# def main():
-    # test = ConnectFour()
-    # print(test.columns)
-    # test.create_ai_player(True)
-
-    # # print(test.players[0])
-    # player = test.players[1]
-
-    # print(player.move())
-    # exit()
-
-
-    # run_game()
-    # exit()
-
-    # test = Solitare()
-    # # test.make_tableau()
-    # test.show_tableau()
-    # # print(test.card_deck.size)
-    # # test.make_foundation_piles()
-    # test.show_foundation_piles()
-    # # test.make_draw_pile()
-    # test.show_draw_disard_piles()
-    # # print(test.card_deck.size)
-    # exit()
-    
 def main():
-    # ConnectFourCLI.run()
     run_game()
     exit()
-    print_menu_screen()
-    valid_game_options  = GameOptions.values()
-    choice = menu_select(valid_game_options)
-    
-    if choice == GameOptions.TIC_TAC_TOE.value:
-        TicTacToeCLI.run()
-    elif choice == GameOptions.CONNECT_FOUR.value:
-        ConnectFourCLI.run()
-    elif choice == GameOptions.SOLITAIRE.value:
-        run_game()
-    else:
-        raise ValueError("Invalid choice. See you next time.")
+    test = Solitare()
+    # test.make_tableau()
+    test.show_tableau()
+    # print(test.card_deck.size)
+    # test.make_foundation_piles()
+    test.show_foundation_piles()
+    # test.make_draw_pile()
+    test.show_stock_pile()
+    # print(test.card_deck.size)
+    test_card = test.get_tableau()[0].pop()
+    print(test_card)
+    print(test_card.value)
+    print(test_card.visible)
+    print(test_card.suit)
+    print(test_card.is_black)
     exit()
+    
+# def main():
+#     # ConnectFourCLI.run()
+#     run_game()
+#     exit()
+#     print_menu_screen()
+#     valid_game_options  = GameOptions.values()
+#     choice = menu_select(valid_game_options)
+    
+#     if choice == GameOptions.TIC_TAC_TOE.value:
+#         TicTacToeCLI.run()
+#     elif choice == GameOptions.CONNECT_FOUR.value:
+#         ConnectFourCLI.run()
+#     elif choice == GameOptions.SOLITAIRE.value:
+#         run_game()
+#     else:
+#         raise ValueError("Invalid choice. See you next time.")
+#     exit()
 
 if __name__ == '__main__':
     main()
