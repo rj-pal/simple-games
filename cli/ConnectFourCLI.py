@@ -1,4 +1,4 @@
-from games.game import ConnectFour
+from games.games import ConnectFour
 import utils.clitools as GameCLI
 from utils.strings import connect4_strings, other_strings
 

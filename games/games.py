@@ -29,9 +29,7 @@ class Solitare:
         self.card_deck = CardDeck()
         self.tableau = self.make_tableau()
         self.foundation_piles = self.make_foundation_piles()
-        self.draw_pile = self.make_draw_pile()
-
-        
+        self.draw_pile = self.make_draw_pile()   
 
     @property
     def size(self):
@@ -39,12 +37,22 @@ class Solitare:
     
     
     def check_move(self, from_card, to_card):
+        # Check King move to empty stack
+        if from_card.value == 13 and to_card is None:
+            return True
+        # check all other possible moves
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
     
+    def check_win(self):
+        return all(pile.size == 13 for pile in self.foundation_piles.values())
+    
     def draw(self):
-        if self.card_deck.peek().visible:
+        if self.draw_pile.peek().visible:
             self.card_deck.add_card(self.draw_pile.pop())
+        
         self.flip_card_draw_pile()
+        print(self.draw_pile.peek())
+        print(self.draw_pile)
         return True
 
     
@@ -74,55 +82,36 @@ class Solitare:
             #     return False  # Or raise an exception, depending on your error handling strategy
 
             tableau_stack = self.get_tableau()[stack_number]
+            if tableau_stack.is_empty():
+                return False
+            
             card = tableau_stack.peek()
             foundation_pile = self.foundation_piles[card.suit]
 
-            return check_foundation_move(tableau_stack, foundation_pile, card)
+            if check_foundation_move(tableau_stack, foundation_pile, card):
+                if not tableau_stack.is_empty():
+                    self.flip_card_tableau(stack_number)
+                return True
+            else:
+                return False
 
-
-
-
-
-
-        current_card_suit = card.suit
-        current_foundation_pile = self.foundation_piles[current_card_suit]
-        if current_foundation_pile.is_empty() and card.value == 1:
-            current_foundation_pile.push(card)
-            print("PUSHED ACE TO FOUNDATION")
-            return True
-        elif current_foundation_pile.peek().value == card.value - 1:
-            current_foundation_pile.push(card)
-            print(f"PUSHED {card} to foundation.")
-            return True
-        else:
-            print("Cannot Add to foundation pile")
-            return False
-
-        # pass
-        # for foundation in self.get_foundation_piles():
-        #     if card.suit == foundation.suit:
-        #         if foundation.is_empty():
-        #             print("PUSHED ACE TO FOUNDATION")
-        #             foundation.push(card)
-                    
-        #             print(foundation)
-        #             return True
-        #         elif foundation.peek().value == card.value - 1:
-        #             foundation.push(card)
-        #             return True
-        #         else:
-        #             print("Cannot Add to foundation pile")
-        #             return False
-        # print("That foundation pile does not exist yet.")
-        # return False
 
     def build(self, position):
+        if not self.draw_pile.peek().visible:
+            return False
         if 0 <= position < self.size:
             card_stack = self.get_tableau()[position]
-            table_card = card_stack.peek()
+            if card_stack.is_empty():
+                table_card = None
+            else:
+                table_card = card_stack.peek()
+            
             stock_card = self.draw_pile.peek()
+    
             if self.check_move(stock_card, table_card):
                 card_stack.push(self.draw_pile.pop())
+                if self.card_deck.size != 0:
+                    self.draw_pile.push(self.card_deck.deck.pop())
                 return True
         
         return False
@@ -130,20 +119,32 @@ class Solitare:
     def transfer(self, from_position, to_position, number_of_cards=1):
         if 0 <= from_position < self.size and 0 <= to_position < self.size:
             from_card_stack = self.get_tableau()[from_position]
+
+            if from_card_stack.size < number_of_cards:
+                print(f"Invalid move. There are not enough cards in this stack to transfer {number_of_cards} cards.")
+                print(input("ENTER TO CONTINUE"))
+                return False
+
+            
             temp_card = from_card_stack.head.next
 
             for _ in range(number_of_cards - 1):
                 if temp_card.next.value.visible:
                     temp_card = temp_card.next
                 else:
-                    print("Invalid move. The card you are attempting to move is hidden.")
-                    print(input())
+                    print(f"Invalid move. There are not enough cards face up cards in this stack to transfer {number_of_cards} cards.")
+                    print(input("ENTER TO CONTINUE"))
                     return False
                 
             print(temp_card.value)
             print(input("ENTER TO CONTINUE"))
             to_card_stack = self.get_tableau()[to_position]
-            to_card = to_card_stack.peek()
+            
+            if to_card_stack.is_empty():
+                to_card = None
+            else:
+                to_card = to_card_stack.peek()
+            
             from_card = temp_card.value
             
             if self.check_move(from_card, to_card):
@@ -152,106 +153,75 @@ class Solitare:
                     temp_stack.push(from_card_stack.pop())
                 while not temp_stack.is_empty():
                     to_card_stack.push(temp_stack.pop())
-                from_card_stack.head.next.value.flip_card()
+                if not from_card_stack.is_empty() and not from_card_stack.head.next.value.visible:
+                    from_card_stack.head.next.value.flip_card()
                 return True
             else:
                 return False
 
-
-
-        #     from_card = from_card_stack.peek()
-        #     #######################
-        #     
-        #     
-        #         to_card_stack.push(from_card_stack.pop())
-        #         from_card_stack.head.next.value.flip_card()
-        #         # self.get_stock_pile()[0].head.next.value.flip_card()
-        #         return True
-        
-        # return False
-            
-
     
     def make_tableau(self):
-        # tableau = Board(1, 7)
         tableau = []
         self.card_deck.shuffle_deck()
         for i in range(self.size):
             card_stack = self.card_deck.deal_cards(i + 1)
             card_stack.head.next.value.flip_card()
             tableau.append(card_stack)
-            self.card_deck.shuffle_deck()
-        # for i in range(tableau.columns):
-        #     card_stack = self.card_deck.deal_cards(i + 1)
-        #     card_stack.head.next.value.flip_card()
-        #     tableau.add_to_square(0, i, card_stack)
-        #     self.card_deck.shuffle_deck()
+            self.card_deck.shuffle_deck()  
         return tableau
 
     def make_foundation_piles(self):
         SUITS = ("S", "H", "D", "C")
         foundation_piles = {}
-        # foundation_piles = Board(1, 4)
         for suit in SUITS:
             card_stack = self.card_deck.get_empty_card_stack()
             card_stack.suit = suit
             foundation_piles[suit] = card_stack
         return foundation_piles
-        # for i in range(foundation_piles.columns):
-        #     card_stack = self.card_deck.get_empty_card_stack()
-        #     card_stack.suit = SUITS[i]
-        #     foundation_piles.add_to_square(0, i, card_stack)
-        # return foundation_piles
+       
 
     def make_draw_pile(self):
-        # stock_pile = Board(1,1)
         draw_pile = self.card_deck.pile()
-        draw_pile.head.next.value.flip_card()
-        # stock_pile.add_to_square(0, 0, draw_pile)
         return draw_pile
-        # discard_pile = self.card_deck.get_empty_card_queue()
-        # self.draw_discard_piles.add_to_square(0, 0, draw_pile)
-        # self.draw_discard_piles.add_to_square(0, 1, discard_pile)
+    
 
     def get_deck(self):
         return self.card_deck
-        # return deepcopy(self.card_deck)
-    
+        
     def get_tableau(self):
         return self.tableau
-        # return deepcopy(self.tableau.get_rows()[0])
+       
         
     def get_foundation_piles(self):
-        # for pile in self.foundation_piles.get_board(mutable=False):
-        # print(self.foundation_piles.get_rows()[0])
+       
         return self.foundation_piles
     
     def get_stock_pile(self):
         return self.draw_pile
-        # return self.draw_pile.get_board(mutable=True)
-        # return self.draw_pile.get_rows()[0]
+    
     
     def show_tableau(self):
         for card_stack in self.get_tableau():
-            # print(card_stack.peek())
             print(card_stack)
-            # print()
 
     def show_foundation_piles(self):
         for card_stack in self.get_foundation_piles():
-            # print(card_stack.peek())
             print(card_stack)
 
     def show_stock_pile(self):
         print(self.get_stock_pile())
-            # print(card_stack.peek())
-            # print(card_queue)
 
     def flip_card_draw_pile(self):
+        if self.draw_pile.is_empty():
+            return False
         self.draw_pile.head.next.value.flip_card()
+        return True
 
     def flip_card_tableau(self, stack_number):
+        if self.tableau[stack_number].is_empty():
+            return False
         self.tableau[stack_number].head.next.value.flip_card()
+        return True
 
 class ConnectFour:
 

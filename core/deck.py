@@ -113,8 +113,8 @@ class CardStack:
             if current_card.value.visible:
                 card_list.append(current_card.value.face)
             else:
-                # card_list.append("######")
-                card_list.append("⬛")
+                # card_list.append(" ")
+                card_list.append("🎴")
 
             current_card = current_card.next
         return card_list
@@ -240,7 +240,7 @@ class CardDeck:
 
     
     def pile(self, number_of_cards=52, facedown=True):
-        card_queue = CardQueue()
+        card_queue = CardStack()
         for i in range(number_of_cards):
             if card := self.deal_card(facedown):
                 card_queue.push(card)

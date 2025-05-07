@@ -1,5 +1,5 @@
 import unittest
-from games.game import ConnectFour
+from games.games import ConnectFour
 
 class TestConnectFour(unittest.TestCase):
     def setUp(self):

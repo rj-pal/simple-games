@@ -2,7 +2,7 @@ import os
 from time import sleep
 from typing import Optional
 import utils.clitools as GameCLI
-from games.game import TicTacToe
+from games.games import TicTacToe
 from utils.strings import tictactoe_strings, other_strings#BOARDLINE_TICTAC, WELCOME_TICTACTOE, INTRO_TICTACTOE, GAMEOVER, THINKING
  
 def set_up_game():
