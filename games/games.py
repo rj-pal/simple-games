@@ -26,15 +26,15 @@ class Solitare:
 
     def __init__(self, size: int=7):
         self._size = size
-        self.card_deck = CardDeck()
+        self.card_deck = CardDeck() # Used for dealing initial cards and as the waste pile
         self.tableau = self.make_tableau()
         self.foundation_piles = self.make_foundation_piles()
-        self.draw_pile = self.make_draw_pile()   
+        self.draw_pile = self.make_draw_pile()
+        self.waste_pile = self.card_deck.get_empty_card_stack()
 
     @property
     def size(self):
         return self._size
-    
     
     def check_move(self, from_card, to_card):
         # Check King move to empty stack
@@ -46,10 +46,21 @@ class Solitare:
     def check_win(self):
         return all(pile.size == 13 for pile in self.foundation_piles.values())
     
-    def draw(self):
+    def push_card_back_to_stock_pile(self):
+        if self.card_deck.size != 0:
+            self.draw_pile.push(self.card_deck.deck.pop()) 
+
+    def draw(self, three_card=False):
+        """Draw a card from the stock pile and flip it over for move."""
+        # No drawing from empty stock pile
+        if self.draw_pile.is_empty():
+            print("Invalid move. Cannot draw from an empty stock pile.")
+            return False
+       
+        # When top card is face up, a draw will add it to the waste pile, or back to the initial card deck
         if self.draw_pile.peek().visible:
             self.card_deck.add_card(self.draw_pile.pop())
-        
+        # Flip over the top card from teh stock pile
         self.flip_card_draw_pile()
         print(self.draw_pile.peek())
         print(self.draw_pile)
@@ -57,8 +68,12 @@ class Solitare:
 
     
     def move_to_foundation(self, stack_number: int=-1, from_stock_pile: bool=True):
+        """Move a card from the stock pile or tableau to the foundation pile of the selected card's suit."""
 
-        def check_foundation_move(from_pile, foundation_pile, card):
+        def check_foundation_move(from_pile, card):
+            """Validates and moves card from stock pile or tabelau stack to the appropriate foundation pile."""
+            # Get the foundation pile that corresponds to the suit of the card
+            foundation_pile = self.foundation_piles[card.suit]
             if foundation_pile.is_empty() and card.value == 1:
                 foundation_pile.push(from_pile.pop())
                 return True
@@ -69,13 +84,19 @@ class Solitare:
 
         if from_stock_pile:
             stock_pile = self.get_stock_pile()
+            # No drawing from empty stock pile
+            if self.draw_pile.is_empty():
+                print("Invalid move. Cannot move from an empty stock pile.")
+                return False
             card = stock_pile.peek()
-            foundation_pile = self.foundation_piles[card.suit]
 
-            if check_foundation_move(stock_pile, foundation_pile, card):
-                if self.card_deck.size != 0:
-                    self.draw_pile.push(self.card_deck.deck.pop())
+            # Validate and make foundation move if allowed
+            if check_foundation_move(from_pile=stock_pile, card=card):
+                # Move top card back from the waste pile to the stock pile
+                self.push_card_back_to_stock_pile()
                 return True
+            else:
+                return False
             
         else:
             ### ADD ERROR HANDLING MAYBE???
@@ -84,13 +105,15 @@ class Solitare:
             #     return False  # Or raise an exception, depending on your error handling strategy
 
             tableau_stack = self.get_tableau()[stack_number]
+            # No moving from empty tableau stack
             if tableau_stack.is_empty():
-                return False
-            
+                print("Invalid move. Cannot move from an empty tableau stack.")
+                return False  
             card = tableau_stack.peek()
-            foundation_pile = self.foundation_piles[card.suit]
 
-            if check_foundation_move(tableau_stack, foundation_pile, card):
+            # Validate and make foundation move if allowed
+            if check_foundation_move(from_pile=tableau_stack, card=card):
+                # Flip over bottom card from tableau stack
                 if not tableau_stack.is_empty():
                     self.flip_card_tableau(stack_number)
                 return True
@@ -99,21 +122,23 @@ class Solitare:
 
 
     def build(self, position):
+        # No building from a stock pile that has no visible card
         if not self.draw_pile.peek().visible:
             return False
+        # Get the stack you want to build to and validate it
         if 0 <= position < self.size:
             card_stack = self.get_tableau()[position]
+            # Set an empty stack to None to allow for moving a King to the tableau stack
             if card_stack.is_empty():
                 table_card = None
             else:
                 table_card = card_stack.peek()
-            
             stock_card = self.draw_pile.peek()
-    
-            if self.check_move(stock_card, table_card):
+            # Validate move
+            if self.check_move(from_card=stock_card, to_card=table_card):
+                # Move card from stock to tableau and top card from the waste pile to the stock pile
                 card_stack.push(self.draw_pile.pop())
-                if self.card_deck.size != 0:
-                    self.draw_pile.push(self.card_deck.deck.pop())
+                self.push_card_back_to_stock_pile()
                 return True
         
         return False
