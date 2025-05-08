@@ -206,7 +206,7 @@ def run_game():
                 column = stack_validator()
                 if test.move_to_foundation(column, False):
                     print("Move successful")
-                    test.flip_card_tableau(column)
+
                 else:
                     print("Invalid move")
             input("Press ENTER or RETURN to Continue.")

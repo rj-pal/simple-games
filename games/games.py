@@ -59,10 +59,9 @@ class Solitare:
     def move_to_foundation(self, stack_number: int=-1, from_stock_pile: bool=True):
 
         def check_foundation_move(from_pile, foundation_pile, card):
-            if foundation_pile.is_empty():
-                if card.value == 1:
-                    foundation_pile.push(from_pile.pop())
-                    return True
+            if foundation_pile.is_empty() and card.value == 1:
+                foundation_pile.push(from_pile.pop())
+                return True
             elif card.value == foundation_pile.peek().value + 1:
                 foundation_pile.push(from_pile.pop())
                 return True      
@@ -73,7 +72,10 @@ class Solitare:
             card = stock_pile.peek()
             foundation_pile = self.foundation_piles[card.suit]
 
-            return check_foundation_move(stock_pile, foundation_pile, card)
+            if check_foundation_move(stock_pile, foundation_pile, card):
+                if self.card_deck.size != 0:
+                    self.draw_pile.push(self.card_deck.deck.pop())
+                return True
             
         else:
             ### ADD ERROR HANDLING MAYBE???

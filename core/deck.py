@@ -99,7 +99,8 @@ class CardStack:
         current_card = self.head.next
         card_stack = ""
         while current_card:
-            card_stack += str(current_card.value) + " ->\n"
+            card_stack += repr(current_card.value) + " ->\n"
+            # card_stack += str(current_card.value) + " ->\n"
             current_card = current_card.next
         return card_stack
     
