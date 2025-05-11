@@ -1,7 +1,5 @@
 from random import shuffle
 
-
-
 # Python program to demonstrate
 # stack implementation using a linked list.
 # node class
@@ -152,53 +150,16 @@ class CardStack:
         return remove_card.value
 
 class CardDeck:
-
     def __init__(self):
         self.deck = self.create_deck()
 
     @property
     def size(self):
         return len(self.deck)
-
-    class Card:
-        def __init__(self, suit: int, value: str):
-            self.suit = suit
-            self.value = value 
-            self.visible = False
-            self.face = self.create_face()
-            
-        def create_face(self):
-            
-            suit_dict = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️"}
-            face_dict = {1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 7: " 7",
-                            8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"}
-
-            # {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
-            #                             8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
-
-            return f"{face_dict[self.value]} of {suit_dict[self.suit]}"
-        
-        @property
-        def is_black(self):
-            return self.suit in {"S", "C"}
-        
-        def look_card(self):
-            return self.face
-        
-        def flip_card(self):
-            self.visible = not self.visible
- 
-        def __repr__(self):
-            return f"Suit: {self.suit}, Value: {self.value}, Visible: {self.visible} Face: {self.face}"
-        
-        def __str__(self):
-            if self.visible:
-                return self.face
-            return "Hidden"
         
     def create_deck(self):
         suit_values = ("S", "H", "D", "C")
-        return [self.Card(suit=suit, value=value) for suit in suit_values for value in range(1, 14)]
+        return [Card(suit=suit, value=value) for suit in suit_values for value in range(1, 14)]
     
     def shuffle_deck(self):
         return shuffle(self.deck)
@@ -219,7 +180,7 @@ class CardDeck:
         if self.size == 0:
             print("CardDeck is empty.")
             return None
-        card = self.deck.pop()
+        card = self.deck.pop()      
         card.visible = not facedown
         return card
     
@@ -250,13 +211,70 @@ class CardDeck:
                 break
         return card_queue
 
-# Driver Code
-# if __name__ == "__main__":
-#     hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
+class Card:
+    def __init__(self, suit: int, value: str):
+        self._suit = suit
+        self._value = value 
+        self._visible = False
+        self.face = self.create_face()
+        
+    def create_face(self):
+        
+        suit_dict = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️"}
+        face_dict = {1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 7: " 7",
+                        8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"}
 
-#     for i, hand in enumerate(hands, start=1):
-#         print(f"Player {i}'s hand: {hand}")
-    # exit()
+        # {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
+        #                             8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
+
+        return f"{face_dict[self.value]} of {suit_dict[self.suit]}"
+    
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def suit(self):
+        return self._suit
+    
+    @property
+    def visible(self):
+        return self._visible
+
+    @visible.setter
+    def visible(self, new_visibility: bool):
+        if isinstance(new_visibility, bool):
+            self._visible = new_visibility
+        else:
+            raise ValueError("Visible must be a boolean value.")
+
+    @property
+    def is_black(self):
+        return self.suit in {"S", "C"}
+    
+    def is_visible(self):
+        return self.visible
+    
+    def look_card(self):
+        return self.face
+    
+    def flip_card(self):
+        self._visible = not self._visible
+
+    def __repr__(self):
+        return f"Suit: {self.suit}, Value: {self.value}, Visible: {self.visible}, Face: {self.face}"
+    
+    def __str__(self):
+        if self.visible:
+            return self.face
+        return "Hidden"
+# Driver Code
+if __name__ == "__main__":
+    hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
+
+    for i, hand in enumerate(hands, start=1):
+        print(f"Player {i}'s hand: {hand}")
+    exit()
 
 
 

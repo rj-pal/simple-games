@@ -62,7 +62,7 @@ def print_tableau(tableau):
         print(" " * 4 + (" -------" + " " * 9) * 7 )
 
     # Change my stack to a list
-    tableau_lists = [card_stack.to_list()[::-1] for card_stack in tableau]
+    tableau_lists = tableau #[card_stack.to_list()[::-1] for card_stack in tableau]
     
     # Get the longest card stack to add blank cards for padding of column stacks 
     max_height = max(len(stack) for stack in tableau_lists)
@@ -86,11 +86,45 @@ def print_foundation_piles(piles):
     print("   |   ".join(top_cards))
 
 def print_draw_pile(pile):
-    print("STOCK PILE\n")
-    if not pile.peek().visible:
-        print("🎴")
+    print("STOCK PILE")
+    print()
+    if not pile:
+        print("🎴".center(6))
+        
     else:
-        print(pile.peek())
+        print("⚔️".center(6))
+
+def print_waste_pile(pile):
+    # print("WASTE PILE")#.rjust(26))
+    # print()
+    if len(pile) == 0:
+        print("⚔️".center(6))
+    else:
+        for card in pile:
+            print(card)
+
+    return
+    for i, card in enumerate(pile):
+        blank = " ".ljust(8)
+        play_now = "Playing: ".ljust(8)
+        if i == len(pile) - 1:
+            # print(card, " < - Now Playing")
+            print(play_now, card.face.rjust(10))
+        else:
+            # print(card)
+            print(blank, card.face.rjust(10))
+    # temp_card = pile.head.next
+    # while display_number > 0:
+    #     if pile.is_empty():
+    #         break
+    #     else:
+    #         print(temp_card.value)
+    #         temp_card = temp_card.next
+    #         display_number -= 1
+    
+        
+
+    
 
 def print_card_table(tableau, piles, pile):#, fixed_height):
     print_foundation_piles(piles)
@@ -99,6 +133,7 @@ def print_card_table(tableau, piles, pile):#, fixed_height):
     print()
     print_draw_pile(pile)
     print()
+   
 
 def run_game():
     clear_screen()
@@ -108,6 +143,7 @@ def run_game():
     def stack_validator():
         while True:
             try:
+                # minus one for zero indexing
                 position = int(input("Enter the card stack number: ")) - 1
                 if position in range(7):
                     return position
@@ -148,13 +184,19 @@ def run_game():
     
     for i in range(30):
         print(f"Round {i + 1}\n")
-        tab = test.get_tableau()
+        for i in test.foundation_piles.values():
+            print(i.peek())
+        tab = test.get_tableau_for_print()
         fp = test.get_foundation_piles()
-        draw = test.get_stock_pile()
+        draw = test.check_stock_pile()
         
         print_card_table(tab, fp, draw)
+
+
         # WASTE PILE
-        print(test.card_deck.deck) 
+        # print(test.card_deck.deck) 
+        # print_waste_pile(pile=test.get_waste_pile(), display_number=3)
+        print_waste_pile(pile=test.show_waste_pile())
         # print(test.show_stock_pile())
         
         print("\nPress 1: To build to the tableau from the stock pile.\nPress 2: To move one or more cards on the tableau.\n" \
@@ -189,7 +231,7 @@ def run_game():
 
         elif move == 3:
             while True:
-                location = int(input("Press 1: To move a card from stock pile.\nPress 2: To move from the tableau.\nEnter your response: "))
+                location = int(input("Press 1: To move a card from waste pile.\nPress 2: To move from the tableau.\nEnter your response: "))
                 if location not in {1,2}:
                     print("\nInvalid entry. Try again.\n")
                 else:
@@ -204,7 +246,7 @@ def run_game():
                           
             elif location == 2:
                 column = stack_validator()
-                if test.move_to_foundation(column, False):
+                if test.move_to_foundation(column, True):
                     print("Move successful")
 
                 else:

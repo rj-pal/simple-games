@@ -26,6 +26,7 @@ class Solitare:
 
     def __init__(self, size: int=7):
         self._size = size
+        self._klondike_value = 3
         self.card_deck = CardDeck() # Used for dealing initial cards and as the waste pile
         self.tableau = self.make_tableau()
         self.foundation_piles = self.make_foundation_piles()
@@ -36,8 +37,24 @@ class Solitare:
     def size(self):
         return self._size
     
+    @property
+    def klondike_value(self):
+        """Klondike value to determine if the draw is 1 or 3."""
+        return self._klondike_value
+
+    @klondike_value.setter
+    def klondike_value(self, value):
+        if value not in {1, 3}:
+            raise ValueError("klondike_value must be either 1 or 3")
+        self._klondike_value = value
+
+    ### IS IT NECESSARY?
+    @klondike_value.deleter
+    def klondike_value(self):
+        raise AttributeError("Cannot delete the klondike_value attribute")
+    
     def check_move(self, from_card, to_card):
-        # Check King move to empty stack
+        # check King move to empty stack
         if from_card.value == 13 and to_card is None:
             return True
         # check all other possible moves
@@ -50,108 +67,108 @@ class Solitare:
         if self.card_deck.size != 0:
             self.draw_pile.push(self.card_deck.deck.pop()) 
 
-    def draw(self, three_card=False):
+    def draw(self, klondike_value=1):
         """Draw a card from the stock pile and flip it over for move."""
-        # No drawing from empty stock pile
+
+        # No drawing from empty stock pile in main move.
         if self.draw_pile.is_empty():
             print("Invalid move. Cannot draw from an empty stock pile.")
+            print(input("Press ENTER or RETURN."))
             return False
-       
-        # When top card is face up, a draw will add it to the waste pile, or back to the initial card deck
-        if self.draw_pile.peek().visible:
-            self.card_deck.add_card(self.draw_pile.pop())
-        # Flip over the top card from teh stock pile
-        self.flip_card_draw_pile()
-        print(self.draw_pile.peek())
-        print(self.draw_pile)
+        
+        for _ in range(self._klondike_value):
+            # flip card will return False if the second or third flip is from emtpy stock pile
+            if self.flip_card_draw_pile():
+                self.waste_pile.push(self.draw_pile.pop())
+            else:
+                break
+        
         return True
+       
+        # # When top card is face up, a draw will add it to the waste pile, or back to the initial card deck
+        # if self.draw_pile.peek().visible:
+        #     self.card_deck.add_card(self.draw_pile.pop())
+        # # Flip over the top card from teh stock pile
+        # self.flip_card_draw_pile()
+        # print(self.draw_pile.peek())
+        # print(self.draw_pile)
+        # return True
 
     
-    def move_to_foundation(self, stack_number: int=-1, from_stock_pile: bool=True):
-        """Move a card from the stock pile or tableau to the foundation pile of the selected card's suit."""
+    def move_to_foundation(self, stack_number: int=-1, from_tableu: bool=False):
+        """Move a card from the waste pile or tableau to the foundation pile of the selected card's suit. Defaults to move from waste pile."""
 
-        def check_foundation_move(from_pile, card):
+        def check_foundation_move(from_pile):
             """Validates and moves card from stock pile or tabelau stack to the appropriate foundation pile."""
             # Get the foundation pile that corresponds to the suit of the card
+            card = from_pile.peek()
             foundation_pile = self.foundation_piles[card.suit]
-            if foundation_pile.is_empty() and card.value == 1:
-                foundation_pile.push(from_pile.pop())
-                return True
+            print("HERE")
+            print(card)
+            if foundation_pile.is_empty():
+                if card.value == 1:
+                    foundation_pile.push(from_pile.pop())
+                    return True
             elif card.value == foundation_pile.peek().value + 1:
                 foundation_pile.push(from_pile.pop())
                 return True      
             return False
-
-        if from_stock_pile:
-            stock_pile = self.get_stock_pile()
-            # No drawing from empty stock pile
-            if self.draw_pile.is_empty():
-                print("Invalid move. Cannot move from an empty stock pile.")
-                return False
-            card = stock_pile.peek()
-
-            # Validate and make foundation move if allowed
-            if check_foundation_move(from_pile=stock_pile, card=card):
-                # Move top card back from the waste pile to the stock pile
-                self.push_card_back_to_stock_pile()
-                return True
-            else:
-                return False
-            
-        else:
-            ### ADD ERROR HANDLING MAYBE???
-            # if stack_number < 0 or stack_number >= len(self.get_tableau()):
-            #     print(f"Error: Invalid stack number: {stack_number}")
-            #     return False  # Or raise an exception, depending on your error handling strategy
-
-            tableau_stack = self.get_tableau()[stack_number]
-            # No moving from empty tableau stack
-            if tableau_stack.is_empty():
+        
+        # check for empty waste pile/tableau stack or validate and make move
+        if from_tableu:
+            if self.tableau[stack_number].is_empty():
                 print("Invalid move. Cannot move from an empty tableau stack.")
                 return False  
-            card = tableau_stack.peek()
-
-            # Validate and make foundation move if allowed
-            if check_foundation_move(from_pile=tableau_stack, card=card):
-                # Flip over bottom card from tableau stack
-                if not tableau_stack.is_empty():
+            if check_foundation_move(from_pile=self.tableau[stack_number]):
+                if not self.tableau[stack_number].is_empty():
                     self.flip_card_tableau(stack_number)
-                return True
-            else:
-                return False
+                return True      
+        else:
+            if self.waste_pile.is_empty():
+                print("Invalid move. Cannot move from an empty stock pile.")
+                return False 
+            return check_foundation_move(from_pile=self.waste_pile)
+        return False
+            ### ADD ERROR HANDLING MAYBE???
+            # tableau_stack = self.get_tableau()[stack_number]
+            
+
+            #     if not tableau_stack.is_empty():
+            #         self.flip_card_tableau(stack_number)
+            #     return True
+            # else:
+            #     return False
 
 
     def build(self, position):
-        # No building from a stock pile that has no visible card
-        if not self.draw_pile.peek().visible:
+        # No building from a waste pile that has not been drawn from or is empty
+        if not self.waste_pile.peek().visible:
             return False
         # Get the stack you want to build to and validate it
         if 0 <= position < self.size:
-            card_stack = self.get_tableau()[position]
+            # card_stack = self.get_tableau()[position]
             # Set an empty stack to None to allow for moving a King to the tableau stack
-            if card_stack.is_empty():
+            if self.tableau[position].is_empty():
                 table_card = None
             else:
-                table_card = card_stack.peek()
-            stock_card = self.draw_pile.peek()
+                table_card = self.tableau[position].peek()
+            waste_card = self.waste_pile.peek()
             # Validate move
-            if self.check_move(from_card=stock_card, to_card=table_card):
+            if self.check_move(from_card=waste_card, to_card=table_card):
                 # Move card from stock to tableau and top card from the waste pile to the stock pile
-                card_stack.push(self.draw_pile.pop())
-                self.push_card_back_to_stock_pile()
+                self.tableau[position].push(self.waste_pile.pop())
+                # self.push_card_back_to_stock_pile()
                 return True
-        
         return False
     
     def transfer(self, from_position, to_position, number_of_cards=1):
         if 0 <= from_position < self.size and 0 <= to_position < self.size:
-            from_card_stack = self.get_tableau()[from_position]
+            from_card_stack = self.tableau[from_position]
 
             if from_card_stack.size < number_of_cards:
                 print(f"Invalid move. There are not enough cards in this stack to transfer {number_of_cards} cards.")
                 print(input("ENTER TO CONTINUE"))
                 return False
-
             
             temp_card = from_card_stack.head.next
 
@@ -165,7 +182,7 @@ class Solitare:
                 
             print(temp_card.value)
             print(input("ENTER TO CONTINUE"))
-            to_card_stack = self.get_tableau()[to_position]
+            to_card_stack = self.tableau[to_position]
             
             if to_card_stack.is_empty():
                 to_card = None
@@ -218,17 +235,25 @@ class Solitare:
     def get_tableau(self):
         return self.tableau
        
+    def get_tableau_for_print(self):
+        
+        return [card_stack.to_list()[::-1] for card_stack in self.tableau]
         
     def get_foundation_piles(self):
        
         return self.foundation_piles
     
+    def check_stock_pile(self):
+        return self.draw_pile.is_empty()
+    
     def get_stock_pile(self):
         return self.draw_pile
     
+    def get_waste_pile(self):
+        return self.waste_pile
     
     def show_tableau(self):
-        for card_stack in self.get_tableau():
+        for card_stack in self.tableau:
             print(card_stack)
 
     def show_foundation_piles(self):
@@ -237,6 +262,27 @@ class Solitare:
 
     def show_stock_pile(self):
         print(self.get_stock_pile())
+
+    def show_waste_pile(self):
+        waste_pile = []
+        temp_card = self.get_waste_pile().head.next
+        for _ in range(self._klondike_value):
+            if temp_card is not None:
+                waste_pile.append(temp_card.value)
+            else:
+                break
+            
+            temp_card = temp_card.next
+        return waste_pile[::-1]
+        
+
+        # while display_number > 0:
+        #     if pile.is_empty():
+        #         break
+        #     else:
+        #         print(temp_card.value)
+        #         temp_card = temp_card.next
+        #         display_number -= 1
 
     def flip_card_draw_pile(self):
         if self.draw_pile.is_empty():
