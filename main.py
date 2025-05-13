@@ -82,7 +82,7 @@ def print_tableau(tableau):
 
 def print_foundation_piles(piles):
     print("FOUNDATION PILES\n")
-    top_cards = [card_stack.peek() if card_stack.is_empty() else card_stack.peek().face for card_stack in piles.values()]
+    top_cards = [card_stack.top_card() if card_stack.is_empty() else card_stack.top_card().face for card_stack in piles.values()]
     print("   |   ".join(top_cards))
 
 def print_draw_pile(pile):
@@ -137,7 +137,7 @@ def print_card_table(tableau, piles, pile):#, fixed_height):
 
 def run_game():
     clear_screen()
-    test = Solitare()
+    test = Solitare(klondike_value=1)
     # print(test.size)
     # exit()
     def stack_validator():
@@ -185,7 +185,7 @@ def run_game():
     for i in range(30):
         print(f"Round {i + 1}\n")
         for i in test.foundation_piles.values():
-            print(i.peek())
+            print(i.top_card())
         tab = test.get_tableau_for_print()
         fp = test.get_foundation_piles()
         draw = test.check_stock_pile()
@@ -279,7 +279,7 @@ def main():
 #     # test.make_draw_pile()
 #     test.show_stock_pile()
 #     # print(test.card_deck.size)
-#     test_card = test.get_tableau()[0].pop()
+#     test_card = test.get_tableau()[0].remove_from()
 #     print(test_card)
 #     print(test_card.value)
 #     print(test_card.visible)

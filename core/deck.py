@@ -36,7 +36,7 @@ class CardQueue:
         return card_queue
 
     # Push a value into the stack.
-    def push(self, value):
+    def add_to(self, value):
         card_node = CardNode(value)
         temp_card_node = self.head
         while temp_card_node.next:
@@ -47,7 +47,7 @@ class CardQueue:
         self._size += 1
 
     # Remove a value from the stack and return.
-    def pop(self):
+    def remove_from(self):
         if self.is_empty():
             raise Exception("Popping from an empty queue")
         remove_card = self.head.next
@@ -55,7 +55,7 @@ class CardQueue:
         self._size -= 1
         return remove_card.value
     
-    def peek(self):
+    def top_card(self):
         if self.is_empty():
             return self.head.value
         return self.head.next.value
@@ -123,9 +123,9 @@ class CardStack:
     def is_empty(self):
         return self._size == 0
 
-    # Get the top item of the stack
-    def peek(self):
-
+    # Get the top card of the card stack
+    def top_card(self):
+        """Returns the top card of the card stack"""
         if self.is_empty():
             return self.head.value
         
@@ -133,19 +133,19 @@ class CardStack:
 
 
     # Push a value into the stack.
-    def push(self, value):
+    def add_to(self, value):
         card_node = CardNode(value)
         card_node.next = self.head.next # Make the new node point to the current head
-        self.head.next = card_node #!!! # Update the head to be the new node
+        self.head.next = card_node # Update the head to be the new node
         self._size += 1
 
 
     # Remove a value from the stack and return.
-    def pop(self):
+    def remove_from(self):
         if self.is_empty():
             raise Exception("Popping from an empty stack")
         remove_card = self.head.next
-        self.head.next = remove_card.next #!!! changed
+        self.head.next = remove_card.next 
         self._size -= 1
         return remove_card.value
 
@@ -188,7 +188,7 @@ class CardDeck:
         card_stack = CardStack()
         for i in range(number_of_cards):
             if card := self.deal_card(facedown):
-                card_stack.push(card)
+                card_stack.add_to(card)
             else:
                 print("Dealing is finished.")
                 break   
@@ -205,7 +205,7 @@ class CardDeck:
         card_queue = CardStack()
         for i in range(number_of_cards):
             if card := self.deal_card(facedown):
-                card_queue.push(card)
+                card_queue.add_to(card)
             else:
                 print("Piling is finished.")
                 break
@@ -283,7 +283,7 @@ if __name__ == "__main__":
 #     queue = deck.pile()
 #     print(queue)
 #     for i in range(50):
-#         queue.pop()
+#         queue.remove_from()
 #     print(queue)
 #     exit()
 
@@ -292,7 +292,7 @@ if __name__ == "__main__":
 #     stack = deck.deal_cards(13, True)
 #     stack1 = deck.deal_cards(13, True)
 #     stack2 = deck.deal_cards(20, True)
-#     print(stack2.peek())
+#     print(stack2.top_card())
 #     print(f"Stack 2: {stack2}, size {stack2.size}")
 #     stack3 = deck.deal_cards(13, True)
 #     stack4 = deck.deal_cards(13)
@@ -303,7 +303,7 @@ if __name__ == "__main__":
 #     print(f"Stack 4: {stack4}")
 
 #     # for _ in range(1, 6):
-#     #     top_value = stack.pop()
+#     #     top_value = stack.remove_from()
 #     #     print(f"Pop: {top_value}") # variable name changed
 #     # print(f"Stack: {stack}")
-#     # print(stack.peek())
+#     # print(stack.top_card())
