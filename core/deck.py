@@ -62,12 +62,15 @@ class CardQueue:
 
 
 class CardStack:
-    VALID_SUITS = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️"}#{"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
+    VALID_SUITS = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️"} #
+    SUITS = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
 
     # Use a Dummy Head Card Node for indicating if the stack of cards is empty or not
     # Suit property is optional
     def __init__(self):
         self.head = CardNode("Empty Stack of Cards")
+        # self.head = CardNode(Card("B", 0))
+
         self._size = 0
         self._suit = None
 
@@ -127,14 +130,14 @@ class CardStack:
     def top_card(self):
         """Returns the top card of the card stack"""
         if self.is_empty():
-            return self.head.value
+            return self.head.value # Value of head is string
         
         return self.head.next.value
 
 
     # Push a value into the stack.
-    def add_to(self, value):
-        card_node = CardNode(value)
+    def add_to(self, card: 'Card'):
+        card_node = CardNode(card)
         card_node.next = self.head.next # Make the new node point to the current head
         self.head.next = card_node # Update the head to be the new node
         self._size += 1
@@ -220,8 +223,8 @@ class Card:
         
     def create_face(self):
         
-        suit_dict = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️"}
-        face_dict = {1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 7: " 7",
+        suit_dict = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️", "B": "🎴"}
+        face_dict = {0: "Blank", 1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 7: " 7",
                         8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"}
 
         # {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
@@ -270,10 +273,23 @@ class Card:
         return "Hidden"
 # Driver Code
 if __name__ == "__main__":
-    hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
 
-    for i, hand in enumerate(hands, start=1):
-        print(f"Player {i}'s hand: {hand}")
+    card = Card("S", 12)
+    card.visible = True
+    pile = CardStack()
+    print(pile.head)
+    # pile.top_card().visible = True
+    print(pile.top_card())
+    
+    pile.add_to(card)
+    print(pile.head.next.value)
+    # print(pile.top_card().next.next)
+    # print(pile.head)
+
+    # hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
+
+    # for i, hand in enumerate(hands, start=1):
+    #     print(f"Player {i}'s hand: {hand}")
     exit()
 
 

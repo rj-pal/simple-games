@@ -67,24 +67,43 @@ class Solitare:
         # check all other possible moves
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
     
+    def check_foundation_move(self, from_pile):
+        card = from_pile.top_card()
+        foundation_pile = self.foundation_piles[card.suit]
+        if foundation_pile.is_empty():
+            # Add Ace to foundation pile
+            if card.value == 1:
+                foundation_pile.add_to(from_pile.remove_from())
+                return True
+            # Add other cards to foundation pile
+        elif card.value == foundation_pile.top_card().value + 1:
+            foundation_pile.add_to(from_pile.remove_from())   
+            return True
+        else:
+            return False
+    
     def check_win(self):
         return all(pile.size == 13 for pile in self.foundation_piles.values())
     
 
-    def draw(self, klondike_value=1):
+    def draw(self):
         """Draw a card from the stock pile and flip it over for move."""
         # No drawing from empty stock pile in main move.
-        if self.draw_pile.is_empty():
-            print("Invalid move. Cannot draw from an empty stock pile.")
-            print(input("Press ENTER or RETURN."))
-            return False
+        # if self.draw_pile.is_empty():
+        #     print("Invalid move. Cannot draw from an empty stock pile.")
+        #     print(input("Press ENTER or RETURN."))
+        #     return False
         
-        for _ in range(self._klondike_value):
+        for flip in range(self._klondike_value):
             # Flip card will return False if the second or third flip is from emtpy stock pile
             if self.flip_card_draw_pile():
                 self.waste_pile.add_to(self.draw_pile.remove_from())
+            elif flip == 0:
+                print("Invalid move. Cannot draw from an empty stock pile.")
+                print(input("Press ENTER or RETURN."))
+                return False 
             else:
-                break  
+                break
         
         return True
        
@@ -92,48 +111,25 @@ class Solitare:
     
     def move_to_foundation(self, stack_number: int=-1, from_tableu: bool=False):
         """Move a card from the waste pile or tableau to the foundation pile of the selected card's suit. Defaults to move from waste pile."""
-
-        def check_foundation_move(from_pile):
-            """Validates and moves card from stock pile or tabelau stack to the appropriate foundation pile."""
-            # Get the foundation pile that corresponds to the suit of the card
-            card = from_pile.top_card()
-            foundation_pile = self.foundation_piles[card.suit]
-            if foundation_pile.is_empty():
-                # Add Ace to foundation pile
-                if card.value == 1:
-                    foundation_pile.add_to(from_pile.remove_from())
-                    return True
-            # Add other cards to foundation pile
-            elif card.value == foundation_pile.top_card().value + 1:
-                foundation_pile.add_to(from_pile.remove_from())
-                return True      
-            return False
-        
-        # check for empty waste pile/tableau stack or validate and make move
+        # Get the pile the player is trying to move from
         if from_tableu:
-            if self.tableau[stack_number].is_empty():
-                print("Invalid move. Cannot move from an empty tableau stack.")
-                return False  
-            if check_foundation_move(from_pile=self.tableau[stack_number]):
-                # if not self.tableau[stack_number].is_empty():
-                self.flip_card_tableau(stack_number)
-                return True      
+            from_pile=self.tableau[stack_number]
         else:
-            if self.waste_pile.is_empty():
-                print("Invalid move. Cannot move from an empty stock pile.")
-                return False 
-            return check_foundation_move(from_pile=self.waste_pile)
+            from_pile=self.waste_pile
+        # No moving from an empty tabelau or waste pile
+        if from_pile.is_empty():
+            if from_tableu:
+                print("Invalid move. Cannot move from an empty tableau stack.")         
+            else:
+                print("Invalid move. Cannot move from an empty waste pile.")
+            print(input("Press ENTER or RETURN to continue."))
+            return False
+        if self.check_foundation_move(from_pile=from_pile):
+            if from_tableu:
+                self.flip_card_tableau(stack_number)
+            return True
         return False
-            ### ADD ERROR HANDLING MAYBE???
-            # tableau_stack = self.get_tableau()[stack_number]
             
-
-            #     if not tableau_stack.is_empty():
-            #         self.flip_card_tableau(stack_number)
-            #     return True
-            # else:
-            #     return False
-
 
     def build(self, position):
         # No building from a waste pile that has not been drawn from or is empty

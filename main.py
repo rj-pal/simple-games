@@ -137,7 +137,7 @@ def print_card_table(tableau, piles, pile):#, fixed_height):
 
 def run_game():
     clear_screen()
-    test = Solitare(klondike_value=1)
+    test = Solitare(klondike_value=3)
     # print(test.size)
     # exit()
     def stack_validator():
@@ -228,6 +228,7 @@ def run_game():
                 print(input("Press Enter or Return to Continue."))
             else:
                 print("\nInvalid move")
+                print(input("Press Enter or Return to Continue."))
 
         elif move == 3:
             while True:
@@ -258,6 +259,7 @@ def run_game():
                 input("Press ENTER or RETURN to Continue.")
             else:
                 print("ERROR OCCURRED")
+                input("Press ENTER or RETURN to Continue.")
 
         if test.check_win():
             print("You Win!")
