@@ -131,22 +131,23 @@ class Solitare:
         return False
             
 
-    def build(self, position):
-        # No building from a waste pile that has not been drawn from or is empty
-        if not self.waste_pile.top_card().visible:
+    def build(self, stack_number):
+        # No building from an empty waste
+        if self.waste_pile.is_empty():
+            print("You cannot build when the waste pile is empty.")
             return False
         # Get the stack you want to build to and validate it
-        if 0 <= position < self.size:
+        if 0 <= stack_number < self.size:
             # Set an empty stack to None to allow for moving a King to the tableau stack
-            if self.tableau[position].is_empty():
+            if self.tableau[stack_number].is_empty():
                 table_card = None
             else:
-                table_card = self.tableau[position].top_card()
+                table_card = self.tableau[stack_number].top_card()
             waste_card = self.waste_pile.top_card()
             # Validate move
             if self.check_move(from_card=waste_card, to_card=table_card):
                 # Move card from stock to tableau and top card from the waste pile to the stock pile
-                self.tableau[position].add_to(self.waste_pile.remove_from())
+                self.tableau[stack_number].add_to(self.waste_pile.remove_from())
                 return True
         return False
     

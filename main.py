@@ -137,7 +137,7 @@ def print_card_table(tableau, piles, pile):#, fixed_height):
 
 def run_game():
     clear_screen()
-    test = Solitare(klondike_value=3)
+    test = Solitare(klondike_value=1)
     # print(test.size)
     # exit()
     def stack_validator():
