@@ -133,6 +133,27 @@ class CardStack:
             return self.head.value # Value of head is string
         
         return self.head.next.value
+    
+    def look_at(self, card_number):
+        if card_number < 0 or card_number > self._size:
+            raise IndexError("Cannot view a card that does not found in the pile.")
+        
+        current_card_node = self.head
+        current_index = 0
+        while current_card_node and current_index < card_number:
+            current_card_node = current_card_node.next
+            current_index += 1
+        
+        if current_card_node:
+            return current_card_node.value
+        else:
+            raise IndexError("Could not retrieve card.")
+        
+    # def __iter__(self):
+    #     current_card_node = self.head.next
+    #     while current_card_node:
+    #         yield current_card_node.value
+    #         current_card_node = current_card_node.next
 
 
     # Push a value into the stack.

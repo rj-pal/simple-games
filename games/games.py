@@ -106,7 +106,6 @@ class Solitare:
                 break
         
         return True
-       
 
     
     def move_to_foundation(self, stack_number: int=-1, from_tableu: bool=False):
@@ -126,9 +125,18 @@ class Solitare:
             return False
         if self.check_foundation_move(from_pile=from_pile):
             if from_tableu:
-                self.flip_card_tableau(stack_number)
+                if not from_pile.top_card().visible:
+                    self.flip_card_tableau(stack_number)
             return True
         return False
+    
+    def get_tableau_card(self, stack_number):
+        """Returns the top card of the requested tableau stack or None if the stack is empty."""
+        if self.tableau[stack_number].is_empty():
+            return None
+        else:
+           return self.tableau[stack_number].top_card()
+
             
 
     def build(self, stack_number):
@@ -136,59 +144,43 @@ class Solitare:
         if self.waste_pile.is_empty():
             print("You cannot build when the waste pile is empty.")
             return False
-        # Get the stack you want to build to and validate it
         if 0 <= stack_number < self.size:
-            # Set an empty stack to None to allow for moving a King to the tableau stack
-            if self.tableau[stack_number].is_empty():
-                table_card = None
-            else:
-                table_card = self.tableau[stack_number].top_card()
+            table_card = self.get_tableau_card(stack_number=stack_number) # Uses None for empty stack and allow for King move
             waste_card = self.waste_pile.top_card()
-            # Validate move
-            if self.check_move(from_card=waste_card, to_card=table_card):
-                # Move card from stock to tableau and top card from the waste pile to the stock pile
-                self.tableau[stack_number].add_to(self.waste_pile.remove_from())
+            if self.check_move(from_card=waste_card, to_card=table_card): # Validate move
+                self.tableau[stack_number].add_to(self.waste_pile.remove_from()) # Move card from stock to tableau
                 return True
         return False
     
-    def transfer(self, from_position, to_position, number_of_cards=1):
-        if 0 <= from_position < self.size and 0 <= to_position < self.size:
-            from_card_stack = self.tableau[from_position]
+    def transfer(self, from_stack, to_stack, number_of_cards=1):
+        if 0 <= from_stack < self.size and 0 <= to_stack < self.size:
+            from_card_stack = self.tableau[from_stack]
 
-            if from_card_stack.size < number_of_cards:
+            if from_card_stack.size < number_of_cards or from_card_stack.is_empty():
                 print(f"Invalid move. There are not enough cards in this stack to transfer {number_of_cards} cards.")
                 print(input("ENTER TO CONTINUE"))
                 return False
             
-            temp_card = from_card_stack.head.next
-
-            for _ in range(number_of_cards - 1):
-                if temp_card.next.value.visible:
-                    temp_card = temp_card.next
-                else:
-                    print(f"Invalid move. There are not enough cards face up cards in this stack to transfer {number_of_cards} cards.")
-                    print(input("ENTER TO CONTINUE"))
-                    return False
-                
-            print(temp_card.value)
-            print(input("ENTER TO CONTINUE"))
-            to_card_stack = self.tableau[to_position]
-            
-            if to_card_stack.is_empty():
-                to_card = None
+            # Check first if the card final position of the cards to be transfered is face up and keep its value, else invalidate the transfer
+            if from_card_stack.look_at(number_of_cards).visible:
+                from_card = from_card_stack.look_at(number_of_cards)
             else:
-                to_card = to_card_stack.top_card()
-            
-            from_card = temp_card.value
-            
+                print(f"Invalid move. The card at {number_of_cards} in the pile you wish to move from is face down.")
+                print(input("ENTER TO CONTINUE"))
+                return False
+    
+            to_card = self.get_tableau_card(stack_number=to_stack) # Uses None for empty stack and allow for King move
+                        
             if self.check_move(from_card, to_card):
+                # Create a temp card stack to move the cards from one tableau to another tableau card stack
                 temp_stack = CardStack()
                 for _ in range(number_of_cards):
                     temp_stack.add_to(from_card_stack.remove_from())
                 while not temp_stack.is_empty():
-                    to_card_stack.add_to(temp_stack.remove_from())
-                if not from_card_stack.is_empty() and not from_card_stack.head.next.value.visible:
-                    from_card_stack.head.next.value.flip_card()
+                    self.tableau[to_stack].add_to(temp_stack.remove_from())
+                # Flip the card in the tableau if necessary after moving all the cards. 
+                if not from_card_stack.is_empty() and not from_card_stack.top_card().visible:
+                    self.flip_card_tableau(from_stack)
                 return True
             else:
                 return False
