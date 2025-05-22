@@ -1,4 +1,5 @@
 from random import shuffle
+from core.errors import EmptyPileError
 
 # Python program to demonstrate
 # stack implementation using a linked list.
@@ -68,8 +69,8 @@ class CardStack:
     # Use a Dummy Head Card Node for indicating if the stack of cards is empty or not
     # Suit property is optional
     def __init__(self):
-        self.head = CardNode("Empty Stack of Cards")
-        # self.head = CardNode(Card("B", 0))
+        self.head = CardNode(Card("B", 0))
+        # self.head = CardNode("Empty stack of cards.")
 
         self._size = 0
         self._suit = None
@@ -90,7 +91,8 @@ class CardStack:
         if value not in self.VALID_SUITS.keys():
             raise ValueError(f"Invalid suit '{value}'. Must be one of {self.VALID_SUITS.keys()} or None.")
         self._suit = value
-        self.head.value = self.VALID_SUITS[self._suit]
+        # self.head.value = self.VALID_SUITS[self._suit]
+        self.head.value.face = self.VALID_SUITS[self._suit]
 
     # String representation of the stack of cards
     def __str__(self):
@@ -125,19 +127,25 @@ class CardStack:
     # Check if the stack is empty
     def is_empty(self):
         return self._size == 0
+    
+    def get_stack_suit(self):
+        if self._suit is not None:
+            return self.head.value.face
+        else:
+            return None
 
     # Get the top card of the card stack
     def top_card(self):
         """Returns the top card of the card stack"""
         if self.is_empty():
             # raise Exception("This pile of cards is empty.")
-            return self.head.value # Value of head is string
+            return None #self.head.value # Value of head is string
         
         return self.head.next.value
     
     def look_at(self, card_number):
         if card_number < 0 or card_number > self._size:
-            raise IndexError("Cannot view a card that does not found in the pile.")
+            raise IndexError("Cannot view a card that is not found in the pile.")
         
         current_card_node = self.head
         current_index = 0
@@ -168,7 +176,7 @@ class CardStack:
     # Remove a value from the stack and return.
     def remove_from(self, flip: bool=False):
         if self.is_empty():
-            raise Exception("This pile of cards is empty.")
+            raise EmptyPileError()
         remove_card = self.head.next
         self.head.next = remove_card.next 
         self._size -= 1
@@ -255,7 +263,7 @@ class Card:
         # {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
         #                             8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
 
-        return f"{face_dict[self.value]} of {suit_dict[self.suit]}"
+        return f"{face_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "Empty card pile."
     
     @property
     def value(self):

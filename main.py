@@ -1,5 +1,6 @@
 from cli import TicTacToeCLI, ConnectFourCLI
-from games.games import Solitare, ConnectFour, TicTacToe, EmptyDrawPileError, EmptyFoundationPileError
+from games.games import Solitare, ConnectFour, TicTacToe
+from core.errors import GameError, EmptyPileError, EmptyDrawPileError, EmptyFoundationPileError
 from utils.game_options import GameOptions
 from utils.clitools import clear_screen, delay_effect, print_menu_screen, menu_select
 from utils.strings import SIMPLE_GAMES_START
@@ -82,7 +83,7 @@ def print_tableau(tableau):
 
 def print_foundation_piles(piles):
     print("FOUNDATION PILES\n")
-    top_cards = [card_stack.top_card() if card_stack.is_empty() else card_stack.top_card().face for card_stack in piles.values()]
+    top_cards = [card_stack.get_stack_suit() if card_stack.is_empty() else card_stack.top_card().face for card_stack in piles.values()]
     print("   |   ".join(top_cards))
 
 def print_draw_pile(pile):
@@ -186,7 +187,7 @@ def run_game():
     def number_of_cards_validator():
         while True:
             try:
-                number_of_cards = int(input())
+                number_of_cards = int(input("Enter how many cards you wish to transfer: "))
                 if number_of_cards in range(1, 15):
                     return number_of_cards
                 print("There are only 14 cards possible in a stack. Please enter only 1 to 14. Try again.")
@@ -201,6 +202,8 @@ def run_game():
         print(f"Round {i + 1}\n")
         for i in test.foundation_piles.values():
             print(i.top_card())
+        for j in test.foundation_piles.keys():
+            print(j)
         tab = test.get_tableau_for_print()
         fp = test.get_foundation_piles()
         draw = test.check_stock_pile()
@@ -216,17 +219,19 @@ def run_game():
         
         print("\nPress 1: To build to the tableau from the waste pile.\nPress 2: To move one or more cards on the tableau.\n" \
                     "Press 3: To build to the foundation piles from the waste pile or tableau.\nPress 4: To move a card from the foundation pile.\n" \
-                    "Press 5: To draw from the stock pile to the waste pile.\nPress 6: To reset the stock pile.\n3")
+                    "Press 5: To draw from the stock pile to the waste pile.\nPress 6: To reset the stock pile.\n")
         move = move_validator()
         if move == 1:
-            stack_number = stack_validator()
-            
-            if test.build(stack_number):
-                print("\nMove successful\n.")
-                
-            else:
-                print("\nInvalid move")
+            try:
+                stack_number = stack_validator()
                     
+                if test.build(stack_number):
+                    print("\nMove successful\n")
+                    
+                else:
+                    print("\nInvalid move")
+            except GameError as e:
+                print(f"\n{e}\n")
             input("Press ENTER or RETURN to Continue.")
         elif move == 2:
           
@@ -246,29 +251,31 @@ def run_game():
                 print("\nInvalid move")
                 print(input("Press Enter or Return to Continue."))
         elif move == 3:
-            while True:
-                location = int(input("Press 1: To move a card from waste pile.\nPress 2: To move from the tableau.\nEnter your response: "))
-                if location not in {1,2}:
-                    print("\nInvalid entry. Try again.\n")
-                else:
-                    break
-            if location == 1:
+            try:
+                while True:
+                    location = int(input("Press 1: To move a card from waste pile.\nPress 2: To move from the tableau.\nEnter your response: "))
+                    if location not in {1,2}:
+                        print("\nInvalid entry. Try again.\n")
+                    else:
+                        break
+                if location == 1:
 
-                if test.move_to_foundation():
-                    print("\nMove successful\n")
-                    
-                else:
-                    print("\nInvalid move.")
-                          
-            elif location == 2:
-                column = stack_validator()
-                if test.move_to_foundation(column, True):
-                    print("\nMove successful\n")
-
-                else:
-                    print("Invalid move")
+                    if test.move_to_foundation():
+                        print("\nMove successful\n")      
+                    else:
+                        print("\nInvalid move.")
+                            
+                elif location == 2:
+                    column = stack_validator()
+                    if test.move_to_foundation(column, True):
+                        print("\nMove successful\n")
+                    else:
+                        print("Invalid move")
+            except GameError as e:
+                print(f"\n{e}\n") 
             input("Press ENTER or RETURN to Continue.")  
         elif move == 4:
+            # test.move_from_foundation(suit="H", stack_number=-9)
             try:
                 print("\nSelect the foundation pile you wish to take from to return to the tableau.\n")
                 suit = suit_validator()
@@ -278,14 +285,14 @@ def run_game():
                     print("\nMove successful\n") 
                 else:
                     print("\nInvalid move.")
-            except EmptyFoundationPileError as e:
+            except GameError as e:
                 print(f"\n{e}\n")
             input("Press ENTER or RETURN to Continue.")              
         elif move == 5:
             try:
                 if test.draw():
                     print("\nMove successful\n")             
-            except EmptyDrawPileError as e:
+            except GameError as e:
                 print(f"\n{e}\n")
             input("Press ENTER or RETURN to Continue.")
             
