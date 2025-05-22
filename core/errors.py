@@ -26,7 +26,6 @@ class InvalidMoveError(GameError):
     def __init__(self, message="This move cannot be played in this situation."):
         super().__init__(message)
 
-
 class InvalidPlayError(GameError):
     """Raised when a card cannot be played as attempted."""
     def __init__(self, message="That card cannot be played in this situation."):

@@ -147,7 +147,7 @@ class CardStack:
         if card_number < 0 or card_number > self._size:
             raise IndexError("Cannot view a card that is not found in the pile.")
         
-        current_card_node = self.head
+        current_card_node = self.head.next
         current_index = 0
         while current_card_node and current_index < card_number:
             current_card_node = current_card_node.next

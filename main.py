@@ -234,22 +234,25 @@ def run_game():
                 print(f"\n{e}\n")
             input("Press ENTER or RETURN to Continue.")
         elif move == 2:
-          
-            print("\nFirst enter the stack you wish to move from: ")
-            from_stack = stack_validator()
+            try:          
+                print("\nFirst enter the stack you wish to move from: ")
+                from_stack = stack_validator()
 
-            print("\nNext, enter the stack you wish to move to: ")
-            to_stack = stack_validator()
-            
-            print(f"\nNow, how many cards you wish to move from stack {from_stack + 1} to stack {to_stack + 1}: ")
-            number_of_cards = number_of_cards_validator()
-                     
-            if test.transfer(from_stack, to_stack, number_of_cards):
-                print("\nMove successful\n")
-                print(input("Press Enter or Return to Continue."))
-            else:
-                print("\nInvalid move")
-                print(input("Press Enter or Return to Continue."))
+                print("\nNext, enter the stack you wish to move to: ")
+                to_stack = stack_validator()
+                
+                print(f"\nNow, how many cards you wish to move from stack {from_stack + 1} to stack {to_stack + 1}: ")
+                number_of_cards = number_of_cards_validator()
+                        
+                if test.transfer(from_stack, to_stack, number_of_cards):
+                    print("\nMove successful\n")
+                else:
+                    print("\nInvalid move")
+                    print(input("Press Enter or Return to Continue."))
+            except GameError as e:
+                print(f"\n{e}\n")
+            input("Press ENTER or RETURN to Continue.")
+        
         elif move == 3:
             try:
                 while True:
