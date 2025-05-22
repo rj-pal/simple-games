@@ -13,6 +13,35 @@ def int_converter(number, columns):
 def pair_converter(pair, columns):
     return pair[0]*columns + pair[1]
 
+class GameError(Exception):
+    """Base exception for all game-related errors."""
+    pass
+
+class EmptyPileError(GameError):
+    """Raised when trying to draw from an empty deck."""
+    def __init__(self, message="The pile is empty."):
+        super().__init__(message)
+
+class EmptyDrawPileError(EmptyPileError):
+    """Raised when trying to draw from an empty deck."""
+    def __init__(self, message="The draw pile is empty. There are no cards to draw from."):
+        super().__init__(message)
+
+class EmptyFoundationPileError(EmptyPileError):
+    """Raised when trying to draw from an empty deck."""
+    def __init__(self, message="The foundation pile is empty. There are no cards to draw from."):
+        super().__init__(message)
+
+class InvalidPlayError(GameError):
+    """Raised when a card cannot be played as attempted."""
+    def __init__(self, message="That card cannot be played in this situation."):
+        super().__init__(message)
+
+class PlayerHasNoCardsError(GameError):
+    """Raised when a player tries to play a card but has none."""
+    def __init__(self, message="You don't have any cards to play!"):
+        super().__init__(message)
+
 # def board(rows: int, columns: int):
 #     board = []
 #     for i in range(rows):
@@ -62,8 +91,11 @@ class Solitare:
     
     def check_move(self, from_card, to_card):
         # check King move to empty stack
-        if from_card.value == 13 and to_card is None:
-            return True
+        if to_card is None:
+            if from_card.value == 13:
+                return True
+            else:
+                return False
         # check all other possible moves
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
     
@@ -85,25 +117,18 @@ class Solitare:
     def check_win(self):
         return all(pile.size == 13 for pile in self.foundation_piles.values())
     
-
     def draw(self):
         """Draw a card from the stock pile and flip it over for move."""
-        # No drawing from empty stock pile in main move.
-        # if self.draw_pile.is_empty():
-        #     print("Invalid move. Cannot draw from an empty stock pile.")
-        #     print(input("Press ENTER or RETURN."))
-        #     return False
-        
-        for flip in range(self._klondike_value):
-            # Flip card will return False if the second or third flip is from emtpy stock pile
-            if self.flip_card_draw_pile():
-                self.waste_pile.add_to(self.draw_pile.remove_from())
-            elif flip == 0:
-                print("Invalid move. Cannot draw from an empty stock pile.")
-                print(input("Press ENTER or RETURN."))
-                return False 
-            else:
+        cards_drawn_for_play = 0    
+        for _ in range(self._klondike_value):
+            try:
+                card_for_play = self.draw_pile.remove_from(flip=True)         
+                self.waste_pile.add_to(card_for_play)
+                cards_drawn_for_play += 1
+            except Exception:
                 break
+        if cards_drawn_for_play == 0:
+            raise EmptyDrawPileError()
         
         return True
 
@@ -129,6 +154,25 @@ class Solitare:
                     self.flip_card_tableau(stack_number)
             return True
         return False
+    
+    def move_from_foundation(self, suit, stack_number):    
+        foundation_pile = self.foundation_piles[suit]
+        if foundation_pile.is_empty():
+            raise EmptyFoundationPileError()
+        from_card = foundation_pile.top_card()
+        tableau_stack = self.tableau[stack_number]
+        if tableau_stack.is_empty():
+            to_card = None
+        else:
+            to_card = tableau_stack.top_card()
+        
+        if self.check_move(from_card, to_card):
+            card = self.foundation_piles[suit].remove_from()
+            self.tableau[stack_number].add_to(card)
+            return True
+        else:
+            return False
+
     
     def get_tableau_card(self, stack_number):
         """Returns the top card of the requested tableau stack or None if the stack is empty."""
@@ -229,6 +273,12 @@ class Solitare:
     
     def check_stock_pile(self):
         return self.draw_pile.is_empty()
+    
+    # def check_tableau(self, number):
+    #     if number < 0 < self._size:
+    #         raise IndexError()
+    #     if self.tableau[number].is_empty():
+    #         raise EmptyPileError
     
     def get_stock_pile(self):
         return self.draw_pile

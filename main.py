@@ -1,5 +1,5 @@
 from cli import TicTacToeCLI, ConnectFourCLI
-from games.games import Solitare, ConnectFour, TicTacToe
+from games.games import Solitare, ConnectFour, TicTacToe, EmptyDrawPileError, EmptyFoundationPileError
 from utils.game_options import GameOptions
 from utils.clitools import clear_screen, delay_effect, print_menu_screen, menu_select
 from utils.strings import SIMPLE_GAMES_START
@@ -137,7 +137,7 @@ def print_card_table(tableau, piles, pile):#, fixed_height):
 
 def run_game():
     clear_screen()
-    test = Solitare(klondike_value=1)
+    test = Solitare(klondike_value=3)
     # print(test.size)
     # exit()
     def stack_validator():
@@ -158,10 +158,25 @@ def run_game():
         while True:
             try:
                 move = int(input("Enter your response: "))
-                if move in {1, 2, 3, 4}:
+                if move in {1, 2, 3, 4, 5}:
                     return move
                 else:
-                    print("Invalid move option. Please enter a number between 1 and 4. Try again.\n")
+                    print("Invalid move option. Please enter a number between 1 and 5. Try again.\n")
+            except ValueError:
+                print("Invalid input. Enter only a number between 1 and 5. Try again\n")
+            except (EOFError, KeyboardInterrupt):
+                print("\nInput terminated. Exiting program.")
+                exit(1)
+
+    def suit_validator():
+        suit_dictionary = {1: "S", 2: "H", 3: "D", 4: "C"}
+        while True:
+            try:
+                suit = int(input("Press 1: for Spade, 2 for Heart, 3 for Diamond, 4 for Club: "))
+                if suit in {1, 2, 3, 4, 5}:
+                    return suit_dictionary[suit]
+                else:
+                    print("Invalid suit option. Please enter a number between 1 and 4 to get the correct foundation pile. Try again.\n")
             except ValueError:
                 print("Invalid input. Enter only a number between 1 and 4. Try again\n")
             except (EOFError, KeyboardInterrupt):
@@ -199,14 +214,15 @@ def run_game():
         print_waste_pile(pile=test.show_waste_pile())
         # print(test.show_stock_pile())
         
-        print("\nPress 1: To build to the tableau from the stock pile.\nPress 2: To move one or more cards on the tableau.\n" \
-                         "Press 3: To build to the foundation piles.\nPress 4: To draw and flip the top card from the stock pile.\n")
+        print("\nPress 1: To build to the tableau from the waste pile.\nPress 2: To move one or more cards on the tableau.\n" \
+                    "Press 3: To build to the foundation piles from the waste pile or tableau.\nPress 4: To move a card from the foundation pile.\n" \
+                    "Press 5: To draw from the stock pile to the waste pile.\nPress 6: To reset the stock pile.\n3")
         move = move_validator()
         if move == 1:
             stack_number = stack_validator()
             
             if test.build(stack_number):
-                print("\nMove successful.")
+                print("\nMove successful\n.")
                 
             else:
                 print("\nInvalid move")
@@ -214,22 +230,21 @@ def run_game():
             input("Press ENTER or RETURN to Continue.")
         elif move == 2:
           
-            print("\nFirst enter the stack you wish to move from.")
+            print("\nFirst enter the stack you wish to move from: ")
             from_stack = stack_validator()
 
-            print("\nNext, enter the stack you wish to move to.")
+            print("\nNext, enter the stack you wish to move to: ")
             to_stack = stack_validator()
             
-            print(f"\nNow, how many cards you wish to move from stack {from_stack + 1} to stack {to_stack + 1}.")
+            print(f"\nNow, how many cards you wish to move from stack {from_stack + 1} to stack {to_stack + 1}: ")
             number_of_cards = number_of_cards_validator()
                      
             if test.transfer(from_stack, to_stack, number_of_cards):
-                print("\nMove successful")
+                print("\nMove successful\n")
                 print(input("Press Enter or Return to Continue."))
             else:
                 print("\nInvalid move")
                 print(input("Press Enter or Return to Continue."))
-
         elif move == 3:
             while True:
                 location = int(input("Press 1: To move a card from waste pile.\nPress 2: To move from the tableau.\nEnter your response: "))
@@ -240,7 +255,7 @@ def run_game():
             if location == 1:
 
                 if test.move_to_foundation():
-                    print("\nMove successful")
+                    print("\nMove successful\n")
                     
                 else:
                     print("\nInvalid move.")
@@ -248,19 +263,32 @@ def run_game():
             elif location == 2:
                 column = stack_validator()
                 if test.move_to_foundation(column, True):
-                    print("Move successful")
+                    print("\nMove successful\n")
 
                 else:
                     print("Invalid move")
-            input("Press ENTER or RETURN to Continue.")
-                       
+            input("Press ENTER or RETURN to Continue.")  
         elif move == 4:
-            if test.draw():                
-                input("Press ENTER or RETURN to Continue.")
-            else:
-                print("ERROR OCCURRED")
-                input("Press ENTER or RETURN to Continue.")
-
+            try:
+                print("\nSelect the foundation pile you wish to take from to return to the tableau.\n")
+                suit = suit_validator()
+                print("\nNow, enter the stack you wish to move to: ")
+                stack_number = stack_validator()
+                if test.move_from_foundation(suit=suit, stack_number=stack_number):
+                    print("\nMove successful\n") 
+                else:
+                    print("\nInvalid move.")
+            except EmptyFoundationPileError as e:
+                print(f"\n{e}\n")
+            input("Press ENTER or RETURN to Continue.")              
+        elif move == 5:
+            try:
+                if test.draw():
+                    print("\nMove successful\n")             
+            except EmptyDrawPileError as e:
+                print(f"\n{e}\n")
+            input("Press ENTER or RETURN to Continue.")
+            
         if test.check_win():
             print("You Win!")
 

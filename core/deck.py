@@ -130,6 +130,7 @@ class CardStack:
     def top_card(self):
         """Returns the top card of the card stack"""
         if self.is_empty():
+            # raise Exception("This pile of cards is empty.")
             return self.head.value # Value of head is string
         
         return self.head.next.value
@@ -165,12 +166,15 @@ class CardStack:
 
 
     # Remove a value from the stack and return.
-    def remove_from(self):
+    def remove_from(self, flip: bool=False):
         if self.is_empty():
-            raise Exception("Popping from an empty stack")
+            raise Exception("This pile of cards is empty.")
         remove_card = self.head.next
         self.head.next = remove_card.next 
         self._size -= 1
+        if flip:
+            remove_card.value.flip_card()
+
         return remove_card.value
 
 class CardDeck:
