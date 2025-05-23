@@ -1,5 +1,5 @@
 from random import shuffle
-from core.errors import EmptyPileError
+from utils.errors import EmptyPileError
 
 # Python program to demonstrate
 # stack implementation using a linked list.
@@ -143,21 +143,23 @@ class CardStack:
         
         return self.head.next.value
     
-    def look_at(self, card_number):
-        if card_number < 0 or card_number > self._size:
-            raise IndexError("Cannot view a card that is not found in the pile.")
+    def look_at(self, stack_index):
+        """Traverses card stack to retrieve card at the requested stack_index position from the top."""
+        if stack_index < 0 or stack_index >= self._size: 
+            raise IndexError(f"Index {stack_index} out of bounds for stack of size {self._size}.")
         
         current_card_node = self.head.next
-        current_index = 0
-        while current_card_node and current_index < card_number:
+       
+        for _ in range(stack_index): 
+            if not current_card_node: 
+                raise IndexError("Index {stack_index} out of bounds with None pointer.")
             current_card_node = current_card_node.next
-            current_index += 1
         
         if current_card_node:
             return current_card_node.value
-        else:
-            raise IndexError("Could not retrieve card.")
-        
+        else: 
+            raise IndexError("Could not retrieve card due to internal error.")
+    
     # def __iter__(self):
     #     current_card_node = self.head.next
     #     while current_card_node:

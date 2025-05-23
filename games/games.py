@@ -6,7 +6,7 @@ from core.board import Board, LineChecker
 from core.deck import CardDeck, CardStack, CardQueue
 from core.player import Player
 from time import sleep
-from core.errors import *
+from utils.errors import *
 
 def int_converter(number, columns):
     return divmod(number, columns)
@@ -71,6 +71,7 @@ class Solitare:
     
     def check_foundation_move(self, card):
         """Validates buidling to a foundation pile in ascending order and same suit card."""
+        # suit validation checked before calling this function
         foundation_pile = self.foundation_piles[card.suit]
         if foundation_pile.is_empty():
             return card.value == 1
@@ -172,21 +173,25 @@ class Solitare:
         if from_card_stack.size < number_of_cards:
             raise InvalidMoveError(f"Cannot transfer {number_of_cards} cards. Stack {from_stack + 1} only has {from_card_stack.size} cards.")
         
-        for i in range(number_of_cards):
+        # Double check all cards in the transfer stack are visible or face up
+        for i in range(number_of_cards - 1):
             card_for_transfer = from_card_stack.look_at(i)
+            print(card_for_transfer)
             if not card_for_transfer.visible:
                 raise InvalidMoveError(f"The card at position {i + 1} is face down. All cards to be transfered must be face up.")
             
-        # Check first if the card final position of the cards to be transfered is face up and keep its value, else invalidate the transfer
-        # from_card = card_for_transfer
-        if not card_for_transfer.visible:
-            raise InvalidMoveError(f"The card you selected for transfer is face down.")
-        from_card = card_for_transfer
+        # Check if the final card is face up and keep its value for transfer validation
+        from_card = from_card_stack.look_at(number_of_cards - 1) # for 0-indexed 
+        print(from_card)
+
+        if not from_card.visible:
+            raise InvalidMoveError(f"The card you selected for transfer to another stack is face down.")
 
         to_card = self.tableau[to_stack].top_card() # Uses None for empty stack and allow for King move
         print(from_card)
         print(to_card)
-                    
+
+        # validate move before moving cards between stacks             
         if not self.check_move(from_card, to_card):
             raise InvalidMoveError(f"The card or cards you wish to move from stack {from_stack} cannot be placed on stack {to_stack}.")
         # Create a temp card stack to move the cards from one tableau to another tableau card stack
