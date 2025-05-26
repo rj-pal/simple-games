@@ -256,21 +256,21 @@ def run_game():
         elif move == 3:
             try:
                 while True:
-                    location = int(input("Press 1: To move a card from waste pile.\nPress 2: To move from the tableau.\nEnter your response: "))
+                    location = int(input("\nPress 1: To move a card from waste pile.\nPress 2: To move from the tableau.\n\nEnter your response: "))
                     if location not in {1,2}:
                         print("\nInvalid entry. Try again.\n")
                     else:
                         break
                 if location == 1:
 
-                    if test.move_to_foundation():
+                    if test.move_to_foundation("waste_pile"):
                         print("\nMove successful\n")      
                     else:
                         print("\nInvalid move.")
                             
                 elif location == 2:
                     column = stack_validator()
-                    if test.move_to_foundation(column, True):
+                    if test.move_to_foundation("tableau", column):
                         print("\nMove successful\n")
                     else:
                         print("Invalid move")

@@ -3,7 +3,7 @@ from random import choice, randint
 from typing import Tuple, List, Union, Optional
 from copy import deepcopy
 from core.board import Board, LineChecker
-from core.deck import CardDeck, CardStack, CardQueue
+from core.deck import CardDeck, CardStack, Card
 from core.player import Player
 from time import sleep
 from utils.errors import *
@@ -61,7 +61,7 @@ class Solitare:
     def klondike_value(self):
         raise AttributeError("Cannot delete the klondike_value attribute")
     
-    def check_move(self, from_card, to_card):
+    def check_move(self, from_card: Card, to_card: Card):
         """Validates building to a tabelau stack in descending order and alternatie suit colour cards."""
         # check king move to empty stack
         if to_card is None:
@@ -69,15 +69,20 @@ class Solitare:
         # check all other possible moves
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
     
-    def check_foundation_move(self, card):
+    def check_foundation_move(self, card: Card):
         """Validates buidling to a foundation pile in ascending order and same suit card."""
         # suit validation checked before calling this function
         foundation_pile = self.foundation_piles[card.suit]
         if foundation_pile.is_empty():
             return card.value == 1
         return card.value == foundation_pile.top_card().value + 1
-
     
+    def move_card(self, from_card_stack: CardStack, to_card_stack: CardStack, flip_card: bool=False):
+        """Moves a single card from one card stack to another. Valid Card Stacks: tabelau, foundation pile, draw pile, or waste pile."""
+        card = from_card_stack.remove_from(flip_card)
+        to_card_stack.add_to(card)
+        return True
+
     def check_win(self):
         return all(pile.size == 13 for pile in self.foundation_piles.values())
     
@@ -86,8 +91,9 @@ class Solitare:
         cards_drawn_for_play = 0    
         for _ in range(self._klondike_value):
             try:
-                card_for_play = self.draw_pile.remove_from(flip=True)         
-                self.waste_pile.add_to(card_for_play)
+                self.move_card(from_card_stack=self.draw_pile, to_card_stack=self.waste_pile, flip_card=True)
+                # card_for_play = self.draw_pile.remove_from(flip=True)         
+                # self.waste_pile.add_to(card_for_play)
                 cards_drawn_for_play += 1
             except EmptyPileError:
                 break
@@ -97,45 +103,49 @@ class Solitare:
         return True
 
     
-    def move_to_foundation(self, stack_number: int=-1, from_tableu: bool=False):
+    def move_to_foundation(self, from_pile: str, stack_number: int=-1):
         """Move a card from the waste pile or tableau to the foundation pile of the selected card's suit. Defaults to move from waste pile."""
         # Get the pile the player is trying to move from
-        if from_tableu:
+        if from_pile == "tableau":
             if not 0 <= stack_number < self._size:
                 raise InvalidStackError(f"Invalid tableau stack number: {stack_number}")
-            from_pile=self.tableau[stack_number]
+            from_card_stack = self.tableau[stack_number]
+        elif from_pile == "waste_pile":
+            from_card_stack = self.waste_pile
         else:
-            from_pile=self.waste_pile     
-        card = from_pile.top_card()
+            raise ValueError("Invalid 'from_pile' argument. Must be either 'tableau' or 'waste_pile'.")
+
+        # Check that the card is not from an empty pile before checking the move to the foundation
+        card = from_card_stack.top_card()
         if card is None:
             raise EmptyPileError("You are attempting to move a card from an empty card pile.")
+        # Validate move to the foundation pile
         if not self.check_foundation_move(card):
             raise InvalidMoveError("The card you want to move cannot be put onto the foundation pile.")
-        card = from_pile.remove_from()
-        self.foundation_piles[card.suit].add_to(card)
-        if from_tableu and not from_pile.is_empty():
-            if not from_pile.top_card().visible:
+        # Move the card
+        self.move_card(from_card_stack=from_card_stack, to_card_stack=self.foundation_piles[card.suit])
+        if from_pile == "tableau" and not from_card_stack.is_empty():
+            if not from_card_stack.top_card().visible:
                 self.flip_card_tableau(stack_number)
         return True
 
-    def move_from_foundation(self, suit, stack_number):
+    def move_from_foundation(self, suit: str, stack_number: int):
         if suit not in self.foundation_piles.keys():
             raise ValueError(f"Invalid suit: {suit}") # Or a custom InvalidSuitError
         if not 0 <= stack_number < self._size:
             raise InvalidStackError(f"Invalid tableau stack number: {stack_number}")
     
-        foundation_pile = self.foundation_piles[suit]
-        from_card = foundation_pile.top_card()
+        from_card = self.foundation_piles[suit].top_card()
         if from_card is None:
             raise EmptyPileError(f"Cannot move from empty {suit} foundation pile.")
-        tableau_stack = self.tableau[stack_number]
-        to_card = tableau_stack.top_card()
+        if from_card.value == 13:
+            raise InvalidMoveError("Cannot move a King back to the tableau.")
+        
+        to_card = self.tableau[stack_number].top_card()
         if not self.check_move(from_card, to_card):
-            raise InvalidMoveError()
-        card = self.foundation_piles[suit].remove_from()
-        self.tableau[stack_number].add_to(card)
-        return True
-
+            raise InvalidMoveError(f"Cannot move {from_card} from foundation to tableau stack {stack_number}.")
+        
+        return self.move_card(from_card_stack=self.foundation_piles[suit], to_card_stack=self.tableau[stack_number])
     
     def get_tableau_card(self, stack_number):
         """Returns the top card of the requested tableau stack or None if the stack is empty."""
@@ -151,12 +161,10 @@ class Solitare:
             raise EmptyPileError("Cannot build from empty waste pile.")
         if not 0 <= stack_number < self._size:
             raise InvalidStackError(f"Invalid tableau stack number: {stack_number}")
-        table_card = self.tableau[stack_number].top_card() # Uses None for empty stack and allow for King move
-        if not self.check_move(from_card=card_to_move, to_card=table_card): # Validate move
-            raise InvalidMoveError(f"The card you wish to build on stack {stack_number} cannot be placed on this stack.")
-        card = self.waste_pile.remove_from()
-        self.tableau[stack_number].add_to(card) # Move card from stock to tableau
-        return True
+        # Validate move first
+        if not self.check_move(from_card=card_to_move, to_card=self.tableau[stack_number].top_card()):
+            raise InvalidMoveError(f"Cannot build {card_to_move.name} on tableau stack {stack_number}.")
+        return self.move_card(from_card_stack=self.waste_pile, to_card_stack=self.tableau[stack_number])
     
     def transfer(self, from_stack, to_stack, number_of_cards=1):
         if not 0 <= from_stack < self.size:
@@ -176,32 +184,26 @@ class Solitare:
         # Double check all cards in the transfer stack are visible or face up
         for i in range(number_of_cards - 1):
             card_for_transfer = from_card_stack.look_at(i)
-            print(card_for_transfer)
             if not card_for_transfer.visible:
                 raise InvalidMoveError(f"The card at position {i + 1} is face down. All cards to be transfered must be face up.")
             
         # Check if the final card is face up and keep its value for transfer validation
         from_card = from_card_stack.look_at(number_of_cards - 1) # for 0-indexed 
-        print(from_card)
-
         if not from_card.visible:
             raise InvalidMoveError(f"The card you selected for transfer to another stack is face down.")
 
-        to_card = self.tableau[to_stack].top_card() # Uses None for empty stack and allow for King move
-        print(from_card)
-        print(to_card)
 
-        # validate move before moving cards between stacks             
-        if not self.check_move(from_card, to_card):
+        # Validate move before moving cards between stacks             
+        if not self.check_move(from_card=from_card, to_card=self.tableau[to_stack].top_card()):
             raise InvalidMoveError(f"The card or cards you wish to move from stack {from_stack} cannot be placed on stack {to_stack}.")
+        
         # Create a temp card stack to move the cards from one tableau to another tableau card stack
         temp_stack = CardStack()
         for _ in range(number_of_cards):
-            temp_card = from_card_stack.remove_from()
-            temp_stack.add_to(temp_card)
+            self.move_card(from_card_stack=from_card_stack, to_card_stack=temp_stack)
         while not temp_stack.is_empty():
-            temp_card = temp_stack.remove_from()
-            self.tableau[to_stack].add_to(temp_card)
+            self.move_card(from_card_stack=temp_stack, to_card_stack=self.tableau[to_stack])
+        
         # Flip the card in the tableau if necessary after moving all the cards. 
         if not from_card_stack.is_empty() and not from_card_stack.top_card().visible:
             self.flip_card_tableau(from_stack)

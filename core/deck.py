@@ -255,17 +255,22 @@ class Card:
         self._value = value 
         self._visible = False
         self.face = self.create_face()
+        self.name = self.create_name()
         
     def create_face(self):
         
         suit_dict = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️", "B": "🎴"}
         face_dict = {0: "Blank", 1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 7: " 7",
                         8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"}
-
-        # {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
-        #                             8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
-
+        
         return f"{face_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "Empty card pile."
+    
+    def create_name(self):
+        suit_dict = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
+        name_dict = {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
+                        8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
+        
+        return f"{name_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "Empty card pile."
     
     @property
     def value(self):
@@ -308,7 +313,6 @@ class Card:
         return "Hidden"
 # Driver Code
 if __name__ == "__main__":
-
     card = Card("S", 12)
     card.visible = True
     pile = CardStack()
