@@ -106,7 +106,7 @@ class Solitare:
         cards_drawn_for_play = 0    
         for _ in range(self._klondike_value):
             try:
-                self.move_card(from_card_stack=self.draw_pile, to_card_stack=self.waste_pile, flip_card=True)
+                self.move_card(from_card_stack=self.draw_pile, to_card_stack=self.waste_pile, flip_card=False)
                 # card_for_play = self.draw_pile.remove_from(flip=True)         
                 # self.waste_pile.add_to(card_for_play)
                 cards_drawn_for_play += 1
@@ -227,7 +227,7 @@ class Solitare:
         tableau = []
         self.card_deck.shuffle_deck()
         for i in range(self.size):
-            card_stack = self.card_deck.deal_cards(i + 1)
+            card_stack = self.card_deck.deal_cards(number_of_cards=i + 1)
             card_stack.head.next.value.flip_card()
             tableau.append(card_stack)
             self.card_deck.shuffle_deck()  

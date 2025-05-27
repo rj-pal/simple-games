@@ -198,6 +198,7 @@ class CardStack:
     #         remove_card.value.flip_card()
 
     #     return remove_card.value
+from collections import deque
 
 class CardDeck:
     def __init__(self):
@@ -209,7 +210,7 @@ class CardDeck:
         
     def create_deck(self):
         suit_values = ("S", "H", "D", "C")
-        return [Card(suit=suit, value=value) for suit in suit_values for value in range(1, 14)]
+        return deque([Card(suit=suit, value=value) for suit in suit_values for value in range(1, 14)])
     
     def shuffle_deck(self):
         return shuffle(self.deck)
@@ -251,21 +252,22 @@ class CardDeck:
         return players
 
     
-    def pile(self, number_of_cards=52, facedown=True):
+    def pile(self, facedown=True):
         card_stack = CardStack()
-        for i in range(number_of_cards):
-            if card := self.deal_card(facedown):
-                card_stack.add_to(card)
-            else:
-                print("Piling is finished.")
-                break
+        print(self.deck)
+        while self.size != 0:
+            card = self.deck.popleft()
+            card.visible = facedown
+            card_stack.add_to(card)      
+        print("Piling is finished")
+        print(card_stack)
         return card_stack
     
     def get_first_card(self):
         if self.size == 0:
             print("CardDeck is empty.")
             return None
-        return self.deck.pop(0)
+        return self.deck.popleft()
 
 class Card:
     def __init__(self, suit: int, value: str):
@@ -343,10 +345,10 @@ if __name__ == "__main__":
     # print(pile.top_card().next.next)
     # print(pile.head)
 
-    # hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
+    hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
 
-    # for i, hand in enumerate(hands, start=1):
-    #     print(f"Player {i}'s hand: {hand}")
+    for i, hand in enumerate(hands, start=1):
+        print(f"Player {i}'s hand: {hand.__str__()}")
     exit()
 
 
