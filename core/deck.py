@@ -102,8 +102,8 @@ class CardStack:
         current_card = self.head.next
         card_stack = ""
         while current_card:
-            card_stack += repr(current_card.value) + " ->\n"
-            # card_stack += str(current_card.value) + " ->\n"
+            # card_stack += repr(current_card.value) + " ->\n"
+            card_stack += str(current_card.value) + " ->\n"
             current_card = current_card.next
         return card_stack
     
@@ -186,6 +186,18 @@ class CardStack:
             remove_card.value.flip_card()
 
         return remove_card.value
+    
+    # Remove a value from the bottom of the stack and return.
+    # def remove_from_bottom(self, flip: bool=False):
+    #     if self.is_empty():
+    #         raise EmptyPileError()
+    #     remove_card = self.head.next
+    #     self.head.next = remove_card.next 
+    #     self._size -= 1
+    #     if flip:
+    #         remove_card.value.flip_card()
+
+    #     return remove_card.value
 
 class CardDeck:
     def __init__(self):
@@ -240,14 +252,20 @@ class CardDeck:
 
     
     def pile(self, number_of_cards=52, facedown=True):
-        card_queue = CardStack()
+        card_stack = CardStack()
         for i in range(number_of_cards):
             if card := self.deal_card(facedown):
-                card_queue.add_to(card)
+                card_stack.add_to(card)
             else:
                 print("Piling is finished.")
                 break
-        return card_queue
+        return card_stack
+    
+    def get_first_card(self):
+        if self.size == 0:
+            print("CardDeck is empty.")
+            return None
+        return self.deck.pop(0)
 
 class Card:
     def __init__(self, suit: int, value: str):

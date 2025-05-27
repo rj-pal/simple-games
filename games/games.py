@@ -61,6 +61,21 @@ class Solitare:
     def klondike_value(self):
         raise AttributeError("Cannot delete the klondike_value attribute")
     
+    def reset_pile(self):
+        if not self.draw_pile.is_empty():
+            raise InvalidMoveError("Cannot reset the stock pile that is not empty.")
+        number_of_waste_cards = self.waste_pile.size
+        while not self.waste_pile.is_empty():
+            waste_card = self.waste_pile.remove_from(flip=True)
+            self.card_deck.add_card(waste_card)
+    
+        temp_stack = self.card_deck.get_empty_card_stack()
+        for i in range(number_of_waste_cards):
+            bottom_card = self.card_deck.get_first_card()
+            temp_stack.add_to(bottom_card)
+        self.draw_pile = temp_stack
+        return True
+    
     def check_move(self, from_card: Card, to_card: Card):
         """Validates building to a tabelau stack in descending order and alternatie suit colour cards."""
         # check king move to empty stack
@@ -101,7 +116,6 @@ class Solitare:
             raise EmptyPileError("The draw pile is empty. There are no cards to draw from.")
         
         return True
-
     
     def move_to_foundation(self, from_pile: str, stack_number: int=-1):
         """Move a card from the waste pile or tableau to the foundation pile of the selected card's suit. Defaults to move from waste pile."""
@@ -192,7 +206,6 @@ class Solitare:
         if not from_card.visible:
             raise InvalidMoveError(f"The card you selected for transfer to another stack is face down.")
 
-
         # Validate move before moving cards between stacks             
         if not self.check_move(from_card=from_card, to_card=self.tableau[to_stack].top_card()):
             raise InvalidMoveError(f"The card or cards you wish to move from stack {from_stack} cannot be placed on stack {to_stack}.")
@@ -207,6 +220,7 @@ class Solitare:
         # Flip the card in the tableau if necessary after moving all the cards. 
         if not from_card_stack.is_empty() and not from_card_stack.top_card().visible:
             self.flip_card_tableau(from_stack)
+        
         return True
   
     def make_tableau(self):

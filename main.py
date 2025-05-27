@@ -135,6 +135,8 @@ def print_card_table(tableau, piles, pile):#, fixed_height):
     print_draw_pile(pile)
     print()
    
+import gc
+import sys
 
 def run_game():
     clear_screen()
@@ -159,12 +161,12 @@ def run_game():
         while True:
             try:
                 move = int(input("Enter your response: "))
-                if move in {1, 2, 3, 4, 5}:
+                if move in {1, 2, 3, 4, 5, 6}:
                     return move
                 else:
-                    print("Invalid move option. Please enter a number between 1 and 5. Try again.\n")
+                    print("Invalid move option. Please enter a number between 1 and 6. Try again.\n")
             except ValueError:
-                print("Invalid input. Enter only a number between 1 and 5. Try again\n")
+                print("Invalid input. Enter only a number between 1 and 6. Try again\n")
             except (EOFError, KeyboardInterrupt):
                 print("\nInput terminated. Exiting program.")
                 exit(1)
@@ -298,11 +300,36 @@ def run_game():
             except GameError as e:
                 print(f"\n{e}\n")
             input("Press ENTER or RETURN to Continue.")
+        elif move == 6:
+
+            if test.reset_pile():
+                print("\nMove successful\n")
+            
+            input("Press ENTER or RETURN to Continue.")
             
         if test.check_win():
             print("You Win!")
 
-        clear_screen()    
+        print(sys.getrefcount(test))  # Curious about Garbage Collection 
+        referrers = gc.get_referrers(test)
+        print(f"Found {len(referrers)} referrers")
+        for r in referrers:
+            print(type(r), r)
+
+        print("Who refers to test.draw_pile?")
+        referrers = gc.get_referrers(test.draw_pile)
+
+        for r in referrers:
+            print(f"Type: {type(r)}")
+            if isinstance(r, dict):
+                # Most referrers are internal dictionaries like __dict__ or locals
+                for k, v in r.items():
+                    if v is main.object_a:
+                        print(f" - Key: {k}")
+
+
+
+        # clear_screen()    
 
 
 
