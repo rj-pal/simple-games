@@ -86,6 +86,7 @@ def run():
     test = ConnectFour()
     GameCLI.set_console_window_size(100, 48)
     GameCLI.print_start_game(connect4_strings["welcome"], connect4_strings["intro"])
-    play_game(set_up_game())
+    game = set_up_game()
+    play_game(game)
     exit()
 

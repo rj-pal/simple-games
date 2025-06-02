@@ -360,7 +360,20 @@ def prompt_column_move():
             print(f"\nYou must enter a free column from 1 to 7 only.\n")
         except ValueError:
             print("\nYou must enter a number. Try again.\n")
-
+def select_klondike_draw_number():
+    valid_input = ["1", "3"]
+    while True:
+        klondike_value = input("\nSelect the number of cards per draw: 1 or 3: ")
+        if klondike_value in valid_input:
+            if klondike_value == "1":
+                print("\nYou are playing in easy mode with one card per draw.")
+            else:
+                print("\nYou are playing in hard mode with three cards per draw.")
+            print(input("\nPress ENTER or RETRUN to start the game."))
+            clear_screen()
+            return int(klondike_value)
+        else:
+            print("Please type only 1 or 3.")
 
 def select_difficulty_level() -> Optional[bool]:
     """Updates the difficulty level boolean when playing against the computer."""

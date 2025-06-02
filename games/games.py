@@ -65,10 +65,12 @@ class Solitare:
         if not self.draw_pile.is_empty():
             raise InvalidMoveError("Cannot reset the stock pile that is not empty.")
         number_of_waste_cards = self.waste_pile.size
+        print(self.waste_pile)
         while not self.waste_pile.is_empty():
             waste_card = self.waste_pile.remove_from(flip=True)
             self.card_deck.add_card(waste_card)
-    
+        for card in self.card_deck.deck:
+            print(card)
         temp_stack = self.card_deck.get_empty_card_stack()
         for i in range(number_of_waste_cards):
             bottom_card = self.card_deck.get_first_card()
@@ -106,7 +108,7 @@ class Solitare:
         cards_drawn_for_play = 0    
         for _ in range(self._klondike_value):
             try:
-                self.move_card(from_card_stack=self.draw_pile, to_card_stack=self.waste_pile, flip_card=False)
+                self.move_card(from_card_stack=self.draw_pile, to_card_stack=self.waste_pile, flip_card=True)
                 # card_for_play = self.draw_pile.remove_from(flip=True)         
                 # self.waste_pile.add_to(card_for_play)
                 cards_drawn_for_play += 1
@@ -288,7 +290,10 @@ class Solitare:
             print(card_stack)
 
     def show_stock_pile(self):
-        print(self.get_stock_pile())
+        if self.check_stock_pile():
+            print(self.draw_pile.head.value.value)
+        else:
+            print(self.get_stock_pile())
 
     def show_waste_pile(self):
         waste_pile = []

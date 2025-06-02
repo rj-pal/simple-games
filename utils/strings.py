@@ -42,6 +42,28 @@ WELCOME_CONNECT4 = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
 
+WELCOME_SOLITAIRE = """
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   *                                                                         *
+   *                                                                         *
+   *     *       *   * * *   *       * * *    *  *      *   *     * * *      *
+   *      *  *  *    * *     *      *        *    *    *  *  *    * *        *
+   *       *   *     * * *   * * *   * * *    *  *    *       *   * * *      *
+   *                                                                         *
+   *                                                                         *
+   *      * * *   *  *                                                       *
+   *        *    *    *                                                      *
+   *        *     *  *                                                       *
+   *                                                                         *
+   *                                                                         *
+   *       * * *    *  *     *       *   * * *    *     *   *  *    * * *    *
+   *        *      *    *    *       *     *     * *    *   *  *    * *      *
+   *      * * *     *  *     * * *   *     *    *   *   *   *   *   * * *    *
+   *                                                                         *
+   *                                                                         *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+"""
+
 GAMEOVER = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    *                                                                         *
@@ -67,11 +89,11 @@ REDWINS = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    *                                                                         *
    *                                                                         *
-   *         *  *  *            *  *  *         *  * *                       *
-   *         *      *           *               *      *                     *
-   *         *  *  *            * * *           *       *                    *
-   *         *      *           *               *      *                     *
-   *         *       *          *  *  *         *  * *                       *
+   *            *  *  *        *  *  *      *  * *                           *
+   *            *      *       *            *      *                         *
+   *            *  *  *        * * *        *       *                        *
+   *            *      *       *            *      *                         *
+   *            *       *      *  *  *      *  * *                           *
    *                                                                         *
    *          *             *     * * *     *       *       * * *            *
    *          *             *       *       *  *    *      *     *           *
@@ -113,6 +135,11 @@ This is an online version of the classic game. Play multiple games per session
 against an opponent or the computer. Red starts the game.
 """
 
+INTRO_SOLITAIRE = """
+This is an online version of the classic game Klondike Solitaire. Play multiple games per session. 
+You can play single draw or three draw solitaire.
+"""
+
 THINKING = "\nComputer is now thinking."
 
 BOARDLINE_TICTACTOE = "* " * 18 + "*" # for Tic Tac Toe
@@ -134,6 +161,13 @@ tictactoe_strings = {
 connect4_strings = {
     "welcome": WELCOME_CONNECT4,
     "intro": INTRO_CONNECT4,
+    "boardline": BOARDLINE_CONNECT4,
+    "boardlabels": COL_NAMES
+}
+
+solitaire_strings = {
+    "welcome": WELCOME_SOLITAIRE,
+    "intro": INTRO_SOLITAIRE,
     "boardline": BOARDLINE_CONNECT4,
     "boardlabels": COL_NAMES
 }

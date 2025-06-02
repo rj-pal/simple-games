@@ -71,7 +71,6 @@ class CardStack:
     def __init__(self):
         self.head = CardNode(Card("B", 0))
         # self.head = CardNode("Empty stack of cards.")
-
         self._size = 0
         self._suit = None
 
@@ -254,13 +253,13 @@ class CardDeck:
     
     def pile(self, facedown=True):
         card_stack = CardStack()
-        print(self.deck)
+        # print(self.deck)
         while self.size != 0:
             card = self.deck.popleft()
-            card.visible = facedown
+            card.visible = not facedown
             card_stack.add_to(card)      
         print("Piling is finished")
-        print(card_stack)
+        # print(card_stack)
         return card_stack
     
     def get_first_card(self):
