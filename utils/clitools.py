@@ -330,6 +330,12 @@ def print_scoreboard(player_list) -> None:
         0.00075, False
     )
 
+def print_computer_thinking(name: str="Computer", time_delay: int=1.5) -> None:
+    """Prints thinking message with time delay to simulate the computer thinking"""
+    print(f"{name} is now thinking.")
+    print()
+    sleep(time_delay)
+
 def prompt_int(value: str) -> int:
     """Gets a valid integer input (1-3) for row/column."""
     valid_input = {1, 2, 3}

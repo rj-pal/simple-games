@@ -849,6 +849,9 @@ class TicTacToe:
 
     def check_winner(self):
         return self.__win._check_for_winner()
+    
+    def get_player(self, index: int):
+        return self.players[index]
 
     def get_winner_info(self):
         return self.__win.get_win_info()
