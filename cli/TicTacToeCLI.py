@@ -1,3 +1,15 @@
+"""
+TicTacToeCLI.py 
+Author: Robert Pal
+Updated: 2025-07-16
+
+This module contains all control flow logic for running the Tic Tac Toe Command Line Application.
+It includes:
+- run() which acts as the main() game running function
+- set_up_game() which sets game play configerations
+- play_game() which controls the all actual game play logic and commands
+- play_again() which controls for multipile play
+"""
 import utils.clitools as GameCLI
 from games.games import TicTacToe
 from utils.strings import tictactoe_strings, other_strings
