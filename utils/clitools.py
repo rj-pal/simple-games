@@ -3,6 +3,7 @@ from time import sleep
 from itertools import chain
 from utils.game_options import GameOptions
 from utils.square import Square
+from utils.strings import tictactoe_strings, connect4_strings, other_strings
 from typing import Union, Optional
 
 
@@ -248,17 +249,38 @@ def print_board(game_board: list[list[Union[int, str]]], line: str) -> None:
     translated_board = board_translator(game_board)
     delay_effect([create_board_tictactoe(translated_board, line)], 0.00075, False)
 
-def print_start_game(welcome: str, intro: str):
-    """Prints the welcome message and introduction."""
-    print(welcome)
-    delay_effect([intro])
+def print_board(game_board: list[list[Union[int, str]]], game_name: str) -> None:
+    """Prints the game board with a slight delay effect."""
+    translated_board = board_translator(game_board)
+    if game_name == 'TicTacToe':
+        delay_effect([create_board_tictactoe(translated_board, line=tictactoe_strings["boardline"])], 0.00075, False)
+    elif game_name == 'Connect4':
+        delay_effect([create_board_connect4(translated_board, line=connect4_strings["boardline"])], 0, False)
+        print(connect4_strings["boardline"])
+        print(connect4_strings["boardlabels"])
+    # else:
+    #     raise ValueError()
 
-def print_game_over(gameover: str):
+def print_start_game(game_type: str):
+    """Prints the welcome message and introduction."""
+    if game_type == 'TicTacToe':
+        string_dict = tictactoe_strings
+    elif game_type == 'Connect4':
+        string_dict = connect4_strings
+    # else:
+    #     raise ValueError
+    print(string_dict["welcome"])
+    delay_effect([string_dict["intro"]])
+
+def print_game_over(winner_mark: str):
     """Displays a flashing 'Game Over' message."""
     print()
     clear_screen()
-    for _ in range(5):
-        print(gameover.center(os.get_terminal_size().columns - 1), end='\r')
+    for i in range(5):
+        if i % 2 == 0:
+            print(other_strings["gameover"].center(os.get_terminal_size().columns - 1), end='\r')
+        else:
+            print(other_strings[winner_mark].center(os.get_terminal_size().columns - 1), end='\r')
         sleep(0.75)
         clear_screen()
         sleep(0.5)
@@ -282,6 +304,25 @@ def one_player() -> bool:
         if one_player_choice in valid_input:
             return one_player_choice in ['1', 'one']
         print('\nOnly one or two players are allowed.\n')
+
+def play_again() -> bool:
+    message = "\nYou must enter 'Yes' or 'No' only."
+    while True:
+        try:
+            play_again = input(
+                "\nWould you like to play again? Enter yes or no: ").lower()
+            if play_again in ['yes', 'y']:
+                return True
+            elif play_again in ['no', 'n']:
+                delay_effect([
+                    "\nGame session complete.\n\nThanks for playing Tic-Tac-Toe. See you in the next session.\n"
+                ])
+                return False
+            else:
+                print(message)
+
+        except ValueError:
+            print(message)
 
 def print_winner_info(name: str, marker: str, win_type: str, win_index: int) -> None:
     """Displays the information of the winner of the game using the winner attributes."""

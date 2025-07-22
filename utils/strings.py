@@ -99,6 +99,46 @@ GAMEOVER = """
    *                                                                         *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
+# A large ASCII art banner displayed when the player X wins in Tic Tac Toe.
+XWINS = """
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   *                                                                         *
+   *                                                                         *
+   *                            *       *                                    *
+   *                              *   *                                      *
+   *                                *                                        *
+   *                              *   *                                      *
+   *                            *       *                                    *
+   *                                                                         *
+   *         *             *     * * *      *       *       * * *            *
+   *         *             *       *        *  *    *      *     *           *
+   *          *     *     *        *        *    *  *        *               *
+   *           *  *   *  *         *        *       *      *    *            *
+   *            *       *        * * *      *       *       * * *            *
+   *                                                                         *
+   *                                                                         *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+"""
+# A large ASCII art banner displayed when the player Y wins in Tic Tac Toe.
+YWINS = """
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   *                                                                         *
+   *                                                                         *
+   *                            *         *                                  *
+   *                             *       *                                   *
+   *                              *  *  *                                    *
+   *                                 *                                       *
+   *                                 *                                       *
+   *                                                                         *
+   *         *             *     * * *      *       *       * * *            *
+   *         *             *       *        *  *    *      *     *           *
+   *          *     *     *        *        *    *  *        *               *
+   *           *  *   *  *         *        *       *      *    *            *
+   *            *       *        * * *      *       *       * * *            *
+   *                                                                         *
+   *                                                                         *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+"""
 # A large ASCII art banner displayed when the Red player wins in Connect 4.
 REDWINS = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -204,6 +244,8 @@ solitaire_strings = {
 other_strings = {
     "gameover": GAMEOVER,
     "thinking": THINKING,
-    "redwinner": REDWINS,
-    "yellowwinner": YELLOWWINS
+    "x": XWINS,
+    "y": YWINS,
+    "r": REDWINS,
+    "y": YELLOWWINS
 }

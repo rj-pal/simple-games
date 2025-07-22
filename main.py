@@ -7,17 +7,20 @@ from utils.strings import SIMPLE_GAMES_START
 import sys
 import select
 
-def clear_stdin_buffer():
-    """Clears any pending input typed by the user before the prompt."""
-    while select.select([sys.stdin], [], [], 0)[0]:
-        sys.stdin.read(1)  # Read one character at a time until buffer is empty
+# def clear_stdin_buffer():
+#     """Clears any pending input typed by the user before the prompt."""
+#     while select.select([sys.stdin], [], [], 0)[0]:
+#         sys.stdin.read(1)  # Read one character at a time until buffer is empty
 
  
 def main():
+    # TicTacToeCLI.run()
     # SolitaireCLI.run()
-    # exit()
+    ConnectFourCLI.run()
+    exit()
+    # print("TESTING")
     print_menu_screen() 
-    clear_stdin_buffer()
+    # clear_stdin_buffer()
     valid_game_options  = GameOptions.values()
     choice = menu_select(valid_game_options)
     
