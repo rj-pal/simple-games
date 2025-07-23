@@ -14,10 +14,10 @@ from utils.strings import SIMPLE_GAMES_START
  
 def main():
     ### For quick testing of individual games
-    # TicTacToeCLI.run()
+    TicTacToeCLI.run()
     # SolitaireCLI.run()
     # ConnectFourCLI.run()
-    # exit()
+    exit()
     print_menu_screen() 
     # clear_stdin_buffer()
     valid_game_options  = GameOptions.values()

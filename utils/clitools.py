@@ -1,4 +1,5 @@
 import os
+import shutil
 from time import sleep
 from itertools import chain
 from utils.game_options import GameOptions
@@ -8,16 +9,22 @@ from typing import Union, Optional
 
 
 def clear_screen():
+    """Clears all printed input on terminal screen for display purposes."""
     os.system('cls' if os.name == 'nt' else 'clear')
 
-# def delay_effect(lines, delay=0.025):
-#     for line in lines:
-#         for char in line:
-#             print(char, end='', flush=True)
-#             sleep(delay)
-#         print()
+def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
+    """Creates the effect of printing line by line or character by character."""
+    # if delay != 0:
+    #     delay = 0  # Used for testing to speed up output
+    for string in strings:
+        for char in string:
+            print(char, end='', flush=word_flush)
+            sleep(delay)
+        print()
+        sleep(delay)
 
 def print_menu_screen(delay=0.025):
+    """Displays a menu of game options centered in the terminal screen. Allow for new games to be added dynamically."""
     clear_screen()
     # set_console_window_size(100, 40)
     columns, rows = os.get_terminal_size()
@@ -57,7 +64,6 @@ def menu_select(valid_selections):
 
         if choice in valid_selections:
             break
-
         print('\n' + blank_space, end="")
         delay_effect([error])  
         print('\n' + blank_space, end="")
@@ -75,100 +81,14 @@ def menu_select(valid_selections):
     return choice
 
 
-
-
-# def print_menu_screen(delay=0.025):
-#     clear_screen()
-#     # Get terminal size
-#     columns, rows = os.get_terminal_size()
-
-#     # Text to print
-#     menu_text = """Welcome to Simple Games.
-    
-#     1. Tic Tac Toe
-#     2. Connect 4
-#     3. Solitaire"""
-
-#     # Calculate horizontal and vertical positions for getting the centre of the terminal 
-#     horizontal_pos = (columns - len(max(menu_text.splitlines(), key=len))) // 2
-#     vertical_pos = (rows - menu_text.count('\n') - 1) // 2
-
-#     # Print empty lines to center the text vertically
-#     for _ in range(vertical_pos):
-#         print()
-
-#     # Print the text, center it horizontally
-#     for line in menu_text.splitlines():
-#         print(' ' * horizontal_pos, end="")
-#         delay_effect([line], delay)
-
-# def menu_select(valid_selections):
-#     print()
-#     # Get terminal size
-#     columns, _ = os.get_terminal_size()
-
-#     # Text to display as the prompt
-#     prompt = "Select the game you want to play: "
-#     error = "Please only select a game from the available options." 
-#     new_screen = "Press enter to select again."
-
-#     # Calculate horizontal position and create blank space string
-#     horizontal_pos = (columns - len(prompt)) // 2
-#     blank_space = ' ' * horizontal_pos
-
-#     # Print the prompt centered horizontally
-
-#     print(blank_space + prompt, end="")
-    
-#     choice = input()
-
-#     while choice not in valid_selections:
-#         print()
-#         print(blank_space, end="")
-#         delay_effect([error])  
-#         print()
-#         print(blank_space, end="")
-#         delay_effect([new_screen])
-#         print(blank_space, end="")
-#         print(input())
-#         clear_screen()
-#         print_menu_screen(delay=0)
-#         print()
-        
-#         return menu_select(valid_selections)
-    
-#     clear_screen()
-#     for _ in range(20):
-#         print()
-#     print(blank_space + " " * 15 + "GAME LOADING")
-#     sleep(2)
-#     clear_screen()
-
-#     return choice
-
-
 def set_console_window_size(width: float, height: float) -> None:
-    """Sets the console window size to fit the board better."""
+    """Sets the console window size to fit the board better for both Windows."""
     os.system('cls||clear')
     if os.name == 'nt':
         os.system(f'mode con: cols={width} lines={height}')
     else:
         os.system(f'printf "\033[8;{height};{width}t"')
 
-def clear_screen() -> None:
-    """Clears the terminal screen."""
-    os.system('clear||cls')
-
-def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
-    """Creates the effect of printing characters or lines with a delay."""
-    if delay != 0:
-        delay = 0  # Used for testing to speed up output
-    for string in strings:
-        for char in string:
-            print(char, end='', flush=word_flush)
-            sleep(delay)
-        print()
-        sleep(delay)
 
 def surround_string(strings: list[str], symbol: str, offset: int = 0) -> list[str]:
     """Creates a bordered display around text, used for scoreboards."""
@@ -251,15 +171,15 @@ def print_board(game_board: list[list[Union[int, str]]], line: str) -> None:
 
 def print_board(game_board: list[list[Union[int, str]]], game_name: str) -> None:
     """Prints the game board with a slight delay effect."""
+    if game_name not in {'TicTacToe', 'Connect4'}:
+        raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4'.")
     translated_board = board_translator(game_board)
     if game_name == 'TicTacToe':
-        delay_effect([create_board_tictactoe(translated_board, line=tictactoe_strings["boardline"])], 0.00075, False)
+        delay_effect([create_board_tictactoe(translated_board, line=tictactoe_strings["boardline"])], 0.000075, False)
     elif game_name == 'Connect4':
         delay_effect([create_board_connect4(translated_board, line=connect4_strings["boardline"])], 0, False)
         print(connect4_strings["boardline"])
         print(connect4_strings["boardlabels"])
-    # else:
-    #     raise ValueError()
 
 def print_start_game(game_type: str):
     """Prints the welcome message and introduction."""
@@ -272,52 +192,26 @@ def print_start_game(game_type: str):
     print(string_dict["welcome"])
     delay_effect([string_dict["intro"]])
 
-# import shutil, sys
 
-# def center_multiline_string(multiline_str: str, terminal_width: int) -> str:
-#     """
-#     Centers a multi-line string (like ASCII art) within the terminal width.
-#     Each line of the art is centered relative to the widest line in the art,
-#     and then the entire block is centered.
-#     """
-#     lines = multiline_str.strip().split('\n') # .strip() removes leading/trailing blank lines
-    
-#     # Find the maximum width of any line in the ASCII art
-#     max_line_width = 0
-#     for line in lines:
-#         # We need to consider that the first line after .strip() might be empty if original had leading newline
-#         if line.strip(): # Only consider non-empty lines for width calculation
-#             max_line_width = max(max_line_width, len(line))
-    
-#     if max_line_width == 0: # Handle empty input string case
-#         return ""
-
-#     centered_lines = []
-#     for line in lines:
-#         # Center each line of the art relative to the max_line_width of the art itself
-#         # This preserves the internal structure of the ASCII art
-#         padded_line = line.ljust(max_line_width) # Pad shorter lines to max_line_width
+def center_display_string(list_of_strings: str, terminal_width: int) -> str:
+    """Centers a multi-line string of ASCII art from a list within the terminal width."""
+    centered_lines = []
+    for line in list_of_strings:
+        centered_lines.append(line.center(terminal_width))
         
-#         # Now center this padded line within the terminal width
-#         centered_lines.append(padded_line.center(terminal_width))
-        
-#     return "\n".join(centered_lines)
+    return "\n".join(centered_lines)
 
 
 def print_game_over(winner_mark: str):
-    """Displays a flashing 'Game Over' message."""
+    """Displays a flashing end of game messages when a winner is found."""
     print()
     clear_screen()
-    # columns = shutil.get_terminal_size().columns
+    columns = shutil.get_terminal_size().columns
     for i in range(5):
         if i % 2 == 0:
-            # centered_output = center_multiline_string(other_strings["gameover"], columns)
-            # print(centered_output.center(columns), end='')
-            print(other_strings["gameover"].center(os.get_terminal_size().columns - 1), end='\r')
+            print(center_display_string(other_strings["gameover"], columns))
         else:
-            # centered_output = center_multiline_string(other_strings[winner_mark], columns)
-            # print(centered_output.center(columns), end='')
-            print(other_strings[winner_mark].center(os.get_terminal_size().columns - 1), end='\r')
+            print(center_display_string(other_strings[winner_mark], columns))
         # sys.stdout.flush()
         sleep(0.75)
         clear_screen()
@@ -344,23 +238,17 @@ def one_player() -> bool:
         print('\nOnly one or two players are allowed.\n')
 
 def play_again() -> bool:
-    message = "\nYou must enter 'Yes' or 'No' only."
+    """Gets valid input from user for and asks the user if they want to play again."""
+    error_message = "\nInvalid input. Please enter 'yes' or 'no'."
     while True:
-        try:
-            play_again = input(
-                "\nWould you like to play again? Enter yes or no: ").lower()
-            if play_again in ['yes', 'y']:
-                return True
-            elif play_again in ['no', 'n']:
-                delay_effect([
-                    "\nGame session complete.\n\nThanks for playing Tic-Tac-Toe. See you in the next session.\n"
-                ])
-                return False
-            else:
-                print(message)
-
-        except ValueError:
-            print(message)
+        play_again = input("\nWould you like to play again? Enter yes or no: ").lower().strip()
+        if play_again in {'yes', 'y'}:
+            return True
+        elif play_again in {'no', 'n'}:
+            delay_effect(["\nGame session complete.\n\nThanks for playing. See you in the next session.\n"])
+            return False
+        else:
+            print(error_message)
 
 def print_winner_info(name: str, marker: str, win_type: str, win_index: int) -> None:
     """Displays the information of the winner of the game using the winner attributes."""
