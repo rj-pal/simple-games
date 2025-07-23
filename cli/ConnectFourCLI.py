@@ -64,16 +64,17 @@ def play_game(game) -> None:
         current_row, current_col = game.move_list[i]
         # GameCLI.clear_screen()
         print()
-        # for j in range(current_row):
-        #     temp_board = game.board.get_board(True)
-        #     temp_board.update_square(current_row, current_col, 0)
-        #     temp_board.add_to_square(j, current_col, player.marker)
-        #     GameCLI.print_board_connect4(temp_board.get_board(), connect4_strings["boardline"], connect4_strings["boardlabels"])
-        #     GameCLI.sleep(0.05)
-        #     GameCLI.clear_screen()
-        #     print()
+        # Printing for dropping effect
+        for j in range(current_row):
+            temp_board = game.board.get_board(True)
+            temp_board.update_square(current_row, current_col, 0)
+            temp_board.add_to_square(j, current_col, player.marker)
+            GameCLI.print_board(temp_board.get_board(), "Connect4")
+            GameCLI.sleep(0.075)
+            GameCLI.clear_screen()
+            print()
             
-        # print("\n" * 3)
+        print("\n" * 3)
         GameCLI.print_board(game.board.get_board(), "Connect4")
         if i >= 6 and game.check_winner():
             game.update_winner_info()
@@ -81,22 +82,13 @@ def play_game(game) -> None:
             game.print_winner()
             winner = game.get_winner_attributes()
             GameCLI.print_game_over(winner_mark=winner[1]) # winner_attributes at index one is the marker type
-
-            # GameCLI.sleep(0.75)
-            # if player.marker == "y":
-            #     GameCLI.print_game_over(other_strings["yellowwinner"])
-            # elif player.marker == "r":
-            #     GameCLI.print_game_over(other_strings["redwinner"])
-
-            # else:
-            #     GameCLI.print_game_over(other_strings["gameover"])
             GameCLI.print_board(game.board.get_board(), "Connect4")
             break
         print()
         GameCLI.print_current_move(name, *game.move_list[i])
     
     # winner = game.get_winner_attributes()
-    GameCLI.print_winner_info(*winner)
+    # GameCLI.print_winner_info(*winner)
 
 def run():
     test = ConnectFour()

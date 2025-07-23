@@ -272,15 +272,53 @@ def print_start_game(game_type: str):
     print(string_dict["welcome"])
     delay_effect([string_dict["intro"]])
 
+# import shutil, sys
+
+# def center_multiline_string(multiline_str: str, terminal_width: int) -> str:
+#     """
+#     Centers a multi-line string (like ASCII art) within the terminal width.
+#     Each line of the art is centered relative to the widest line in the art,
+#     and then the entire block is centered.
+#     """
+#     lines = multiline_str.strip().split('\n') # .strip() removes leading/trailing blank lines
+    
+#     # Find the maximum width of any line in the ASCII art
+#     max_line_width = 0
+#     for line in lines:
+#         # We need to consider that the first line after .strip() might be empty if original had leading newline
+#         if line.strip(): # Only consider non-empty lines for width calculation
+#             max_line_width = max(max_line_width, len(line))
+    
+#     if max_line_width == 0: # Handle empty input string case
+#         return ""
+
+#     centered_lines = []
+#     for line in lines:
+#         # Center each line of the art relative to the max_line_width of the art itself
+#         # This preserves the internal structure of the ASCII art
+#         padded_line = line.ljust(max_line_width) # Pad shorter lines to max_line_width
+        
+#         # Now center this padded line within the terminal width
+#         centered_lines.append(padded_line.center(terminal_width))
+        
+#     return "\n".join(centered_lines)
+
+
 def print_game_over(winner_mark: str):
     """Displays a flashing 'Game Over' message."""
     print()
     clear_screen()
+    # columns = shutil.get_terminal_size().columns
     for i in range(5):
         if i % 2 == 0:
+            # centered_output = center_multiline_string(other_strings["gameover"], columns)
+            # print(centered_output.center(columns), end='')
             print(other_strings["gameover"].center(os.get_terminal_size().columns - 1), end='\r')
         else:
+            # centered_output = center_multiline_string(other_strings[winner_mark], columns)
+            # print(centered_output.center(columns), end='')
             print(other_strings[winner_mark].center(os.get_terminal_size().columns - 1), end='\r')
+        # sys.stdout.flush()
         sleep(0.75)
         clear_screen()
         sleep(0.5)

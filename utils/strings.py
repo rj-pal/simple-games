@@ -1,7 +1,7 @@
 """
 string.py 
 Author: Robert Pal
-Updated: 2025-07-21
+Updated: 2025-07-22
 
 This module contains all user-facing string messages for the games Tic Tac Toe, Connect 4 and Solitaire used in the Command Line Application. 
 The strings are stored as constants and used for displaying information or states of game play, including board configurations. All strings are 
@@ -99,7 +99,7 @@ GAMEOVER = """
    *                                                                         *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
-# A large ASCII art banner displayed when the player X wins in Tic Tac Toe.
+# A large ASCII art banner displayed when the player 'X' wins in Tic Tac Toe.
 XWINS = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    *                                                                         *
@@ -119,16 +119,16 @@ XWINS = """
    *                                                                         *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """
-# A large ASCII art banner displayed when the player Y wins in Tic Tac Toe.
-YWINS = """
+# A large ASCII art banner displayed when the player 'O' wins in Tic Tac Toe.
+OWINS = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    *                                                                         *
    *                                                                         *
-   *                            *         *                                  *
-   *                             *       *                                   *
-   *                              *  *  *                                    *
-   *                                 *                                       *
-   *                                 *                                       *
+   *                            *   *                                        *
+   *                          *       *                                      *
+   *                          *       *                                      *
+   *                          *       *                                      *
+   *                            *   *                                        *
    *                                                                         *
    *         *             *     * * *      *       *       * * *            *
    *         *             *       *        *  *    *      *     *           *
@@ -144,11 +144,11 @@ REDWINS = """
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    *                                                                         *
    *                                                                         *
-   *            *  *  *        *  *  *      *  * *                           *
-   *            *      *       *            *      *                         *
-   *            *  *  *        * * *        *       *                        *
-   *            *      *       *            *      *                         *
-   *            *       *      *  *  *      *  * *                           *
+   *                 *  *  *        *  *  *      *  * *                      *
+   *                 *      *       *            *      *                    *
+   *                 *  *  *        * * *        *       *                   *
+   *                 *      *       *            *      *                    *
+   *                 *       *      *  *  *      *  * *                      *
    *                                                                         *
    *          *             *     * * *     *       *       * * *            *
    *          *             *       *       *  *    *      *     *           *
@@ -220,7 +220,7 @@ board_length = len(BOARDLINE_CONNECT4) # This constant stores the calculated len
 #  Formatted string for Connect 4 column headers (1-7), aligned to the board length.
 COL_NAMES_CONNECT4 = " ".join(f"{w:^12}" for w in column_names).ljust(board_length)
 
-# ==== Dictionary of Game Strings or Game Bundles for each game  ====
+# ==== Dictionary of Game Strings or Game Bundles   ====
 # A collection of strings specific to the Tic Tac Toe game.
 tictactoe_strings = {
     "welcome": WELCOME_TICTACTOE,
@@ -245,7 +245,7 @@ other_strings = {
     "gameover": GAMEOVER,
     "thinking": THINKING,
     "x": XWINS,
-    "y": YWINS,
+    "o": OWINS,
     "r": REDWINS,
     "y": YELLOWWINS
 }
