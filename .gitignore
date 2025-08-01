@@ -4,3 +4,7 @@ original*
 *.idea
 *.ipynb_checkpoints
 __pycache__
+.git_backup
+.vscode
+environment.yml
+uv.lock
