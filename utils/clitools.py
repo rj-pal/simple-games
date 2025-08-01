@@ -20,8 +20,9 @@ def clear_screen():
 
 def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
     """Creates the effect of printing line by line or character by character."""
-    if delay != 0:
-        delay = 0  # Used for testing to speed up output
+    # Used for testing to speed up output
+    # if delay != 0:
+    #     delay = 0  
     for string in strings:
         for char in string:
             print(char, end='', flush=word_flush)
