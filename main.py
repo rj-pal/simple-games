@@ -46,7 +46,6 @@ def main():
     else:
         raise ValueError("Invalid choice. See you next time.")
 
-
 if __name__ == '__main__':
     main()
     ### Use when testing

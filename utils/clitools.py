@@ -18,7 +18,7 @@ def clear_screen():
     """Clears all printed input on terminal screen for display purposes."""
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = True) -> None:
+def delay_effect(strings: list[str], delay: float = 0.015, word_flush: bool = True) -> None:
     """Creates the effect of printing line by line or character by character."""
     # Used for testing to speed up output
     # if delay != 0:
@@ -30,7 +30,7 @@ def delay_effect(strings: list[str], delay: float = 0.025, word_flush: bool = Tr
         print()
         sleep(delay)
 
-def print_menu_screen(delay=0.025):
+def print_menu_screen(delay: float=0.025):
     """Displays a menu of game options centered in the terminal screen. Allow for new games to be added dynamically."""
     clear_screen()
     # set_console_window_size(100, 40)
@@ -72,7 +72,7 @@ def menu_select(valid_selections):
         if choice in valid_selections:
             break
         print('\n' + blank_space, end="")
-        delay_effect([error])  
+        print(error)  
         print('\n' + blank_space, end="")
         sleep(1)
         clear_screen()
@@ -135,7 +135,7 @@ def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) ->
         [create_row_connect4([square.value for square in row]) for row in game_board])
 
 
-def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_rate: float=0.000075) -> None:
+def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_rate: float=0.000095) -> None:
     """Prints the game board with a slight delay effect."""
     if game_name not in {'TicTacToe', 'Connect4'}:
         raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4'.")
@@ -183,9 +183,9 @@ def print_game_over(winner_mark: str):
         else:
             print(center_display_string(other_strings[winner_mark], columns))
         # sys.stdout.flush()
-        sleep(0.75)
+        sleep(0.45)
         clear_screen()
-        sleep(0.5)
+        sleep(0.45)
     print()
 
 def get_player_names() -> tuple[str, str]:
