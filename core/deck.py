@@ -258,7 +258,7 @@ class CardDeck:
             card = self.deck.popleft()
             card.visible = not facedown
             card_stack.add_to(card)      
-        print("Piling is finished")
+        # print("Piling is finished")
         # print(card_stack)
         return card_stack
     

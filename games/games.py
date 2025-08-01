@@ -458,6 +458,9 @@ class ConnectFour:
 
     def get_winner_info(self):
         return self.__win.get_win_info()
+
+    def get_player(self, index: int):
+        return self.players[index]
     
     def reset_winner(self):
         self.__win.reset_win_info()

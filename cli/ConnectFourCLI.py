@@ -1,7 +1,7 @@
 """
 ConnectFourCLI.py 
 Author: Robert Pal
-Updated: 2025-07-22
+Updated: 2025-08-01
 
 This module contains all control flow logic for running the Connect Four Command Line Application.
 It includes:
@@ -9,19 +9,18 @@ It includes:
 - set_up_game() which sets game play configerations
 - play_game() which controls the all actual game play logic and commands
 """
-
 from games.games import ConnectFour
 import utils.clitools as GameCLI
-from utils.strings import connect4_strings, other_strings
+from utils.strings import other_strings
 
 def set_up_game():
     game = ConnectFour()
 
     if GameCLI.one_player():
-        difficulty = GameCLI.select_difficulty_level()
+        difficulty = GameCLI.select_difficulty_level("Connect4")
         game.create_ai_player(difficulty=difficulty)
-        # r = GameCLI.get_player_name()
-        # game.update_player_name(r, "r")
+        r = GameCLI.get_player_name()
+        game.update_player_name(r, "r")
 
     else:
         r, y = GameCLI.get_player_names()
@@ -33,7 +32,6 @@ def set_up_game():
 def play_game(game) -> None:
     
     for i in range(game.board_size):
-        # print(game.round_count)
         if game.go_first:
             player = game.players[i % 2]
         else:
@@ -42,12 +40,15 @@ def play_game(game) -> None:
         name = player.get_player_name()
         if i == 0:
             GameCLI.print_first_player(name)
-            GameCLI.print_board(game.board.get_board(), "Connect4")
-            GameCLI.clear_screen()
+            
+        
 
         if isinstance(player, ConnectFour.ConnectFourPlayer):
-
+            GameCLI.clear_screen()
+            print(f"\nRound {game.round_count + 1}")
             GameCLI.print_player_turn_prompt_connect4(name)
+            GameCLI.print_board(game.board.get_board(), "Connect4")
+            print()
             while True:
                 col = GameCLI.prompt_column_move()
                 if game.make_move(col, player.marker):
@@ -67,7 +68,10 @@ def play_game(game) -> None:
         # Printing for dropping effect
         for j in range(current_row):
             temp_board = game.board.get_board(True)
-            temp_board.update_square(current_row, current_col, 0)
+            for k in range(len(game.move_list) - 1): # populate the temp board up without the current move
+                row, col =  game.move_list[k]
+                temp_board.add_to_square(row, col, game.get_player(k % 2).marker)
+            # print the temp board starting from the top to simmulate falling piece
             temp_board.add_to_square(j, current_col, player.marker)
             GameCLI.print_board(temp_board.get_board(), "Connect4")
             GameCLI.sleep(0.075)
@@ -79,22 +83,17 @@ def play_game(game) -> None:
         if i >= 6 and game.check_winner():
             game.update_winner_info()
             game.update_players_stats()
-            game.print_winner()
-            winner = game.get_winner_attributes()
-            GameCLI.print_game_over(winner_mark=winner[1]) # winner_attributes at index one is the marker type
+            GameCLI.print_game_over(player.marker) # use player marker to print correct game over screen
+            GameCLI.clear_screen()
             GameCLI.print_board(game.board.get_board(), "Connect4")
+            game.print_winner()
             break
         print()
         GameCLI.print_current_move(name, *game.move_list[i])
-    
-    # winner = game.get_winner_attributes()
-    # GameCLI.print_winner_info(*winner)
 
 def run():
-    test = ConnectFour()
     GameCLI.set_console_window_size(100, 48)
     GameCLI.print_start_game("Connect4")
     game = set_up_game()
     play_game(game)
     exit()
-

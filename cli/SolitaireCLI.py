@@ -1,3 +1,13 @@
+"""
+SolitaireCLI.py 
+Author: Robert Pal
+Updated: 2025-08-01
+
+This module contains all control flow logic for running the Solitaire Command Line Application.
+
+This game is still in development.
+"""
+
 from games.games import Solitare
 import utils.clitools as GameCLI
 from utils.strings import solitaire_strings
@@ -60,8 +70,6 @@ def print_draw_pile(pile):
         print("⚔️".center(6))
 
 def print_waste_pile(pile):
-    # print("WASTE PILE")#.rjust(26))
-    # print()
     if len(pile) == 0:
         print("⚔️".center(6))
     else:
@@ -149,7 +157,7 @@ def play_game(test):
         # print(type(waste))
         
         print_card_table(tab, fp, draw, waste)
-        test.show_stock_pile()
+        # test.show_stock_pile()
         
         print("\nPress 1: To build to the tableau from the waste pile.\nPress 2: To move one or more cards on the tableau.\n" \
                     "Press 3: To build to the foundation piles from the waste pile or tableau.\nPress 4: To move a card from the foundation pile.\n" \

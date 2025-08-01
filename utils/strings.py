@@ -1,7 +1,7 @@
 """
 string.py 
 Author: Robert Pal
-Updated: 2025-07-22
+Updated: 2025-08-01
 
 This module contains all user-facing string messages for the games Tic Tac Toe, Connect 4 and Solitaire used in the Command Line Application. 
 The strings are stored as constants and used for displaying information or states of game play, including board configurations. All strings are 
@@ -190,12 +190,12 @@ against an opponent or the computer. X starts the game.
 """
 # Introduction and basic game flow for Connect 4
 INTRO_CONNECT4 = """
-This is an online version of the classic game. Play multiple games per session
+This is an online version of the classic game. Play a single game
 against an opponent or the computer. Red starts the game.
 """
 # Introduction and basic game flow for Solitaire
 INTRO_SOLITAIRE = """
-This is an online version of the classic game Klondike Solitaire. Play multiple games per session. 
+This is an online version of the classic game Klondike Solitaire. Play a single game. 
 You can play single draw or three draw solitaire.
 """
 # Message for simulating computer thinking of move selection

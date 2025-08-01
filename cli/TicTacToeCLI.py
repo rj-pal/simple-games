@@ -21,7 +21,7 @@ def set_up_game() -> TicTacToe:
     game = TicTacToe()
     # One or Two player mode set by function from command line utility tools using tertiary values T, F or None.
     if GameCLI.one_player():
-        difficulty = GameCLI.select_difficulty_level()
+        difficulty = GameCLI.select_difficulty_level("TicTacToe")
         name_dictionary = {
             None: "CPU Easy",
             False: "CPU Intermediate",
@@ -78,23 +78,18 @@ def play_game(game) -> None:
 
         # Ends the game before the final round if a winner is found
         if i >= 4 and game.check_winner():
-            # Updates winner info and player stats
-            game.update_winner_info()
-            game.update_players_stats()
-            # Gets the winner info for display
-            winner = game.get_winner_attributes()
-            GameCLI.print_game_over(winner_mark=winner[1]) # winner_attributes at index one is the marker type
-            GameCLI.print_board(game.board.get_board(), "TicTacToe")
-            GameCLI.print_winner_info(*winner)
+            GameCLI.print_game_over(player.marker) # use player marker attribute to display correct game over screen        
             break
-    
-
+    # Updates winner info and player stats
+    game.update_winner_info()
+    game.update_players_stats()
+    # Gets the winner info for summary display
+    winner = game.get_winner_attributes()
+    if winner[0] is not None: # reprint the final board state if winner
+        GameCLI.print_board(game.board.get_board(), "TicTacToe")
+    GameCLI.print_winner_info(*winner)
     # Resets the game state for new game
     game.reset_game_state()
-
-# def play_again() -> None:
-#     """Runs the short display script to allow for multi-game play."""
-    
 
 def run(width: int=85, height: int=30, multiplay: bool=True) -> None:
     """Main game control flow that initiates, sets up and asks for multi-game play."""
