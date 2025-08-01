@@ -1,4 +1,14 @@
-# Tic Tac Toe
+# Major Update: Simple Games
+
+Three games are now included for Command Line Game Play: Tic Tac Toe, Connect 4 and Solitaire.
+
+Tic Tac Toe and Connect 4 are operational. You can play Solitaire, but it is still in development.
+
+If you encounter any errors while playing, please conntact me.
+
+### This is old documentation from when the directory only included Tic Tac Toe
+
+## Tic Tac Toe
 Tic-Tac-Toe Game for Command Line written in Python (requires **Python 3.9** or higher)
 ***
 This is simple Tic-Tac-Toe game with original algorithms for game play including keeping track of squares and checking for winner all created by me 🔥
