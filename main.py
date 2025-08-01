@@ -20,6 +20,7 @@ from utils.strings import SIMPLE_GAMES_START
 #     while select.select([sys.stdin], [], [], 0)[0]:
 #         sys.stdin.read(1)  # Read one character at a time until buffer is empty
 
+
 ### Quick Running of a game for testing new feature or change to avoid menu options screen ###
 def test():
     """Running command line app directly for testing. Comment out the games that are not being tested at the time."""
@@ -27,14 +28,15 @@ def test():
     SolitaireCLI.run()
     # ConnectFourCLI.run()
     exit()
- 
+
+
 def main():
-    print_menu_screen() 
+    print_menu_screen()
     ### In development mode
     # clear_stdin_buffer()
-    valid_game_options  = GameOptions.values()
+    valid_game_options = GameOptions.values()
     choice = menu_select(valid_game_options)
-    
+
     if choice == GameOptions.TIC_TAC_TOE.value:
         TicTacToeCLI.run()
     elif choice == GameOptions.CONNECT_FOUR.value:
@@ -44,7 +46,8 @@ def main():
     else:
         raise ValueError("Invalid choice. See you next time.")
 
+
 if __name__ == '__main__':
-    # main()
+    main()
     ### Use when testing
-    test()
+    # test()
