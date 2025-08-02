@@ -14,12 +14,28 @@ from utils.square import Square
 from utils.strings import tictactoe_strings, connect4_strings, solitaire_strings, other_strings
 from typing import Union, Optional
 
-def clear_screen():
+# ==== Helper functions for console and screen management at os level in controlling overall command line display ====
+def clear_screen() -> None:
     """Clears all printed input on terminal screen for display purposes."""
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def delay_effect(strings: list[str], delay: float = 0.015, word_flush: bool = True) -> None:
-    """Creates the effect of printing line by line or character by character."""
+def set_console_window_size(width: float, height: float) -> None:
+    """Sets the console window size to fit the board better for both Windows."""
+    os.system('cls||clear')
+    # Make it compliant for Linux/MacOS and Windows systems
+    if os.name == 'nt':
+        os.system(f'mode con: cols={width} lines={height}')
+    else:
+        os.system(f'printf "\033[8;{height};{width}t"')
+        
+# ==== Helper for functions for string management in creating typewriter effect and box effect on output to user  ====
+def delay_effect(strings: Union[list[str], str], delay: float = 0.015, word_flush: bool = True) -> None:
+    """
+    Creates the effect of printing line by line or character by character. Speed of printing can be changed with delay parameter.
+    When word_flush is true, each character or letter will print one by one according to the delay speed.
+    When word_flush is false, each individual line will print one by one according to the delay speed.
+    Requires a list of strings to be displayed. If string is passed, each character will be printed on its onw line. 
+    """
     # Used for testing to speed up output
     # if delay != 0:
     #     delay = 0  
@@ -29,6 +45,21 @@ def delay_effect(strings: list[str], delay: float = 0.015, word_flush: bool = Tr
             sleep(delay)
         print()
         sleep(delay)
+
+def surround_string(strings: list[str], symbol: str, offset: int = 0) -> list[str]:
+    """Creates a bordered box display around any mulit-line text and centers it, which is used for scoreboards or other messages."""
+    # Split each string from list on '\n' if it has one; otherwise, keep the string as a single element by wrapping it in a list.
+    # Use itertools.chain.from_iterable to flatten the resulting list of lists into a single list of strings or lines.
+    string_list = list(chain.from_iterable(
+        string.split("\n") if "\n" in string else [string] for string in strings)
+        )
+    print(string_list)
+    # Find the longest line from string list and build a border using the symbol, padded by offset on both sides if not set to 0.
+    border = symbol * (len(max(string_list, key=len)) + 2 * offset)
+    # Make complete list with top border, centered line of text matching the border length, and bottom border
+    output_list = [border, *[string.center(len(border)) for string in string_list], border]
+    # Add side symbols to each line, join lines with newlines, and add spacing above and below for final list
+    return ["\n" + "\n".join([symbol + string + symbol for string in output_list]) + "\n"]
 
 def print_menu_screen(delay: float=0.025):
     """Displays a menu of game options centered in the terminal screen. Allow for new games to be added dynamically."""
@@ -86,22 +117,6 @@ def menu_select(valid_selections):
     clear_screen()
 
     return choice
-
-def set_console_window_size(width: float, height: float) -> None:
-    """Sets the console window size to fit the board better for both Windows."""
-    os.system('cls||clear')
-    if os.name == 'nt':
-        os.system(f'mode con: cols={width} lines={height}')
-    else:
-        os.system(f'printf "\033[8;{height};{width}t"')
-
-def surround_string(strings: list[str], symbol: str, offset: int = 0) -> list[str]:
-    """Creates a bordered display around text, used for scoreboards."""
-    string_list = list(chain.from_iterable(
-        string.split("\n") if "\n" in string else [string] for string in strings))
-    border = symbol * (len(max(string_list, key=len)) + 2 * offset)
-    output_list = [border, *[string.center(len(border)) for string in string_list], border]
-    return ["\n" + "\n".join([symbol + string + symbol for string in output_list]) + "\n"]
 
 def board_translator(game_board: list[list[Union[int, str]]]) -> list[list[Square]]:
     """Converts raw board data into Square enum values."""
