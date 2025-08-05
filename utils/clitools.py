@@ -176,6 +176,7 @@ def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_r
         delay_effect([create_board_tictactoe(game_board=translated_board, line=tictactoe_strings["boardline"])], 
                      delay=delay_rate, word_flush=False) # Use default delay for Tic Tac Toe
     elif game_name == 'Connect4':
+        # print('\n' * 3)
         delay_effect([create_board_connect4(game_board=translated_board, line=connect4_strings["boardline"])], 
                      delay=0, word_flush=False) # No delay for Connect Four
         print(connect4_strings["boardline"])
@@ -309,7 +310,7 @@ def print_scoreboard(player_list) -> None:
 
 def print_computer_thinking(name: str="Computer", time_delay: int=1.5) -> None:
     """Prints thinking message with time delay to simulate the computer thinking"""
-    print(f"{name} is now thinking.")
+    print(f"\n{name} is now thinking.")
     print()
     sleep(time_delay)
 

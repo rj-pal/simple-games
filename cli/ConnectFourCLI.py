@@ -32,48 +32,44 @@ def set_up_game():
 def play_game(game) -> None:
     
     for i in range(game.board_size):
-        if game.go_first:
-            player = game.players[i % 2]
-        else:
-            player = game.players[i % 2 - 1]
-
+        # if game.go_first:
+        #     player = game.players[i % 2]
+        # else:
+        #     player = game.players[i % 2 - 1]
+        player = game.get_current_player()
         name = player.get_player_name()
         if i == 0:
             GameCLI.print_first_player(name)
             GameCLI.print_player_turn_prompt_connect4(name)
-
+        
         GameCLI.clear_screen()
-        if player.is_human:
-            pass
+        # Used to keep the board from not moving on the command line
+        board_state_before_move = game.board.get_board(True)
+        print("\n" * 3)
+        GameCLI.print_board(board_state_before_move.get_board(), "Connect4")
 
-            
-        if isinstance(player, ConnectFour.ConnectFourPlayer):
-            
-            
-            # print(f"\nRound {game.round_count + 1}")
-            print("\n" * 3)
-            # Used to keep the board from not moving on the command line
-            board_state_before_move = game.board.get_board(True)
-            GameCLI.print_board(board_state_before_move.get_board(), "Connect4")
+        if player.is_human:
             GameCLI.print_player_turn_prompt_connect4(name)
             while True:
                 col = GameCLI.prompt_column_move()
-                if game.make_move(col, player.marker):
+                # result = game.make_move(col, player.marker)
+                if not game.is_full(col):
                     break
                 else:
                     GameCLI.print_square_occupied_prompt(name)
+        else:
+            GameCLI.print_computer_thinking(player.name, 2)
+            col = player.move()
+        game.make_move(col, player.marker)
+        if player.is_human:
             # Overwrite the get input prompt (or make_move) with the original prompt - this keeps the board in one position without screen glitches
+            # Re-print the board from before the move and re-print the promt, then the current move will be printed
             GameCLI.clear_screen()
             print("\n" * 3)
-            # Re-print the board before the move 
             GameCLI.print_board(board_state_before_move.get_board(), "Connect4")
-            # Re-print the prompt so it appears the state never changed (the current move is printed after this line, replacing the get input prompt line)
             GameCLI.print_player_turn_prompt_connect4(name)
-        elif isinstance(player, ConnectFour.AIPlayer):
-            print(other_strings["thinking"])
-            GameCLI.sleep(2)
-            col = player.move()
-            game.make_move(col, player.marker)
+
+        
         # Print the last made move by the player or AI player
         GameCLI.print_current_move(name, *game.move_list[i])
         GameCLI.sleep(2)

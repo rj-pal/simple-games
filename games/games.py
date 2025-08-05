@@ -364,6 +364,12 @@ class ConnectFour:
             self.AIPlayer(difficulty=difficulty, game=self),
         )
 
+    def get_current_player(self):
+        if self.go_first:
+            return self.players[self.round_count % 2]
+        else:
+            return self.players[self.round_count % 2 - 1]
+
     # def add_two_hard_move_ai_players_for_testing(self):
     #     self.players = (
     #         self.AITestPlayer(name="AI one", marker="x", game=self, difficulty=True, hard_test=True),
@@ -396,6 +402,9 @@ class ConnectFour:
         if 0 <= col < self.columns: # validate the move is on the board
             return not self.board.square_is_occupied(row, col)
         return False
+    
+    def is_full(self, col):
+        return self.height_list[col] == 0
 
     def make_move(self, col, marker):
         for row in range(self.rows - 1, -1, -1):
@@ -526,7 +535,6 @@ class ConnectFour:
             super().__init__(name, marker)  # Initialize the name first
             self.marker = marker  # Use the property setter for validation
             self.marker_name = self._get_marker_name()
-            self.is_human = True
 
         @Player.name.setter
         def name(self, value):
@@ -547,15 +555,24 @@ class ConnectFour:
             """Determine the marker name based on the marker value."""
             return "Red" if self._marker == "r" else "Yellow"
         
+        @property
+        def is_human(self):
+            """Ensure the is_human boolean tag is True."""
+            return True
+        
 
     class AIPlayer(Player):
 
         def __init__(self, name: str = "CPU", marker: str = "y", difficulty: bool = False, game: 'ConnectFour' = None):
             """AIPlayer is a child class of Player"""
             super().__init__(name, marker)
-            self.is_human = False
             self.game = game
             self.score = 0
+
+        @property
+        def is_human(self):
+            """Ensure the is_human boolean tag is False."""
+            return False
         
         def get_random_column(self): 
                 return randint(0, self.game.columns - 1)
