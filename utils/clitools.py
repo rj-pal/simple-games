@@ -181,6 +181,15 @@ def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_r
         print(connect4_strings["boardline"])
         print(connect4_strings["boardlabels"])
 
+def print_board_dropping_effect(board_states: list[list[list[Union[int, str]]]], sleep_delay=0.075):
+    """Prints the Connect 4 Board with animation that simulates a dropping effect. Sleep delay can control the speed of the dropping piece."""
+    # print the temp board starting from the top to simmulate falling piece
+    for board_state in board_states:
+        print("\n" * 3)
+        print_board(board_state, "Connect4")
+        sleep(sleep_delay)
+        clear_screen()
+
 def print_start_game(game_name: str):
     """Prints the welcome message and introduction."""
     if game_name not in {'TicTacToe', 'Connect4', 'Solitaire'}:

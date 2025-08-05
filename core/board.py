@@ -376,6 +376,30 @@ class Board:
  
         new_board.board = deepcopy(self._board, memo) # Deep copy the board data that is immutable so as not to affect game play
         return new_board
+    
+    def __deepcopy__(self, memo):
+        """
+        Creates a deep copy of the Board instance, ensuring no shared mutable data with the original.
+
+        Args:
+            memo (dict): Dictionary used to track already copied objects to prevent redundant copies 
+                        and handle circular references.
+
+        Returns:
+            Board: A new Board instance with duplicated internal state, independent of the original.
+        """
+        if id(self) in memo:
+            return memo[id(self)]  # Return existing copy if it's already copied
+
+        # Create a new board instance (same size as the original)
+        new_board = Board(self._rows, self._columns)
+        memo[id(self)] = new_board  # Store the new object in memo to avoid circular references
+
+        # Deep copy the internal board state to the new board
+        new_board._board = deepcopy(self._board, memo)  # Ensure we copy the board's data correctly
+
+        return new_board
+
    
     def __str__(self) -> str:
         """Returns a string representation of the board as a grid matrix."""

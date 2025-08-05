@@ -408,6 +408,26 @@ class ConnectFour:
                 return True
         return False
     
+    # def clear_square(self, row, col):
+    #     """"Used to clear a single square on the board for printing or un-do move purposes."""
+    #     self.board.update_square(row, col, 0)
+    
+    def get_board_animation_states(self, player_marker):
+        board_states = []
+        # Get a mutable copy of the current board state that allows for board manipulation without change the actual state of the game board
+        temp_board = self.board.get_board(True)
+        # Remove the marker of the most recently played square and update it with 0 (or blank square)
+        current_row_played, current_column_played = self.move_list[-1]
+        temp_board.update_square(current_row_played, current_column_played, 0)
+        # Create a boad state with the current player's marker starting from the top row to the final row position of the current move
+        for j in range(current_row_played + 1):
+            temp_board.add_to_square(j, current_column_played, player_marker)
+            board_states.append(temp_board.get_board())
+            temp_board.update_square(j, current_column_played, 0)
+
+        return board_states
+
+
     def reset_board(self) -> None:
         """Sets each square in the board to a blank."""
         self.board.reset_board()
@@ -506,6 +526,7 @@ class ConnectFour:
             super().__init__(name, marker)  # Initialize the name first
             self.marker = marker  # Use the property setter for validation
             self.marker_name = self._get_marker_name()
+            self.is_human = True
 
         @Player.name.setter
         def name(self, value):
@@ -532,6 +553,7 @@ class ConnectFour:
         def __init__(self, name: str = "CPU", marker: str = "y", difficulty: bool = False, game: 'ConnectFour' = None):
             """AIPlayer is a child class of Player"""
             super().__init__(name, marker)
+            self.is_human = False
             self.game = game
             self.score = 0
         

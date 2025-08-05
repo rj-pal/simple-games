@@ -93,7 +93,6 @@ class Player:
             self.games_played
         )
         return str(player_info)
-
     
     def __str__(self) -> str:
         """Returns a string of key information on the player statistics used for printing in the Game Class."""

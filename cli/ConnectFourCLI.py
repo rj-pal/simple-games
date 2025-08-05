@@ -41,14 +41,20 @@ def play_game(game) -> None:
         if i == 0:
             GameCLI.print_first_player(name)
             GameCLI.print_player_turn_prompt_connect4(name)
+
+        GameCLI.clear_screen()
+        if player.is_human:
+            pass
+
             
         if isinstance(player, ConnectFour.ConnectFourPlayer):
-            GameCLI.clear_screen()
+            
+            
             # print(f"\nRound {game.round_count + 1}")
             print("\n" * 3)
             # Used to keep the board from not moving on the command line
-            board_state_before_move = game.board.get_board()
-            GameCLI.print_board(board_state_before_move, "Connect4")
+            board_state_before_move = game.board.get_board(True)
+            GameCLI.print_board(board_state_before_move.get_board(), "Connect4")
             GameCLI.print_player_turn_prompt_connect4(name)
             while True:
                 col = GameCLI.prompt_column_move()
@@ -56,35 +62,26 @@ def play_game(game) -> None:
                     break
                 else:
                     GameCLI.print_square_occupied_prompt(name)
-            # Overwrite the get input prompt (or make_move) with the original promp - this keeps the board in one position with screen glitches
+            # Overwrite the get input prompt (or make_move) with the original prompt - this keeps the board in one position without screen glitches
             GameCLI.clear_screen()
             print("\n" * 3)
-            GameCLI.print_board(board_state_before_move, "Connect4")
+            # Re-print the board before the move 
+            GameCLI.print_board(board_state_before_move.get_board(), "Connect4")
+            # Re-print the prompt so it appears the state never changed (the current move is printed after this line, replacing the get input prompt line)
             GameCLI.print_player_turn_prompt_connect4(name)
         elif isinstance(player, ConnectFour.AIPlayer):
             print(other_strings["thinking"])
             GameCLI.sleep(2)
             col = player.move()
             game.make_move(col, player.marker)
-
-        current_row, current_col = game.move_list[i]
+        # Print the last made move by the player or AI player
         GameCLI.print_current_move(name, *game.move_list[i])
         GameCLI.sleep(2)
         GameCLI.clear_screen()
+        board_states = game.get_board_animation_states(player.marker)
         # Printing for dropping effect
-        board_state_before_move = game.board.get_board()
-        for j in range(current_row + 1):
-            print("\n" * 3)
-            temp_board = game.board.get_board(True)
-            for k in range(len(game.move_list) - 1): # populate the temp board up without the current move
-                row, col =  game.move_list[k]
-                temp_board.add_to_square(row, col, game.get_player(k % 2).marker)
-            # print the temp board starting from the top to simmulate falling piece
-            temp_board.add_to_square(j, current_col, player.marker)
-            GameCLI.print_board(temp_board.get_board(), "Connect4")
-            GameCLI.sleep(0.075)
-            GameCLI.clear_screen()
-            # print()     
+        GameCLI.print_board_dropping_effect(board_states=board_states)
+        # Re-print the current board  
         print("\n" * 3)
         GameCLI.print_board(game.board.get_board(), "Connect4")
         if i >= 6 and game.check_winner():
@@ -95,7 +92,6 @@ def play_game(game) -> None:
             GameCLI.print_board(game.board.get_board(), "Connect4")
             game.print_winner()
             break
-        # print()
         
 
 def run():
