@@ -45,20 +45,21 @@ def play_game(game) -> None:
         if isinstance(player, ConnectFour.ConnectFourPlayer):
             GameCLI.clear_screen()
             # print(f"\nRound {game.round_count + 1}")
-            print("\n" * 4)
-            temp_board = game.board.get_board()
-            GameCLI.print_board(temp_board, "Connect4")
+            print("\n" * 3)
+            # Used to keep the board from not moving on the command line
+            board_state_before_move = game.board.get_board()
+            GameCLI.print_board(board_state_before_move, "Connect4")
             GameCLI.print_player_turn_prompt_connect4(name)
-            # print()
             while True:
                 col = GameCLI.prompt_column_move()
                 if game.make_move(col, player.marker):
                     break
                 else:
                     GameCLI.print_square_occupied_prompt(name)
+            # Overwrite the get input prompt (or make_move) with the original promp - this keeps the board in one position with screen glitches
             GameCLI.clear_screen()
-            print("\n" * 4)
-            GameCLI.print_board(temp_board, "Connect4")
+            print("\n" * 3)
+            GameCLI.print_board(board_state_before_move, "Connect4")
             GameCLI.print_player_turn_prompt_connect4(name)
         elif isinstance(player, ConnectFour.AIPlayer):
             print(other_strings["thinking"])
@@ -66,16 +67,14 @@ def play_game(game) -> None:
             col = player.move()
             game.make_move(col, player.marker)
 
-        # GameCLI.clear_screen()
         current_row, current_col = game.move_list[i]
-        # print()
         GameCLI.print_current_move(name, *game.move_list[i])
         GameCLI.sleep(2)
         GameCLI.clear_screen()
-        # print()
         # Printing for dropping effect
+        board_state_before_move = game.board.get_board()
         for j in range(current_row + 1):
-            print("\n" * 4)
+            print("\n" * 3)
             temp_board = game.board.get_board(True)
             for k in range(len(game.move_list) - 1): # populate the temp board up without the current move
                 row, col =  game.move_list[k]
@@ -86,7 +85,7 @@ def play_game(game) -> None:
             GameCLI.sleep(0.075)
             GameCLI.clear_screen()
             # print()     
-        print("\n" * 4)
+        print("\n" * 3)
         GameCLI.print_board(game.board.get_board(), "Connect4")
         if i >= 6 and game.check_winner():
             game.update_winner_info()
