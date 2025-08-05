@@ -12,7 +12,7 @@ from itertools import chain
 from utils.game_options import GameOptions
 from utils.square import Square
 from utils.strings import tictactoe_strings, connect4_strings, solitaire_strings, other_strings
-from typing import Union, Optional
+from typing import Union, Set, Optional
 
 # ==== Helper functions for console and screen management at os level in controlling overall command line display ====
 def clear_screen() -> None:
@@ -34,7 +34,7 @@ def delay_effect(strings: Union[list[str], str], delay: float = 0.015, word_flus
     Creates the effect of printing line by line or character by character. Speed of printing can be changed with delay parameter.
     When word_flush is true, each character or letter will print one by one according to the delay speed.
     When word_flush is false, each individual line will print one by one according to the delay speed.
-    Requires a list of strings to be displayed. If string is passed, each character will be printed on its onw line. 
+    Requires a list of strings to be displayed. If a string is passed, each character will be printed on its onw line. 
     """
     # Used for testing to speed up output
     # if delay != 0:
@@ -49,11 +49,11 @@ def delay_effect(strings: Union[list[str], str], delay: float = 0.015, word_flus
 def surround_string(strings: list[str], symbol: str, offset: int = 0) -> list[str]:
     """Creates a bordered box display around any mulit-line text and centers it, which is used for scoreboards or other messages."""
     # Split each string from list on '\n' if it has one; otherwise, keep the string as a single element by wrapping it in a list.
-    # Use itertools.chain.from_iterable to flatten the resulting list of lists into a single list of strings or lines.
+    # Use itertools.chain.from_iterable to flatten the resulting list of lists into a single string, which is then wrapped in a list of strings, which
+    # each line in the text is a single element in the list.
     string_list = list(chain.from_iterable(
         string.split("\n") if "\n" in string else [string] for string in strings)
         )
-    print(string_list)
     # Find the longest line from string list and build a border using the symbol, padded by offset on both sides if not set to 0.
     border = symbol * (len(max(string_list, key=len)) + 2 * offset)
     # Make complete list with top border, centered line of text matching the border length, and bottom border
@@ -62,59 +62,75 @@ def surround_string(strings: list[str], symbol: str, offset: int = 0) -> list[st
     return ["\n" + "\n".join([symbol + string + symbol for string in output_list]) + "\n"]
 
 def print_menu_screen(delay: float=0.025):
-    """Displays a menu of game options centered in the terminal screen. Allow for new games to be added dynamically."""
+    """Displays a menu of game options centered in the terminal screen. Allows for new games to be added to menu with ENUMs."""
     clear_screen()
-    # set_console_window_size(100, 40)
-    columns, rows = os.get_terminal_size()
-
+    # Get the command line console size
+    columns, rows = shutil.get_terminal_size()
+    # Dynamically add more game options using game_options ENUM, which stores the game options numerically via a string
     MENU_OPTIONS = {
-        GameOptions.TIC_TAC_TOE.value: "Tic Tac Toe",
-        GameOptions.CONNECT_FOUR.value: "Connect 4",
-        GameOptions.SOLITAIRE.value: "Solitaire"
+        GameOptions.TIC_TAC_TOE.value: "Tic Tac Toe", # game_option "1"
+        GameOptions.CONNECT_FOUR.value: "Connect 4",  # game_option "2"
+        GameOptions.SOLITAIRE.value: "Solitaire"      # game_option "3"
     }
 
-    # create menu options dynmically as more games are added
+    # Menu options string created with top text and game options indented from top text
     menu_text = "Welcome to Simple Games.\n\n"
     for key, value in MENU_OPTIONS.items():
         menu_text += f"    {key}. {value}\n"
-
+    # Centre left to right relative to the longest line in the menu_text, which should be the first line 
     horizontal_pos = (columns - len(max(menu_text.splitlines(), key=len))) // 2
+    # Centre top to bottom relative to the total number of lines in te the menu_text
     vertical_pos = (rows - menu_text.count('\n') - 1) // 2
 
-    # centre the menu in the command line screen
+    # Start printing menu_text after adding the appropriate number of new lines as calculated in vertical_pos
     print('\n' * vertical_pos, end='')
     for line in menu_text.splitlines():
+        # Start printing menu_text after adding the appropriate number of spaces as calculated in horizontal_pos
         print(' ' * horizontal_pos, end="")
+        # Use delay)_effect for typewriter printing effect
         delay_effect([line], delay)
 
-def menu_select(valid_selections):
+def menu_select(valid_selections: GameOptions, load_message: bool=True):
+    """
+    Obtain user selection from the game options. Repeat until a valid selection has been made from the ENUM class of game options. 
+    Default boolean load_message for simulating classic game loading screens
+    """
     print()
-    columns, _ = os.get_terminal_size()
+    # Get the terminal size
+    columns, _ = shutil.get_terminal_size()
     prompt = "Select the game you want to play: "
     error = "Please only select a game from the available options."
-
-    horizontal_pos = (columns - len(prompt)) // 2
-    blank_space = ' ' * horizontal_pos
-
+    # Get the left to right positions for both prompt and error; add apppropriate number of spaces, as per procedure in print_menu_screen
+    horizontal_pos_for_prompt = (columns - len(prompt)) // 2
+    horizontal_pos_for_error  = (columns - len(error)) // 2
+    blank_space_prompt = ' ' * horizontal_pos_for_prompt
+    blank_space_error = ' ' * horizontal_pos_for_error
+    # All displays are centred in the middle of the screen and appropriated spacing is added using the blank_space strings
     while True:
-        print(blank_space + prompt, end="")
+        print(blank_space_prompt + prompt, end="")
         choice = input().strip()
-
-        if choice in valid_selections:
+        if choice in valid_selections: # from game_options ENUM - only allows 1, 2, or 3 (stored as strings so type casting not needed)
             break
-        print('\n' + blank_space, end="")
-        print(error)  
-        print('\n' + blank_space, end="")
-        sleep(1)
+        print('\n' + blank_space_prompt, end="") # for cursor location management 
+        print()
+        print(blank_space_error + error)  
+        print('\n' + blank_space_error, end="") # for cursor location management 
+        sleep(1.5)
         clear_screen()
+        # Re-prints the menu screen if invalid option was selected 
         print_menu_screen(delay=0)
         print()
     
     clear_screen()
-    print('\n' * 15)
-    print(blank_space + " " * 15 + "GAME LOADING")
-    sleep(2)
-    clear_screen()
+    if load_message:
+        # Re-caculate console for centring the 'Game Loading' message
+        columns, rows = shutil.get_terminal_size()
+        print('\n' * (rows // 2)) # top bottom centring
+        horizontal_pos = (columns - len("GAME LOADING")) // 2
+        print(' ' * horizontal_pos + "GAME LOADING\n") # left right centring
+        print('\n' + (' ' * horizontal_pos), end="") # cursor location management 
+        sleep(2)
+        clear_screen()
 
     return choice
 
@@ -262,7 +278,7 @@ def print_player_turn_prompt_tictactoe(name: str) -> None:
 
 def print_player_turn_prompt_connect4(name: str) -> None:
     """Prints the prompt for the player's turn."""
-    delay_effect([f"\nIt is {name}'s turn. Select the column you want to drop your piece in.\n"])
+    delay_effect([f"\nIt is {name}'s turn. Select the column you want to drop your piece in.\n"], 0)
 
 def print_square_occupied_prompt(name: str) -> None:
     """Prints a prompt when the selected square is occupied."""

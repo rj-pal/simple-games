@@ -553,8 +553,9 @@ class ConnectFour:
                 print(f"Computer's move {move}")
                 # sleep(5)
                 return move 
-            print(self.game.height_list)
-            print(self.game.size_list)
+            ### Debugging
+            # print(self.game.height_list)
+            # print(self.game.size_list)
             # print("Played RANDOM")
             # sleep(5)
             return self.random_int()
