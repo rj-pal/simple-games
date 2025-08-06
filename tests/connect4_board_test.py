@@ -2,7 +2,10 @@ from games.games import ConnectFour
 from utils.clitools import print_board
 
 test = ConnectFour()
-
+print("MMMM")
+print(test.get_player(0).name)
+print(test.get_current_player().name)
+print("MNNNNNNN")
 board = test.board
 board.add_to_square(5, 1, "y")
 board.add_to_square(5, 0, "y")

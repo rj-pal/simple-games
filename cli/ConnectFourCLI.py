@@ -1,7 +1,7 @@
 """
 ConnectFourCLI.py 
 Author: Robert Pal
-Updated: 2025-08-01
+Updated: 2025-08-05
 
 This module contains all control flow logic for running the Connect Four Command Line Application.
 It includes:
@@ -11,86 +11,83 @@ It includes:
 """
 from games.games import ConnectFour
 import utils.clitools as GameCLI
-from utils.strings import other_strings
 
 def set_up_game():
+    """
+    Sets up game play configurations for one or two players. If one player, sets the AI difficulty to easy, intermediate or hard.
+    Player one plays 'Red' and player two or AI plays 'Yellow'. Red moves first. Players can select name or default name assigned if skipped.
+    """
     game = ConnectFour()
-
     if GameCLI.one_player():
         difficulty = GameCLI.select_difficulty_level("Connect4")
         game.create_ai_player(difficulty=difficulty)
-        r = GameCLI.get_player_name()
-        game.update_player_name(r, "r")
-
+        red_player_1_name = GameCLI.get_player_name()
+        game.update_player_name(red_player_1_name, "r")
     else:
-        r, y = GameCLI.get_player_names()
-        game.update_player_name(r, "r")
-        game.update_player_name(y, "y")
+        red_player_1_name, yellow_player_2_name = GameCLI.get_player_names()
+        game.update_player_name(red_player_1_name, "r")
+        game.update_player_name(yellow_player_2_name, "y")
 
     return game
 
 def play_game(game) -> None:
-    
+    """Runs the game control flow for a single game controling all user input and display using Command Line Tools."""
     for i in range(game.board_size):
-        # if game.go_first:
-        #     player = game.players[i % 2]
-        # else:
-        #     player = game.players[i % 2 - 1]
         player = game.get_current_player()
-        name = player.get_player_name()
+         
+        # Display a welcome message and the initial prompt on first round to start game.
         if i == 0:
-            GameCLI.print_first_player(name)
-            GameCLI.print_player_turn_prompt_connect4(name)
+            GameCLI.print_first_player(name=player.name)
+            GameCLI.print_player_turn_prompt_connect4(name=player.name)
         
-        GameCLI.clear_screen()
-        # Used to keep the board from not moving on the command line
-        board_state_before_move = game.board.get_board(True)
-        print("\n" * 3)
-        GameCLI.print_board(board_state_before_move.get_board(), "Connect4")
+        # Store the board state before any move to correctly handle screen updates, messaging to user and command line dispaly glitches.
+        board_state_before_move = game.board.get_board(mutable=True)
+        GameCLI.print_board_with_spacing(game_board=board_state_before_move.get_board())
 
+        # Get validated column on board for human player or AI player to make move
         if player.is_human:
-            GameCLI.print_player_turn_prompt_connect4(name)
+            GameCLI.print_player_turn_prompt_connect4(name=player.name)
             while True:
-                col = GameCLI.prompt_column_move()
-                # result = game.make_move(col, player.marker)
-                if not game.is_full(col):
+                current_col = GameCLI.prompt_column_move()
+                if not game.is_full(col=current_col):
                     break
                 else:
-                    GameCLI.print_square_occupied_prompt(name)
+                    GameCLI.print_square_occupied_prompt(name=player.name)
         else:
-            GameCLI.print_computer_thinking(player.name, 2)
-            col = player.move()
-        game.make_move(col, player.marker)
-        if player.is_human:
-            # Overwrite the get input prompt (or make_move) with the original prompt - this keeps the board in one position without screen glitches
-            # Re-print the board from before the move and re-print the promt, then the current move will be printed
-            GameCLI.clear_screen()
-            print("\n" * 3)
-            GameCLI.print_board(board_state_before_move.get_board(), "Connect4")
-            GameCLI.print_player_turn_prompt_connect4(name)
-
+            GameCLI.print_computer_thinking(name=player.name, time_delay=2)
+            current_col = player.move() # Use AI player method to get validated column
         
-        # Print the last made move by the player or AI player
-        GameCLI.print_current_move(name, *game.move_list[i])
+        # Updated the game state with validated column or else exit program
+        if not game.make_move(col=current_col, marker=player.marker):
+            print("Critical Error: Invalid move was attempted after move validation. Exiting the program.")
+            exit(1)
+        
+        # Reprint the pre-move board and prompt to avoid screen glitches caused by the input prompt and ensure smooth user experience
+        if player.is_human:
+            GameCLI.print_board_with_spacing(game_board=board_state_before_move.get_board())
+            GameCLI.print_player_turn_prompt_connect4(name=player.name)
+        
+        # Display validation of last successful move to user before board animation
+        GameCLI.print_current_move(player.name, *game.move_list[i])
         GameCLI.sleep(2)
         GameCLI.clear_screen()
-        board_states = game.get_board_animation_states(player.marker)
-        # Printing for dropping effect
+        
+        # Animation of game piece using a dropping effect
+        board_states = game.get_board_animation_states(player_marker=player.marker)
         GameCLI.print_board_dropping_effect(board_states=board_states)
-        # Re-print the current board  
-        print("\n" * 3)
-        GameCLI.print_board(game.board.get_board(), "Connect4")
+        
+        # Check for a winner and end the game if a win condition is met. The game can only be won after a minimum of 7 moves (i>=6).
         if i >= 6 and game.check_winner():
             game.update_winner_info()
             game.update_players_stats()
-            GameCLI.print_game_over(player.marker) # use player marker to print correct game over screen
+            GameCLI.print_game_over(winner_mark=player.marker)
             GameCLI.clear_screen()
-            GameCLI.print_board(game.board.get_board(), "Connect4")
+            GameCLI.print_board(game_board=game.board.get_board(), game_name="Connect4")
             game.print_winner()
             break
-        
 
 def run():
+    # Optimized console window size for display for smooth user experience.
     GameCLI.set_console_window_size(100, 48)
     GameCLI.print_start_game("Connect4")
     game = set_up_game()

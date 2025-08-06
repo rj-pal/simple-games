@@ -1,3 +1,11 @@
+"""
+games.py 
+Author: Robert Pal
+Updated: 2025-08-05
+
+This module contains three game engines.
+"""
+
 from collections import Counter
 from random import choice, randint
 from typing import Tuple, List, Union, Optional
@@ -349,6 +357,7 @@ class ConnectFour:
          self.win_column: int = -1
          self.__win: LineChecker = self.ConnectFourWinChecker(self.board)
          self.players = self.create_human_players() # Default to two player mode
+         self._premove_board_state = None
 
     def create_board(self):
         return Board(self.rows, self.columns)
@@ -403,12 +412,13 @@ class ConnectFour:
             return not self.board.square_is_occupied(row, col)
         return False
     
-    def is_full(self, col):
+    def is_full(self, col: int):
         return self.height_list[col] == 0
 
-    def make_move(self, col, marker):
+    def make_move(self, col: int, marker: str):
         for row in range(self.rows - 1, -1, -1):
             if self.is_valid(row, col):
+                self._premove_board_state = self.board.get_board(True)
                 self.board.add_to_square(row, col, marker)
                 self.move_list.append((row, col))
                 self.height_list[col] = row
@@ -417,22 +427,19 @@ class ConnectFour:
                 return True
         return False
     
-    # def clear_square(self, row, col):
-    #     """"Used to clear a single square on the board for printing or un-do move purposes."""
-    #     self.board.update_square(row, col, 0)
-    
     def get_board_animation_states(self, player_marker):
+        # lazy method called only when needed
         board_states = []
         # Get a mutable copy of the current board state that allows for board manipulation without change the actual state of the game board
-        temp_board = self.board.get_board(True)
-        # Remove the marker of the most recently played square and update it with 0 (or blank square)
+        temp_board = self._premove_board_state
         current_row_played, current_column_played = self.move_list[-1]
-        temp_board.update_square(current_row_played, current_column_played, 0)
         # Create a boad state with the current player's marker starting from the top row to the final row position of the current move
         for j in range(current_row_played + 1):
             temp_board.add_to_square(j, current_column_played, player_marker)
             board_states.append(temp_board.get_board())
-            temp_board.update_square(j, current_column_played, 0)
+            if j < current_row_played:
+                temp_board.update_square(j, current_column_played, 0)
+        self._last_pre_move_state = None
 
         return board_states
 

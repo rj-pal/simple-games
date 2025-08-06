@@ -1,7 +1,7 @@
 """
 clitools.py 
 Author: Robert Pal
-Updated: 2025-08-01
+Updated: 2025-08-05
 
 This module contains helper functrions for Command Line Applications.
 """
@@ -191,6 +191,12 @@ def print_board_dropping_effect(board_states: list[list[list[Union[int, str]]]],
         sleep(sleep_delay)
         clear_screen()
 
+def print_board_with_spacing(game_board, game="Connect4", spacing=3):
+        """For printing the Connect 4 board with space on top and clear screen."""
+        clear_screen()
+        print("\n" * spacing)
+        print_board(game_board=game_board, game_name="Connect4")
+
 def print_start_game(game_name: str):
     """Prints the welcome message and introduction."""
     if game_name not in {'TicTacToe', 'Connect4', 'Solitaire'}:
@@ -359,22 +365,27 @@ def select_klondike_draw_number():
             print("Please type only 1 or 3.")
 
 def select_difficulty_level(game_name: str) -> Optional[bool]:
-    """Updates the difficulty level boolean when playing against the computer."""
+    """Updates the difficulty level boolean when playing against the computer. Returns None, False, or True"""
     if game_name not in {'TicTacToe', 'Connect4'}:
         raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4'.")
+    # Tic Tac Toe has three AI levels and Connect 4 only two (for now)
     if game_name == "TicTacToe":
         difficulty_choices = "\nSelect the level of difficult for the AI: 1) Blind, 2) Normal, 3) Impossible: "
     else:
-        difficulty_choices = "\nSelect the level of difficult for the AI: 1) Blind or 2) Basic: "
-    valid_input = ['1', 'easy', '2', 'intermediate', '3', 'hard']
+        difficulty_choices = "\nSelect the level of difficult for the AI: 1) Blind or 2) Normal: "
+    # Allow for user to input number or selection name
+    valid_input = ['1', 'blind', '2', 'normal', '3', 'impossible']
     while True:
-        level_of_difficulty = input(difficulty_choices).lower()
+        level_of_difficulty = input(difficulty_choices).lower() # get the user's selection
+        # None for blind or easy mode
         if level_of_difficulty in valid_input[:2]:
             delay_effect(["\nYou are playing against the computer in easy mode."])
             return None
+        # False for normal or intermediate mode
         elif level_of_difficulty in valid_input[2:4]:
             delay_effect(["\nYou are playing against the computer in intermediate mode." ])
             return False
+        # True for impossible or hard mode (not available for Connect 4)
         elif level_of_difficulty in valid_input[4:]:
             if game_name == "Connect4":
                 print("\nThis option is not currently avaliable for Connect 4. Please select again")

@@ -1,7 +1,7 @@
 """
 TicTacToeCLI.py 
 Author: Robert Pal
-Updated: 2025-07-22
+Updated: 2025-08-05
 
 This module contains all control flow logic for running the Tic Tac Toe Command Line Application.
 It includes:
@@ -17,6 +17,7 @@ def set_up_game() -> TicTacToe:
     """
     Sets up game play configurations for one or two players. If one player, sets the AI difficulty to easy, intermediate or hard.
     Player one plays 'x' and player two or AI plays 'o'. X moves first. In multi-play, the first player changes with each subsequent game.
+    Players can select name or default name assigned if skipped.
     """
     game = TicTacToe()
     # One or Two player mode set by function from command line utility tools using tertiary values T, F or None.
