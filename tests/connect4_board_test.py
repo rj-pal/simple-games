@@ -1,4 +1,4 @@
-from games.games import ConnectFour
+from games.connect4 import ConnectFour
 from utils.clitools import print_board
 
 test = ConnectFour()

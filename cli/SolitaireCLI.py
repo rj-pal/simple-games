@@ -8,7 +8,7 @@ This module contains all control flow logic for running the Solitaire Command Li
 This game is still in development.
 """
 
-from games.games import Solitare
+from games.solitaire import Solitare
 import utils.clitools as GameCLI
 from utils.errors import *
 

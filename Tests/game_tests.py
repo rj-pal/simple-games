@@ -1,4 +1,4 @@
-from games.games import TicTacToe
+from games.tictactoe import TicTacToe
 from core.board import *
 from core.player import *
 from random import randint

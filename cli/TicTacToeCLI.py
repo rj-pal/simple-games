@@ -10,7 +10,7 @@ It includes:
 - play_game() which controls the all actual game play logic and commands
 """
 import utils.clitools as GameCLI
-from games.games import TicTacToe
+from games.tictactoe import TicTacToe
 from utils.strings import tictactoe_strings, other_strings
  
 def set_up_game() -> TicTacToe:

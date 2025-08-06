@@ -9,7 +9,7 @@ It includes:
 - set_up_game() which sets game play configerations
 - play_game() which controls the all actual game play logic and commands
 """
-from games.games import ConnectFour
+from games.connect4 import ConnectFour
 import utils.clitools as GameCLI
 
 def set_up_game():
