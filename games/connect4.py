@@ -297,8 +297,8 @@ class ConnectFour:
         def move(self):
 
             if (move:= self.win_or_block()) is not None:
-                print("Played WIN or BLOCK")
-                print(f"Computer's move {move}")
+                # print("Played WIN or BLOCK")
+                # print(f"Computer's move {move}")
                 # sleep(5)
                 return move
             ### Debugging
@@ -375,15 +375,15 @@ class ConnectFour:
             def down_check(row_height, column):
                 column_line = self.game.board.get_column_segment
                 if (move := check_and_update(column_line(row=row_height, col=column, length = 3), row, column)) is not None:
-                    print(f"WON in DOWN COL at move {move}")
+                    # print(f"WON in DOWN COL at move {move}")
                     return move
 
                 diagonal_line = self.game.board.get_diagonal_segment
                 if (move := check_and_update(diagonal_line(row=row_height, col=column + 1, length = 3, up=False, right=True), row, column)) is not None:
-                    print(f"WON in DOWN Diag Right {move}")
+                    # print(f"WON in DOWN Diag Right {move}")
                     return move
                 if (move := check_and_update(diagonal_line(row=row_height, col=column - 1, length = 3, up=False, right=False), row, column)) is not None:
-                    print(f"WON in DOWN Diag Left {move}")
+                    # print(f"WON in DOWN Diag Left {move}")
                     return move
                 return None
 
@@ -452,12 +452,12 @@ class ConnectFour:
                 # Check for three in a row down, down-right and down left starting from vertical mid-point
                 if row_height <= self.game.board.rows // 2:
                     if move := down_check(row_height, column):
-                        print(f"WON in DOWN {move}")
+                        # print(f"WON in DOWN {move}")
                         return move
 
                 # Check all diagonal directions with one-two or two-one patterns
                 if move:= star_pattern_check(row, row_height, column):
-                    print(f"Won in a Star at {move}")
+                    # print(f"Won in a Star at {move}")
                     return move
 
                 left_value = self.game.board.get_square_value(row, column - 1)
@@ -470,13 +470,13 @@ class ConnectFour:
                 if column <= horizontal_midpoint:
                     # Check row right combinations and up-right diagonal
                     if move := right_and_up_check(row, column):
-                        print(f"WON in ROW RIGHT at Col {move}")
+                        # print(f"WON in ROW RIGHT at Col {move}")
                         return move
 
                 if column >= horizontal_midpoint:
                     # Check row left combinations and up-left diagonal
                     if (move := left_and_up_check(row, column)) is not None:
-                        print(f"WON in ROW LEFT at Col {move}")
+                        # print(f"WON in ROW LEFT at Col {move}")
                         return move
 
             return block_position if block_position != -1 else None

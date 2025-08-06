@@ -307,7 +307,7 @@ def set_up_game():
 
 
 def run():
-    GameCLI.set_console_window_size(85, 30)  # console dimensions: width, height
+    GameCLI.set_console_window_size(120, 50)  # console dimensions: width, height
     GameCLI.print_start_game('Solitaire')
     game = set_up_game()
     play_game(game)
