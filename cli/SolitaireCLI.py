@@ -1,7 +1,7 @@
 """
 SolitaireCLI.py 
 Author: Robert Pal
-Updated: 2025-08-01
+Updated: 2025-08-13
 
 This module contains all control flow logic for running the Solitaire Command Line Application.
 
@@ -10,98 +10,8 @@ This game is still in development.
 
 from games.solitaire import Solitare
 import utils.clitools as GameCLI
+from utils.clitools import print_card_table
 from utils.errors import *
-
-
-def print_tableau(tableau):
-
-    def normalize_cards_in_stack(card_stack, width=12):
-        new_card_stack = []
-        for card in card_stack:
-            if card == "🎴":
-                card = card.center(11)
-            elif card == " ":
-                card = card.center(width)
-            else:
-                card = card.center(width + 1)
-            new_card_stack.append(card)
-        return new_card_stack
-
-    def print_labels(column_width=17):
-        print("TABLEAU")
-        tableau_labels = [
-            "Stack 1", "Stack 2", "Stack 3", "Stack 4", "Stack 5", "Stack 6",
-            "Stack 7"
-        ]
-        print()
-        for label in tableau_labels:
-            print(f"{label:^{column_width}}", end='')
-        print()
-        print(" " * 4 + (" -------" + " " * 9) * 7)
-
-    # Change my stack to a list
-    tableau_lists = tableau  #[card_stack.to_list()[::-1] for card_stack in tableau]
-
-    # Get the longest card stack to add blank cards for padding of column stacks
-    max_height = max(len(stack) for stack in tableau_lists)
-
-    # Ensure all card stacks are the same length
-    padded_tableau = [
-        stack + [" "] * (max_height - len(stack)) for stack in tableau_lists
-    ]
-
-    # Ensure all cards are padded to the same size for alignment in columns
-    padded_cards_and_tableau = [
-        normalize_cards_in_stack(card_stack) for card_stack in padded_tableau
-    ]
-
-    # Print name and labels for tableau
-    print_labels()
-
-    column_space = " " * 5
-    for row in zip(*padded_cards_and_tableau):
-        print(column_space.join(card for card in row))
-
-
-def print_foundation_piles(piles):
-    print("FOUNDATION PILES\n")
-    top_cards = [
-        card_stack.get_stack_suit()
-        if card_stack.is_empty() else card_stack.top_card().face
-        for card_stack in piles.values()
-    ]
-    print("   |   ".join(top_cards))
-
-
-def print_draw_pile(pile):
-    print("STOCK PILE")
-    print()
-    if not pile:
-        print("🎴".center(6))
-
-    else:
-        print("⚔️".center(6))
-
-
-def print_waste_pile(pile):
-    if len(pile) == 0:
-        print("⚔️".center(6))
-    else:
-        for card in pile:
-            print(card)
-
-
-def print_card_table(tableau: list, foundation_piles: dict, draw_pile: bool,
-                     waste_pile: list):
-    print_foundation_piles(foundation_piles)
-    print()
-    print_tableau(tableau)
-    print()
-    print_draw_pile(draw_pile)
-    print()
-    print_waste_pile(waste_pile)
-    print()
-
 
 def stack_validator():
     while True:
