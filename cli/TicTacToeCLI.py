@@ -9,8 +9,10 @@ It includes:
 - set_up_game() which sets game play configerations
 - play_game() which controls the all actual game play logic and commands
 """
-import utils.clitools as GameCLI
+import utils.clitools.clitools as GameCLI
 from games.tictactoe import TicTacToe
+import utils.clitools.printing
+import utils.clitools.console
 from utils.strings import tictactoe_strings, other_strings
  
 def set_up_game() -> TicTacToe:
@@ -68,18 +70,18 @@ def play_game(game) -> None:
                     GameCLI.print_square_occupied_prompt(name)
         # Handles AI player logic
         elif isinstance(player, TicTacToe.AIPlayer):
-            GameCLI.print_computer_thinking(name)
+            utils.clitools.printing.print_computer_thinking(name)
             row, col = player.move(game.board.get_board())
             game.make_move(row, col, player.marker)
         
         # Displays board and other info to the user about the most current move
         GameCLI.clear_screen()
         GameCLI.print_current_move(name, row, col)
-        GameCLI.print_board(game.board.get_board(), "TicTacToe")
+        utils.clitools.printing.print_board(game.board.get_board(), "TicTacToe")
 
         # Ends the game before the final round if a winner is found
         if i >= 4 and game.check_winner():
-            GameCLI.print_game_over(player.marker) # use player marker attribute to display correct game over screen        
+            utils.clitools.printing.print_game_over(player.marker) # use player marker attribute to display correct game over screen        
             break
     # Updates winner info and player stats
     game.update_winner_info()
@@ -87,17 +89,17 @@ def play_game(game) -> None:
     # Gets the winner info for summary display
     winner = game.get_winner_attributes()
     if winner[0] is not None: # reprint the final board state if winner
-        GameCLI.print_board(game.board.get_board(), "TicTacToe")
-    GameCLI.print_winner_info(*winner)
+        utils.clitools.printing.print_board(game.board.get_board(), "TicTacToe")
+    utils.clitools.printing.print_winner_info(*winner)
     # Resets the game state for new game
     game.reset_game_state()
 
 def run(width: int=85, height: int=30, multiplay: bool=True) -> None:
     """Main game control flow that initiates, sets up and asks for multi-game play."""
-    GameCLI.set_console_window_size(width, height) # console dimensions: width, height
+    utils.clitools.console.set_console_window_size(width, height) # console dimensions: width, height
     
     # Game introduction message with basic game play explanation
-    GameCLI.print_start_game("TicTacToe")
+    utils.clitools.printing.print_start_game("TicTacToe")
     
     # Set up the game state for one or two players and AI settings
     game = set_up_game()
@@ -107,10 +109,10 @@ def run(width: int=85, height: int=30, multiplay: bool=True) -> None:
     # Run function script to get boolean for multiplay
     multiplay = GameCLI.play_again()
     while multiplay:
-        GameCLI.print_scoreboard(game.players) # Show games history
+        utils.clitools.printing.print_scoreboard(player_list=game.get_players_info_string_as_list()) # Show games history
         game.reset_board()
         play_game(game)
         multiplay = GameCLI.play_again()
-    GameCLI.print_scoreboard(game.players) # Show games history
+    utils.clitools.printing.print_scoreboard(player_list=game.get_players_info_string_as_list()) # Show games history
     
     exit()

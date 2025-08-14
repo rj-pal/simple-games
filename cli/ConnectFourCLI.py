@@ -10,7 +10,10 @@ It includes:
 - play_game() which controls the all actual game play logic and commands
 """
 from games.connect4 import ConnectFour
-import utils.clitools as GameCLI
+import utils.clitools.clitools as GameCLI
+import utils.clitools.printing
+import utils.clitools.console
+import utils.clitools.menu_printing
 
 def set_up_game():
     """
@@ -42,7 +45,7 @@ def play_game(game) -> None:
         
         # Store the board state before any move to correctly handle screen updates, messaging to user and command line dispaly glitches.
         board_state_before_move = game.board.get_board(mutable=True)
-        GameCLI.print_board_with_spacing(game_board=board_state_before_move.get_board())
+        utils.clitools.printing.print_board_with_spacing(game_board=board_state_before_move.get_board())
 
         # Get validated column on board for human player or AI player to make move
         if player.is_human:
@@ -54,7 +57,7 @@ def play_game(game) -> None:
                 else:
                     GameCLI.print_square_occupied_prompt(name=player.name)
         else:
-            GameCLI.print_computer_thinking(name=player.name, time_delay=2)
+            utils.clitools.printing.print_computer_thinking(name=player.name, time_delay=2)
             current_col = player.move() # Use AI player method to get validated column
         
         # Updated the game state with validated column or else exit program
@@ -64,7 +67,7 @@ def play_game(game) -> None:
         
         # Reprint the pre-move board and prompt to avoid screen glitches caused by the input prompt and ensure smooth user experience
         if player.is_human:
-            GameCLI.print_board_with_spacing(game_board=board_state_before_move.get_board())
+            utils.clitools.printing.print_board_with_spacing(game_board=board_state_before_move.get_board())
             GameCLI.print_player_turn_prompt_connect4(name=player.name)
         
         # Display validation of last successful move to user before board animation
@@ -74,22 +77,22 @@ def play_game(game) -> None:
         
         # Animation of game piece using a dropping effect
         board_states = game.get_board_animation_states(player_marker=player.marker)
-        GameCLI.print_board_dropping_effect(board_states=board_states)
+        utils.clitools.printing.print_board_dropping_effect(board_states=board_states)
         
         # Check for a winner and end the game if a win condition is met. The game can only be won after a minimum of 7 moves (i>=6).
         if i >= 6 and game.check_winner():
             game.update_winner_info()
             game.update_players_stats()
-            GameCLI.print_game_over(winner_mark=player.marker)
+            utils.clitools.printing.print_game_over(winner_mark=player.marker)
             GameCLI.clear_screen()
-            GameCLI.print_board(game_board=game.board.get_board(), game_name="Connect4")
+            utils.clitools.printing.print_board(game_board=game.board.get_board(), game_name="Connect4")
             game.print_winner()
             break
 
 def run():
     # Optimized console window size for display for smooth user experience.
-    GameCLI.set_console_window_size(100, 48)
-    GameCLI.print_start_game("Connect4")
+    utils.clitools.console.set_console_window_size(100, 48)
+    utils.clitools.menu_printing.print_start_game("Connect4")
     game = set_up_game()
     play_game(game)
     exit()

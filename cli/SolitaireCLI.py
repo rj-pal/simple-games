@@ -9,8 +9,9 @@ This game is still in development.
 """
 
 from games.solitaire import Solitare
-import utils.clitools as GameCLI
-from utils.clitools import print_card_table
+import utils.clitools.clitools as GameCLI
+# from utils.clitools.clitools import print_card_table
+import utils.clitools.menu_printing
 from utils.errors import *
 
 def stack_validator():
@@ -103,7 +104,7 @@ def play_game(test):
         # print(type(draw))
         # print(type(waste))
 
-        print_card_table(tab, fp, draw, waste)
+        GameCLI.print_card_table(tab, fp, draw, waste)
         # test.show_stock_pile()
 
         print("\nPress 1: To build to the tableau from the waste pile.\nPress 2: To move one or more cards on the tableau.\n" \
@@ -218,6 +219,6 @@ def set_up_game():
 
 def run():
     GameCLI.set_console_window_size(120, 50)  # console dimensions: width, height
-    GameCLI.print_start_game('Solitaire')
+    utils.clitools.menu_printing.print_start_game('Solitaire')
     game = set_up_game()
     play_game(game)
