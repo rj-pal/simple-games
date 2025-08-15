@@ -16,10 +16,10 @@ from utils.square import Square
 from typing import Union
 
 # ==== For enhanced effects, like ASCII string centering and box display of game information ===
-def surround_string(strings: list[str], border_symbol: str, offset: int = 0) -> list[str]:
+def surround_string(strings: list[str], border_symbol: str="|", offset: int = 0) -> list[str]:
     """
     Creates a bordered box display around any mulit-line text and centers it with padding around the text, which is used for scoreboards or other messages. 
-    Border must use a string with no default setting. Offset is defaulted to 0 for minimum padding in the the box.
+    Border must use a string with no default setting. Offset is defaulted to 0 for minimum padding in the the box. Default border_symbol is '#'
     """
     # Split each string from list on '\n' if it has one; otherwise, keep the string as a single element by wrapping it in a list.
     # Use itertools.chain.from_iterable to flatten the resulting list of lists into a single string, which is then wrapped in a list of strings, which
@@ -54,7 +54,7 @@ def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_r
     if game_name not in {'TicTacToe', 'Connect4'}:
         raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4'.")
     
-    translated_board = board_translator(game_board)
+    translated_board = board_translator(game_board=game_board)
     
     if game_name == 'TicTacToe':
         delay_effect([create_board_tictactoe(game_board=translated_board, line=tictactoe_strings["boardline"])],
@@ -77,7 +77,7 @@ def create_row_tictactoe(row: list[list[Square]], border_symbol: str="*") -> str
 def create_board_tictactoe(game_board: list[list[Union[int, str]]], line: str) -> str:
     """Returns a formatted string representation of the entire centred Tic Tac Toe board by building the board row by row."""
     return f"\n{line.center(shutil.get_terminal_size().columns - 1)}\n".join(
-        [create_row_tictactoe([square.value for square in row]) for row in game_board])
+        [create_row_tictactoe(row=[square.value for square in row]) for row in game_board])
 
 # ==== Functions for creating Connect 4  Board for display ====
 def create_row_connect4(row: list[list[Square]], border_symbol: str="|") -> str:
@@ -91,30 +91,32 @@ def create_row_connect4(row: list[list[Square]], border_symbol: str="|") -> str:
 def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) -> str:
     """Returns a formatted string representation of the entire Connect 4 board for by building the board row by row."""
     return f"\n{line}\n".join(
-        [create_row_connect4([square.value for square in row]) for row in game_board])
+        [create_row_connect4(row=[square.value for square in row]) for row in game_board])
 
 # ==== Functions for specific for Connect 4 board display ====
-def print_board_dropping_effect(board_states: list[list[list[Union[int, str]]]], sleep_delay: float=0.075, top_spacing: int=3):
+def print_board_dropping_effect(board_states: list[list[list[Union[int, str]]]], sleep_delay: float=0.075, top_spacing: int=3) -> None:
     """Prints the Connect 4 Board with animation that simulates a dropping effect. Sleep delay can control the speed of the dropping piece. Optional top spacing."""
     for board_state in board_states:
         print("\n" * top_spacing)
-        print_board(board_state, "Connect4")
+        print_board(game_board=board_state, game_name="Connect4")
         sleep(sleep_delay)
         clear_screen()
 
 
-def print_board_with_spacing(game_board: list[list[Union[int, str]]], top_spacing=3):
-        """For printing the Connect 4 board with space on top and clear screen. Displays single use board state of current game."""
-        clear_screen()
-        print("\n" * top_spacing)
-        print_board(game_board=game_board, game_name="Connect4")
+def print_board_with_spacing(game_board: list[list[Union[int, str]]], top_spacing=3) -> None:
+    """For printing the Connect 4 board with space on top and clear screen. Displays single use board state of current game."""
+    clear_screen()
+    print("\n" * top_spacing)
+    print_board(game_board=game_board, game_name="Connect4")
 
 # ==== Functions for game messaging ====
-def print_winner_info(name: str, marker: str, win_type: str, win_index: int) -> None:
+def print_winner_info(name: str, marker: str, win_type: str, win_index: int, border_symbol: str="#", offset: int=9, 
+                      delay: float=0.00075, word_flush=False) -> None:
     """Displays the information of the winner of the game using the winner attributes."""
     if all(info is None for info in (name, marker, win_type)):
         draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
-        delay_effect(surround_string([draw_string], "#", 9), 0.00075, False)
+        delay_effect(surround_string(strings=[draw_string], border_symbol=border_symbol, offset=offset), delay=delay, word_flush=word_flush)
+        
     else:
         winner_string = f"\nWinner winner chicken dinner. {name} is the winner.\n{marker.upper()} wins in"
         win_type_dict = {
@@ -124,12 +126,12 @@ def print_winner_info(name: str, marker: str, win_type: str, win_index: int) -> 
             "left_diagonal": "the left diagonal."
         }
         winner_string = f"{winner_string} {win_type_dict[win_type]}\n"
-        delay_effect(surround_string([winner_string], "#", 9), 0.00075, False)
+        delay_effect(surround_string(strings=[winner_string], border_symbol=border_symbol, offset=offset), delay=delay, word_flush=word_flush)
 
 
-def print_scoreboard(player_list: list[str], border_symbol: str="#") -> None:
+def print_scoreboard(player_list: list[str], border_symbol: str="#", offset: int=25, delay: float=0.00075, word_flush=False) -> None:
     """Shows the player statistics for the game."""
-    delay_effect(surround_string(player_list, border_symbol, 25), 0.00075, False)
+    delay_effect(surround_string(strings=player_list, border_symbol=border_symbol, offset=offset), delay=delay, word_flush=word_flush)
 
 
 def print_computer_thinking(name: str="Computer", time_delay: int=1.5) -> None:
@@ -139,16 +141,16 @@ def print_computer_thinking(name: str="Computer", time_delay: int=1.5) -> None:
     sleep(time_delay)
 
 
-def print_game_over(winner_mark: str):
+def print_game_over(winner_mark: str) -> None:
     """Displays a flashing end of game messages when a winner is found."""
     print()
     clear_screen()
     columns = shutil.get_terminal_size().columns
     for i in range(5):
         if i % 2 == 0:
-            print(center_display_string(other_strings["gameover"], columns))
+            print(center_display_string(list_of_strings=other_strings["gameover"], terminal_width=columns))
         else:
-            print(center_display_string(other_strings[winner_mark], columns))
+            print(center_display_string(list_of_strings=other_strings[winner_mark], terminal_width=columns))
         # sys.stdout.flush()
         sleep(0.45)
         clear_screen()
@@ -156,7 +158,7 @@ def print_game_over(winner_mark: str):
     print()
 
 # ==== Functions for menu printing and game start up welcome messaging ====
-def print_menu_screen(delay: float=0.025):
+def print_menu_screen(delay: float=0.025) -> None:
     """Displays a menu of game options centered in the terminal screen. Allows for new games to be added to menu with Enums in the GameOptions."""
     clear_screen()
     columns, rows = shutil.get_terminal_size()
@@ -175,10 +177,10 @@ def print_menu_screen(delay: float=0.025):
     print('\n' * vertical_pos, end='') # Start printing menu_text after adding the appropriate number of new lines as calculated in vertical_pos
     for line in menu_text.splitlines():
         print(' ' * horizontal_pos, end="") # Start printing menu_text after adding the appropriate number of spaces as calculated in horizontal_pos
-        delay_effect([line], delay) # Use delay)_effect for typewriter printing effect
+        delay_effect(strings=[line], delay=delay) # Use delay)_effect for typewriter printing effect
 
 
-def print_start_game(game_name: str):
+def print_start_game(game_name: str) -> None:
     """Prints the welcome message and introduction for each game."""
     if game_name not in {'TicTacToe', 'Connect4', 'Solitaire'}:
         raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4' or 'Solitaire'.")
@@ -189,4 +191,4 @@ def print_start_game(game_name: str):
     else:
         string_dict = solitaire_strings
     print(string_dict["welcome"])
-    delay_effect([string_dict["intro"]])
+    delay_effect(strings=[string_dict["intro"]])

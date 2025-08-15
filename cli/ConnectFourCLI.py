@@ -13,7 +13,6 @@ from games.connect4 import ConnectFour
 import utils.clitools.clitools as GameCLI
 import utils.clitools.printing
 import utils.clitools.console
-import utils.clitools.menu_printing
 
 def set_up_game():
     """
@@ -92,7 +91,7 @@ def play_game(game) -> None:
 def run():
     # Optimized console window size for display for smooth user experience.
     utils.clitools.console.set_console_window_size(100, 48)
-    utils.clitools.menu_printing.print_start_game("Connect4")
+    utils.clitools.printing.print_start_game("Connect4")
     game = set_up_game()
     play_game(game)
     exit()

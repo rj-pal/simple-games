@@ -11,7 +11,6 @@ This game is still in development.
 from games.solitaire import Solitare
 import utils.clitools.clitools as GameCLI
 # from utils.clitools.clitools import print_card_table
-import utils.clitools.menu_printing
 from utils.errors import *
 
 def stack_validator():
