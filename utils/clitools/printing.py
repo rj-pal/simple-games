@@ -1,7 +1,7 @@
 """
 game_printing.py 
 Author: Robert Pal
-Updated: 2025-08-17
+Updated: 2025-08-18
 
 This module contains all game related display and print functions for Command Line Applications.
 """
@@ -77,11 +77,11 @@ def board_translator(game_board: list[list[Union[int, str]]]) -> list[list[Squar
 
 
 def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_rate: float=0.000175) -> None:
-    """Prints the game board with an optional delay effect.
+    """Prints the game board with an optional delay effect for typewritter dispaly.
 
     This function translates board data (strings and integers) to `Square` Enum strings for display. Lines are created row by row by zipping together each
-    2D `Square` Enum for each row. Each square is printed line by line from top to bottom in the grid board with added border symbols to create the 2D board.
-    The formatted board string is passed as a list to the delay function to create the typewritter effect. 
+    2D `Square` Enum for each row. Each square is printed line by line from top to bottom in the board with added border symbols to create the 2D grid board.
+    The formatted board string is passed as a list to the delay function to create the typewritter effect if delay is not 0. 
 
     Args:
         game_board: A 2D list representing the current state of the game board.
@@ -94,83 +94,69 @@ def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_r
     if game_name not in {'TicTacToe', 'Connect4'}:
         raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4'.")
     
-    translated_board = board_translator(game_board=game_board)
+    translated_board = board_translator(game_board=game_board) # Get 2D `Square` Enum board for typewritter printing
     
     if game_name == 'TicTacToe':
-        delay_effect([create_board_tictactoe(game_board=translated_board, line=tictactoe_strings["boardline"])],
+        delay_effect([create_board(game_board=translated_board, game_name="TicTacToe", grid_line=tictactoe_strings["boardline"])],
                      delay=delay_rate, word_flush=False) # Use default delay for Tic Tac Toe
     elif game_name == 'Connect4':
-        delay_effect([create_board_connect4(game_board=translated_board, line=connect4_strings["boardline"])],
+        delay_effect([create_board(game_board=translated_board, game_name="Connect4", grid_line=connect4_strings["boardline"])],
                      delay=0, word_flush=False) # No delay for Connect Four since it uses dropping effect
+        # For adding bottom borderline to Connect4 board and column labels for easier UI experience in making moves
         print(connect4_strings["boardline"])
         print(connect4_strings["boardlabels"])
 
-# ==== Functions for creating Tic Tac Toe Board for display ====
-def create_row_tictactoe(row: list[list[Square]], border_symbol: str="*") -> str:
-    """Returns a formatted and centred string of a single Tic-Tac-Toe board row.
 
-    This function zips together a single row for a grid of a 2D board with grid border lines for inside walls.
+def create_row(row: list[list[Square]], border_symbol: str, centre: bool = False) -> str:
+    """Returns a formatted string of a single game board row.
+
+    This function zips together a single row of a 2D board with grid border lines for inside walls.
 
     Args:
         row: A 2D list representing a single row of the board.
-        border_symbol: The symbol for the inside grid lines. Defaults to '*'.
+        border_symbol: The symbol for the inside grid lines.
+        centre: A boolean flag to centre the row. Defaults to False.
 
     Returns:
         A formatted string of the board row.
     """
-    return "\n".join([
-        border_symbol.join(line).center(shutil.get_terminal_size().columns - 1)
-        for line in zip(*row)
-    ])
+    # Centre functionality is used with Tic Tac Toe only - previous function does boolean check of game_name to pass the correct boolean flag here
+    if centre: 
+        return "\n".join([border_symbol.join(line).center(shutil.get_terminal_size().columns - 1)for line in zip(*row)])
+    else:
+        return "\n".join([border_symbol.join(line) for line in zip(*row)])
 
-def create_board_tictactoe(game_board: list[list[Union[int, str]]], line: str) -> str:
-    """Return a formatted string representation of the entire Tic-Tac-Toe board.
-
-    This function builds the board row by row and centers each row in the terminal.
+def create_board(game_board: list[list[Union[int, str]]], game_name: str, grid_line: str) -> str:
+    """Returns a formatted string representation of the entire game board.
 
     Args:
+        game_name: The name of the game ('TicTacToe' or 'Connect4').
         game_board: A 2D list representing the game board.
-        line: The line string used to separate rows.
 
     Returns:
         A formatted string of the complete board.
+    
+    Raises:
+        ValueError: If `game_name` is not 'TicTacToe' or 'Connect4'.
     """
-    return f"\n{line.center(shutil.get_terminal_size().columns - 1)}\n".join(
-        [create_row_tictactoe(row=[square.value for square in row]) for row in game_board])
+    if game_name not in {'TicTacToe', 'Connect4'}: # Extra safety precaution
+        raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4'.")
+    
+    # Game configuration accounts for minor differences in boards and can be customized (main difference is centring of the board or not)
+    game_config = {
+        'TicTacToe': {'border_symbol': '*', 'line_func': lambda line: line.center(shutil.get_terminal_size().columns - 1)},
+        'Connect4': {'border_symbol': '|', 'line_func': lambda line: line}
+    }
 
-# ==== Functions for creating Connect 4  Board for display ====
-def create_row_connect4(row: list[list[Square]], border_symbol: str="|") -> str:
-    """Return a formatted string of a single Connect 4 board row.
+    board_config = game_config[game_name]
+    border_symbol = board_config['border_symbol']
+    line_func = board_config['line_func'] 
+    
+    line = f"\n{line_func(grid_line)}\n"  # Grid lines are the row seperators and the symbols match with the column walls
 
-    This function zips together a single row for a grid of a 2D board with grid border lines for inside walls.
+    return line.join([create_row(row=[square.value for square in row], border_symbol=border_symbol, 
+                                 centre=(game_name == 'TicTacToe')) for row in game_board]) # Boolean check for game_name since only TicTacToe should be centred
 
-    Args:
-        row: A 2D list representing a single row of the board.
-        border_symbol: The symbol for the inside grid lines. Defaults to '|'.
-
-    Returns:
-        A formatted string of the board row.
-    """
-    return "\n".join([
-        border_symbol.join(line)
-        for line in zip(*row)
-    ] )
-
-
-def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) -> str:
-    """Return a formatted string of the entire Connect 4 board.
-
-    This functdion builds the board row by row.
-
-    Args:
-        game_board: A 2D list representing the game board.
-        line: The line string used to separate rows.
-
-    Returns:
-        A formatted string of the complete board.
-    """
-    return f"\n{line}\n".join(
-        [create_row_connect4(row=[square.value for square in row]) for row in game_board])
 
 # ==== Functions for specific for Connect 4 board display ====
 def print_board_dropping_effect(board_states: list[list[list[Union[int, str]]]], sleep_delay: float=0.075, top_spacing: int=3) -> None:
@@ -179,8 +165,7 @@ def print_board_dropping_effect(board_states: list[list[list[Union[int, str]]]],
     Args:
         board_states: A list of 2D lists, where each list represents a board state for the animation frames.
         sleep_delay: The time delay between each animation frame. Defaults to 0.075 seconds.
-        top_spacing: The number of newlines to print before the board for top spacing. Defaults to 3.
-                     
+        top_spacing: The number of newlines to print before the board for top spacing. Defaults to 3.                 
     """
     for board_state in board_states:
         print("\n" * top_spacing)
@@ -205,6 +190,18 @@ def print_board_with_spacing(game_board: list[list[Union[int, str]]], top_spacin
 def print_winner_info(name: str, marker: str, win_type: str, win_index: int, border_symbol: str="#", offset: int=9, 
                       delay: float=0.00075, word_flush=False) -> None:
     """Displays the information of the winner of the game using the winner attributes."""
+    """Displays the winner's information based on saved attributes from the `Game` object.
+
+    Args:
+        name: The name of the winner.
+        marker: The marker of the winner ('x', 'o', 'r' or 'y').
+        win_type: The type of win ('row', 'column', 'right_diagonal', or 'left_diagonal').
+        win_index: The index of the winning row, column, or starting point of diagonal.
+        border_symbol: The symbol for the message border. Defaults to '#'.
+        offset: The padding for the message box. Defaults to 9.
+        delay: The delay rate for the print effect. Defaults to 0.00075.
+        word_flush: A boolean to control word flushing for typewriter effecdt.
+    """
     if all(info is None for info in (name, marker, win_type)):
         draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
         delay_effect(surround_string(strings=[draw_string], border_symbol=border_symbol, offset=offset), delay=delay, word_flush=word_flush)
@@ -222,19 +219,36 @@ def print_winner_info(name: str, marker: str, win_type: str, win_index: int, bor
 
 
 def print_scoreboard(player_list: list[str], border_symbol: str="#", offset: int=25, delay: float=0.00075, word_flush=False) -> None:
-    """Shows the player statistics for the game."""
+    """Displays the player statistics for the game.
+
+    Args:
+        player_list: A list of strings containing player statistics. __str__ representation of a `Player` object.
+        border_symbol: The symbol for the scoreboard border. Defaults to '#'.
+        offset: The padding for the scoreboard. Defaults to 25.
+        delay: The delay rate for the print effect. Defaults to 0.00075.
+        word_flush: A boolean to control word flushing for typewriter effect.
+    """
     delay_effect(surround_string(strings=player_list, border_symbol=border_symbol, offset=offset), delay=delay, word_flush=word_flush)
 
 
 def print_computer_thinking(name: str="Computer", time_delay: int=1.5) -> None:
-    """Prints thinking message with time delay to simulate the computer thinking"""
+    """Prints a message to simulate the computer thinking with delay time.
+
+    Args:
+        name: The name of the computer player. Defaults to 'Computer'.
+        time_delay: The delay in seconds before the message disappears. Defaults to 1.5.
+    """
     print(f"\n{name} is now thinking.")
     print()
     sleep(time_delay)
 
 
 def print_game_over(winner_mark: str) -> None:
-    """Displays a flashing end of game messages when a winner is found."""
+    """Displays flashing ascii art game over messages when a winner is found.
+
+    Args:
+        winner_mark: The marker of the winning player to display.
+    """
     print()
     clear_screen()
     columns = shutil.get_terminal_size().columns
@@ -243,7 +257,6 @@ def print_game_over(winner_mark: str) -> None:
             print(center_display_string(list_of_strings=other_strings["gameover"], terminal_width=columns))
         else:
             print(center_display_string(list_of_strings=other_strings[winner_mark], terminal_width=columns))
-        # sys.stdout.flush()
         sleep(0.45)
         clear_screen()
         sleep(0.45)
@@ -251,7 +264,13 @@ def print_game_over(winner_mark: str) -> None:
 
 # ==== Functions for menu printing and game start up welcome messaging ====
 def print_menu_screen(delay: float=0.025) -> None:
-    """Displays a menu of game options centered in the terminal screen. Allows for new games to be added to menu with Enums in the GameOptions."""
+    """Displays a menu of game options centered on the terminal screen.
+
+    This allows for new games to be added using the `GameOptions` Enum.
+
+    Args:
+        delay: The delay rate for the typewriter print effect. Defaults to 0.025.
+    """
     clear_screen()
     columns, rows = shutil.get_terminal_size()
     # Dynamically allow for more game options using game_options ENUM, which stores the game options numerically via a string
@@ -273,7 +292,14 @@ def print_menu_screen(delay: float=0.025) -> None:
 
 
 def print_start_game(game_name: str) -> None:
-    """Prints the welcome message and introduction for each game."""
+    """Prints the welcome and introduction message for a specific game.
+
+    Args:
+        game_name: The name of the game ('TicTacToe', 'Connect4', or 'Solitaire').
+    
+    Raises:
+        ValueError: If `game_name` is not one of 'TicTacToe', 'Connect4', or 'Solitaire'.
+    """
     if game_name not in {'TicTacToe', 'Connect4', 'Solitaire'}:
         raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4' or 'Solitaire'.")
     if game_name == 'TicTacToe':
