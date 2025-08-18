@@ -1,7 +1,7 @@
 """
 game_printing.py 
 Author: Robert Pal
-Updated: 2025-08-14
+Updated: 2025-08-17
 
 This module contains all game related display and print functions for Command Line Applications.
 """
@@ -17,9 +17,19 @@ from typing import Union
 
 # ==== For enhanced effects, like ASCII string centering and box display of game information ===
 def surround_string(strings: list[str], border_symbol: str="|", offset: int = 0) -> list[str]:
-    """
-    Creates a bordered box display around any mulit-line text and centers it with padding around the text, which is used for scoreboards or other messages. 
-    Border must use a string with no default setting. Offset is defaulted to 0 for minimum padding in the the box. Default border_symbol is '#'
+    """Creates a bordered box display around multi-line text with each line centred. Formatted strings are stored in a list.
+    
+    This function centers text based on the longest line from a list of strings with white space padding on shorter lines. It creates a top and bottom border 
+    based on the length of the longest line, and adds a right and left border to each line. Offset padding can be set to extend the width of the box with 
+    inner padding. The function is useful for scoreboards or other game info messaging.
+
+    Args:
+        strings: A list of strings to be placed inside the box.
+        border_symbol: The symbol used for the box border. Defaults to '|'.
+        offset: The amount of padding to add to the border. Defaults to 0.
+
+    Returns:
+        A list of formatted strings with new lines and the border symbol before and after the line of text, and a top and bottom border line.
     """
     # Split each string from list on '\n' if it has one; otherwise, keep the string as a single element by wrapping it in a list.
     # Use itertools.chain.from_iterable to flatten the resulting list of lists into a single string, which is then wrapped in a list of strings, which
@@ -36,7 +46,15 @@ def surround_string(strings: list[str], border_symbol: str="|", offset: int = 0)
 
 
 def center_display_string(list_of_strings: list[str], terminal_width: int) -> str:
-    """Centers a multi-line string of ASCII art from a list within the terminal width to adjust for difficult line spacing in passed string."""
+    """Centers a multi-line ASCII art string within the terminal width.
+
+    Args:
+        list_of_strings: A list of strings representing the multi-line ASCII art.
+        terminal_width: The width of the terminal.
+
+    Returns:
+        A single string with each line centered and joined by newlines.
+    """
     centered_lines = []
     for line in list_of_strings:
         centered_lines.append(line.center(terminal_width))
@@ -44,13 +62,35 @@ def center_display_string(list_of_strings: list[str], terminal_width: int) -> st
 
 # ==== Functions for general board creation and display ====
 def board_translator(game_board: list[list[Union[int, str]]]) -> list[list[Square]]:
-    """Converts raw board data from Tic Tac Toe or Connect4 into Square Enum values for command line dispaly using dictionary mapping of marker values."""
+    """Convert raw board data into Square Enum values.
+
+    This function maps raw board data from Tic-Tac-Toe or Connect 4 to `Square` Enum values for command-line display.
+
+    Args:
+        game_board: A 2D list containing integer or string representations of the game board cells.
+
+    Returns:
+        A 2D list with the cell values translated to `Square` Enums.
+    """
     marker_mapping = {0: Square.BLANK, "x": Square.X, "o": Square.O, "r": Square.R, "y": Square.Y}
     return [[marker_mapping[cell] for cell in row] for row in game_board]
 
 
 def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_rate: float=0.000175) -> None:
-    """Prints the game board using the Square strings with optional delay effect. Translate Board Object data of type string and int to string of Square Enum data type."""
+    """Prints the game board with an optional delay effect.
+
+    This function translates board data (strings and integers) to `Square` Enum strings for display. Lines are created row by row by zipping together each
+    2D `Square` Enum for each row. Each square is printed line by line from top to bottom in the grid board with added border symbols to create the 2D board.
+    The formatted board string is passed as a list to the delay function to create the typewritter effect. 
+
+    Args:
+        game_board: A 2D list representing the current state of the game board.
+        game_name: The name of the game ('TicTacToe' or 'Connect4').
+        delay_rate: The delay rate for the print effect.
+    
+    Raises:
+        ValueError: If `game_name` is not 'TicTacToe' or 'Connect4'.
+    """
     if game_name not in {'TicTacToe', 'Connect4'}:
         raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4'.")
     
@@ -67,21 +107,50 @@ def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_r
 
 # ==== Functions for creating Tic Tac Toe Board for display ====
 def create_row_tictactoe(row: list[list[Square]], border_symbol: str="*") -> str:
-    """Returns a formatted string of a single board row of Tic Tac Toe with grid border lines for inside grid walls. Default symbol is '*'"""
+    """Returns a formatted and centred string of a single Tic-Tac-Toe board row.
+
+    This function zips together a single row for a grid of a 2D board with grid border lines for inside walls.
+
+    Args:
+        row: A 2D list representing a single row of the board.
+        border_symbol: The symbol for the inside grid lines. Defaults to '*'.
+
+    Returns:
+        A formatted string of the board row.
+    """
     return "\n".join([
         border_symbol.join(line).center(shutil.get_terminal_size().columns - 1)
         for line in zip(*row)
     ])
 
-
 def create_board_tictactoe(game_board: list[list[Union[int, str]]], line: str) -> str:
-    """Returns a formatted string representation of the entire centred Tic Tac Toe board by building the board row by row."""
+    """Return a formatted string representation of the entire Tic-Tac-Toe board.
+
+    This function builds the board row by row and centers each row in the terminal.
+
+    Args:
+        game_board: A 2D list representing the game board.
+        line: The line string used to separate rows.
+
+    Returns:
+        A formatted string of the complete board.
+    """
     return f"\n{line.center(shutil.get_terminal_size().columns - 1)}\n".join(
         [create_row_tictactoe(row=[square.value for square in row]) for row in game_board])
 
 # ==== Functions for creating Connect 4  Board for display ====
 def create_row_connect4(row: list[list[Square]], border_symbol: str="|") -> str:
-    """Returns a formatted string of a single board row for Connect 4 with grid border lines for inside grid walls. Default symbol is'|'"""
+    """Return a formatted string of a single Connect 4 board row.
+
+    This function zips together a single row for a grid of a 2D board with grid border lines for inside walls.
+
+    Args:
+        row: A 2D list representing a single row of the board.
+        border_symbol: The symbol for the inside grid lines. Defaults to '|'.
+
+    Returns:
+        A formatted string of the board row.
+    """
     return "\n".join([
         border_symbol.join(line)
         for line in zip(*row)
@@ -89,22 +158,45 @@ def create_row_connect4(row: list[list[Square]], border_symbol: str="|") -> str:
 
 
 def create_board_connect4(game_board: list[list[Union[int, str]]], line: str) -> str:
-    """Returns a formatted string representation of the entire Connect 4 board for by building the board row by row."""
+    """Return a formatted string of the entire Connect 4 board.
+
+    This functdion builds the board row by row.
+
+    Args:
+        game_board: A 2D list representing the game board.
+        line: The line string used to separate rows.
+
+    Returns:
+        A formatted string of the complete board.
+    """
     return f"\n{line}\n".join(
         [create_row_connect4(row=[square.value for square in row]) for row in game_board])
 
 # ==== Functions for specific for Connect 4 board display ====
 def print_board_dropping_effect(board_states: list[list[list[Union[int, str]]]], sleep_delay: float=0.075, top_spacing: int=3) -> None:
-    """Prints the Connect 4 Board with animation that simulates a dropping effect. Sleep delay can control the speed of the dropping piece. Optional top spacing."""
+    """Prints the Connect 4 board with a dropping animation effect.
+
+    Args:
+        board_states: A list of 2D lists, where each list represents a board state for the animation frames.
+        sleep_delay: The time delay between each animation frame. Defaults to 0.075 seconds.
+        top_spacing: The number of newlines to print before the board for top spacing. Defaults to 3.
+                     
+    """
     for board_state in board_states:
         print("\n" * top_spacing)
         print_board(game_board=board_state, game_name="Connect4")
         sleep(sleep_delay)
         clear_screen()
 
-
 def print_board_with_spacing(game_board: list[list[Union[int, str]]], top_spacing=3) -> None:
-    """For printing the Connect 4 board with space on top and clear screen. Displays single use board state of current game."""
+    """Prints the Connect 4 board with top spacing.
+
+    This function is for displaying a single use board state of the current game.
+
+    Args:
+        game_board: The 2D list representing the current game board.
+        top_spacing: The number of newlines to print before the board for top spacing. Defaults to 3.
+    """    
     clear_screen()
     print("\n" * top_spacing)
     print_board(game_board=game_board, game_name="Connect4")

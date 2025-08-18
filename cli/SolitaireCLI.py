@@ -1,7 +1,7 @@
 """
 SolitaireCLI.py 
 Author: Robert Pal
-Updated: 2025-08-13
+Updated: 2025-08-17
 
 This module contains all control flow logic for running the Solitaire Command Line Application.
 
@@ -9,7 +9,9 @@ This game is still in development.
 """
 
 from games.solitaire import Solitare
-import utils.clitools.clitools as GameCLI
+import utils.clitools.console as GameCLI
+from utils.clitools.printing import print_start_game
+from utils.clitools.clitools import select_klondike_draw_number
 # from utils.clitools.clitools import print_card_table
 from utils.errors import *
 
@@ -210,7 +212,7 @@ def play_game(test):
 
 def set_up_game():
 
-    klondike_value = GameCLI.select_klondike_draw_number()
+    klondike_value = select_klondike_draw_number()
     game = Solitare(klondike_value=klondike_value)
 
     return game
@@ -218,6 +220,6 @@ def set_up_game():
 
 def run():
     GameCLI.set_console_window_size(120, 50)  # console dimensions: width, height
-    utils.clitools.menu_printing.print_start_game('Solitaire')
+    print_start_game('Solitaire')
     game = set_up_game()
     play_game(game)

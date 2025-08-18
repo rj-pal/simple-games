@@ -1,7 +1,7 @@
 """
 main.py 
 Author: Robert Pal
-Updated: 2025-08-01
+Updated: 2025-08-17
 
 This module contains control flow logic for running the the Simple Games applications through the main() function. Game option Enums are used to 
 determine the permitted game to be run. Command line tools are used for user input and display. It also includes some testing and in developement functions.
@@ -25,9 +25,9 @@ from utils.strings import SIMPLE_GAMES_START
 ### Quick Running of a game for testing new feature or change to avoid menu options screen ###
 def test():
     """Running command line app directly for testing. Comment out the games that are not being tested at the time."""
-    TicTacToeCLI.run()
+    # TicTacToeCLI.run()
     # SolitaireCLI.run()
-    # ConnectFourCLI.run()
+    ConnectFourCLI.run()
     exit()
 
 
