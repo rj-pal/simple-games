@@ -50,7 +50,7 @@ def play_game(game) -> None:
         if player.is_human:
             utils.clitools.printing.print_player_turn_prompt(name=player.name, game_name='Connect4')
             while True:
-                current_col = GameCLI.prompt_move(game_name='Connect4')
+                current_col = GameCLI.prompt_move(game_name='Connect4', valid_input_range=7)
                 if not game.is_full(col=current_col):
                     break
                 else:
