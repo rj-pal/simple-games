@@ -9,7 +9,7 @@ It includes:
 - set_up_game() which sets game play configerations
 - play_game() which controls the all actual game play logic and commands
 """
-import utils.clitools.clitools as GameCLI
+import utils.clitools.prompting as GameCLI
 from games.tictactoe import TicTacToe
 import utils.clitools.printing
 import utils.clitools.console
@@ -32,12 +32,12 @@ def set_up_game() -> TicTacToe:
         }
         # Allow for player one to update default player names
         game.create_ai_player(name=name_dictionary[difficulty], difficulty=difficulty)
-        x = GameCLI.get_player_name()
+        x = GameCLI.get_player_names(two_players=False)
         game.update_player_name(x, "x")
 
     else:
         # Allows for both users to update default player names
-        player_one, player_two = GameCLI.get_player_names()
+        player_one, player_two = GameCLI.get_player_names(two_players=True)
         game.update_player_name(player_one, "x")
         game.update_player_name(player_two, "o")
 
@@ -54,7 +54,7 @@ def play_game(game) -> None:
             player = game.get_player(i % 2 - 1)
 
         # Get the name for dipslay purposes
-        name = player.get_player_name()
+        name = player.get_name()
         if i == 0:
             GameCLI.print_first_player(name)
             GameCLI.clear_screen()

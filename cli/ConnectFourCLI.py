@@ -10,7 +10,7 @@ It includes:
 - play_game() which controls the all actual game play logic and commands
 """
 from games.connect4 import ConnectFour
-import utils.clitools.clitools as GameCLI
+import utils.clitools.prompting as GameCLI
 import utils.clitools.printing
 import utils.clitools.console
 
@@ -23,10 +23,10 @@ def set_up_game():
     if GameCLI.one_player():
         difficulty = GameCLI.select_difficulty_level("Connect4")
         game.create_ai_player(difficulty=difficulty)
-        red_player_1_name = GameCLI.get_player_name()
+        red_player_1_name = GameCLI.get_player_names(two_players=False)
         game.update_player_name(red_player_1_name, "r")
     else:
-        red_player_1_name, yellow_player_2_name = GameCLI.get_player_names()
+        red_player_1_name, yellow_player_2_name = GameCLI.get_player_names(two_players=True)
         game.update_player_name(red_player_1_name, "r")
         game.update_player_name(yellow_player_2_name, "y")
 

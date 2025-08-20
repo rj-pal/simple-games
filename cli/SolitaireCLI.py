@@ -1,7 +1,7 @@
 """
 SolitaireCLI.py 
 Author: Robert Pal
-Updated: 2025-08-17
+Updated: 2025-08-19
 
 This module contains all control flow logic for running the Solitaire Command Line Application.
 
@@ -11,7 +11,7 @@ This game is still in development.
 from games.solitaire import Solitare
 import utils.clitools.console as GameCLI
 from utils.clitools.printing import print_start_game
-from utils.clitools.clitools import select_klondike_draw_number
+from utils.clitools.prompting import select_klondike_draw_number
 # from utils.clitools.clitools import print_card_table
 from utils.errors import *
 

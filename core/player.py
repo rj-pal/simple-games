@@ -63,10 +63,10 @@ class Player:
         """Returns the number of tied games of the player based on the other game statistics."""
         return self.games_played - (self.win_count + self.lost_count)
 
-    def get_player_name(self) -> str:
+    def get_name(self) -> str:
         return deepcopy(self.name)
     
-    def get_player_marker(self) -> str:
+    def get_marker(self) -> str:
         return deepcopy(self.marker)
     
     def game_played(self) -> None:

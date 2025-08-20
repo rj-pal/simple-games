@@ -1,7 +1,7 @@
 """
-clitools.py 
+prompting.py 
 Author: Robert Pal
-Updated: 2025-08-14
+Updated: 2025-08-19
 
 This module contains helper functrions for Command Line Applications.
 """
@@ -15,24 +15,31 @@ from typing import Union, Optional
 
 
 def menu_select(valid_selections: GameOptions, load_message: bool=True):
-    """
-    Obtain user selection from the game options. Repeat until a valid selection has been made from the ENUM class of game options. 
-    Default boolean load_message for simulating classic game loading screens
+    """Obtains a user's game selection from the menu of game options.
+
+    This function continuously prompts the user until a valid selection is made from the `GameOptions` Enum of availble games for play.
+
+    Args:
+        valid_selections: The Enum dictonary containing valid game options.
+        load_message: If True, simulates a classic game loading screen. Defaults to True.
+
+    Returns:
+        The valid choice of game selected by the user.
     """
     print()
     columns, _ = shutil.get_terminal_size()
     prompt = "Select the game you want to play: "
     error = "Please only select a game from the available options."
-    # Get the left to right positions for both prompt and error; add apppropriate number of spaces, as per procedure in print_menu_screen
+    # Get the left to right positions for both prompt and error; add apppropriate number of spaces, as per procedure in print_menu_screen in printing
     horizontal_pos_for_prompt = (columns - len(prompt)) // 2
     horizontal_pos_for_error  = (columns - len(error)) // 2
     blank_space_prompt = ' ' * horizontal_pos_for_prompt
     blank_space_error = ' ' * horizontal_pos_for_error
-    # All displays are centred in the middle of the screen and appropriate spacing is added using the blank_space strings
+    # All displays are centred in the middle of the screen and appropriate spacing is added using the blank_space strings and centre measurements above
     while True:
         print(blank_space_prompt + prompt, end="")
         choice = input().strip()
-        if choice in valid_selections: # from game_options ENUM - only allows 1, 2, or 3 (stored as strings so type casting not needed)
+        if choice in valid_selections: # from game_options ENUM - only allows 1, 2, or 3 - stored as strings, so int type casting not needed.
             break
         print('\n' + blank_space_prompt, end="") # for cursor location management 
         print()
@@ -40,8 +47,8 @@ def menu_select(valid_selections: GameOptions, load_message: bool=True):
         print('\n' + blank_space_error, end="") # for cursor location management 
         sleep(1.5)
         clear_screen()
-        # Re-prints the menu screen if invalid option was selected 
-        print_menu_screen(delay=0)
+        # Re-prints the menu screen if invalid option was selected
+        print_menu_screen(delay=0) # imported function from printing
         print()
     clear_screen()
     if load_message:
@@ -57,18 +64,31 @@ def menu_select(valid_selections: GameOptions, load_message: bool=True):
     return choice
 
 
-def get_player_names() -> tuple[str, str]:
-    """Gets names for two players."""
-    name_one = input("\nPlease enter the name for Player one or press enter: ")
-    name_two = input("\nPlease enter the name for Player two or press enter: ")
-    return name_one, name_two
+def get_player_names(two_players=False) -> Union[str, tuple[str, str]]:
+    """Gets names for one or two players.
 
-def get_player_name() -> str:
-    """Gets name for a single player."""
-    return input("\nPlease enter the name for Player one or press enter: ")
+    Args:
+        two_players: A boolean that determines whether to prompt for a second player's name. Defaults to False.
+
+    Returns:
+        If `two_players` is False, returns a single string representing the first player's name. 
+        Otherwise, returns a tuple containing two strings, one for each player's name.
+    """
+    name_one = input("\nPlease enter the name for Player one or press enter: ")
+    if not two_players:
+        return name_one
+    else:
+        name_two = input("\nPlease enter the name for Player two or press enter: ")
+        return name_one, name_two
 
 def one_player() -> bool:
-    """Sets the game to one or two players."""
+    """Determines if the game is for one or two players.
+
+    This function prompts the user until a valid input is received.
+
+    Returns:
+        True if the game is for one player, False otherwise.
+    """
     valid_input = {'1', '2', 'one', 'two'}
     while True:
         one_player_choice = input("How many players? One or two: ").lower()
@@ -77,7 +97,13 @@ def one_player() -> bool:
         print('\nOnly one or two players are allowed.\n')
 
 def play_again() -> bool:
-    """Gets valid input from user for and asks the user if they want to play again."""
+    """Asks the user if they want to play again.
+
+    This function validates user input, prompting until 'yes' or 'no' is entered.
+
+    Returns:
+        True if the user wants to play again, False otherwise.
+    """
     error_message = "\nInvalid input. Please enter 'yes' or 'no'."
     while True:
         play_again = input("\nWould you like to play again? Enter yes or no: ").lower().strip()

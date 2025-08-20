@@ -9,7 +9,7 @@ determine the permitted game to be run. Command line tools are used for user inp
 from cli import TicTacToeCLI, ConnectFourCLI, SolitaireCLI
 from utils.clitools.printing import print_menu_screen
 from utils.game_options import GameOptions
-from utils.clitools.clitools import menu_select
+from utils.clitools.prompting import menu_select
 from utils.strings import SIMPLE_GAMES_START
 
 ### In development ###
@@ -25,9 +25,9 @@ from utils.strings import SIMPLE_GAMES_START
 ### Quick Running of a game for testing new feature or change to avoid menu options screen ###
 def test():
     """Running command line app directly for testing. Comment out the games that are not being tested at the time."""
-    # TicTacToeCLI.run()
+    TicTacToeCLI.run()
     # SolitaireCLI.run()
-    ConnectFourCLI.run()
+    # ConnectFourCLI.run()
     exit()
 
 
@@ -48,6 +48,6 @@ def main():
         raise ValueError("Invalid choice. See you next time.")
 
 if __name__ == '__main__':
-    main()
+    # main()
     ### Use when testing
-    # test()
+    test()

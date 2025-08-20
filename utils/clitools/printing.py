@@ -1,7 +1,7 @@
 """
-game_printing.py 
+printing.py 
 Author: Robert Pal
-Updated: 2025-08-18
+Updated: 2025-08-19
 
 This module contains all game related display and print functions for Command Line Applications.
 """
@@ -70,9 +70,10 @@ def board_translator(game_board: list[list[Union[int, str]]]) -> list[list[Squar
         game_board: A 2D list containing integer or string representations of the game board cells.
 
     Returns:
-        A 2D list with the cell values translated to `Square` Enums.
+        A 2D list with the cell values translated to `Square` Enums or ASCII art form.
     """
-    marker_mapping = {0: Square.BLANK, "x": Square.X, "o": Square.O, "r": Square.R, "y": Square.Y}
+    # Translator is necessary since Board objects are lists of str and int, whereas printing requires 2D marker representation in ascii art form
+    marker_mapping = {0: Square.BLANK, "x": Square.X, "o": Square.O, "r": Square.R, "y": Square.Y} 
     return [[marker_mapping[cell] for cell in row] for row in game_board]
 
 
@@ -86,7 +87,7 @@ def print_board(game_board: list[list[Union[int, str]]], game_name: str, delay_r
     Args:
         game_board: A 2D list representing the current state of the game board.
         game_name: The name of the game ('TicTacToe' or 'Connect4').
-        delay_rate: The delay rate for the print effect.
+        delay_rate: The delay rate for the print effect. Defaults to 0.000175.
     
     Raises:
         ValueError: If `game_name` is not 'TicTacToe' or 'Connect4'.
@@ -174,9 +175,7 @@ def print_board_dropping_effect(board_states: list[list[list[Union[int, str]]]],
         clear_screen()
 
 def print_board_with_spacing(game_board: list[list[Union[int, str]]], top_spacing=3) -> None:
-    """Prints the Connect 4 board with top spacing.
-
-    This function is for displaying a single use board state of the current game.
+    """Prints the Connect 4 board with top spacing for displaying single use board state of the current game.
 
     Args:
         game_board: The 2D list representing the current game board.
@@ -189,8 +188,7 @@ def print_board_with_spacing(game_board: list[list[Union[int, str]]], top_spacin
 # ==== Functions for game messaging ====
 def print_winner_info(name: str, marker: str, win_type: str, win_index: int, border_symbol: str="#", offset: int=9, 
                       delay: float=0.00075, word_flush=False) -> None:
-    """Displays the information of the winner of the game using the winner attributes."""
-    """Displays the winner's information based on saved attributes from the `Game` object.
+    """Displays the winner's information based on saved attributes from the `Game` object. Displays message for draw game with no winner.
 
     Args:
         name: The name of the winner.
@@ -202,13 +200,12 @@ def print_winner_info(name: str, marker: str, win_type: str, win_index: int, bor
         delay: The delay rate for the print effect. Defaults to 0.00075.
         word_flush: A boolean to control word flushing for typewriter effecdt.
     """
-    if all(info is None for info in (name, marker, win_type)):
+    if all(info is None for info in (name, marker, win_type)): # Attributes are all None in draw game, since attributes only update when winner is found
         draw_string = "\nCATS GAME.\n There was no winner so there will be no chicken dinner.\n"
-        delay_effect(surround_string(strings=[draw_string], border_symbol=border_symbol, offset=offset), delay=delay, word_flush=word_flush)
-        
+        delay_effect(surround_string(strings=[draw_string], border_symbol=border_symbol, offset=offset), delay=delay, word_flush=word_flush)     
     else:
         winner_string = f"\nWinner winner chicken dinner. {name} is the winner.\n{marker.upper()} wins in"
-        win_type_dict = {
+        win_type_dict = { # Use winner attributes to create dictionary based on the type of win
             "row": f"row {win_index + 1}.",
             "column": f"column {win_index + 1}.",
             "right_diagonal": "the right diagonal.",
@@ -226,7 +223,7 @@ def print_scoreboard(player_list: list[str], border_symbol: str="#", offset: int
         border_symbol: The symbol for the scoreboard border. Defaults to '#'.
         offset: The padding for the scoreboard. Defaults to 25.
         delay: The delay rate for the print effect. Defaults to 0.00075.
-        word_flush: A boolean to control word flushing for typewriter effect.
+        word_flush: A boolean to control word flushing for typewriter effect. Defaults to False.
     """
     delay_effect(surround_string(strings=player_list, border_symbol=border_symbol, offset=offset), delay=delay, word_flush=word_flush)
 
@@ -253,7 +250,7 @@ def print_game_over(winner_mark: str) -> None:
     clear_screen()
     columns = shutil.get_terminal_size().columns
     for i in range(5):
-        if i % 2 == 0:
+        if i % 2 == 0: # Alternates between printing Game Over ascii art and 'Marker' Wins ascii art
             print(center_display_string(list_of_strings=other_strings["gameover"], terminal_width=columns))
         else:
             print(center_display_string(list_of_strings=other_strings[winner_mark], terminal_width=columns))
@@ -266,7 +263,7 @@ def print_game_over(winner_mark: str) -> None:
 def print_menu_screen(delay: float=0.025) -> None:
     """Displays a menu of game options centered on the terminal screen.
 
-    This allows for new games to be added using the `GameOptions` Enum.
+    This function allows for new games to be added using the `GameOptions` Enum.
 
     Args:
         delay: The delay rate for the typewriter print effect. Defaults to 0.025.
@@ -288,7 +285,7 @@ def print_menu_screen(delay: float=0.025) -> None:
     print('\n' * vertical_pos, end='') # Start printing menu_text after adding the appropriate number of new lines as calculated in vertical_pos
     for line in menu_text.splitlines():
         print(' ' * horizontal_pos, end="") # Start printing menu_text after adding the appropriate number of spaces as calculated in horizontal_pos
-        delay_effect(strings=[line], delay=delay) # Use delay)_effect for typewriter printing effect
+        delay_effect(strings=[line], delay=delay) # Use delay_effect for typewriter printing effect
 
 
 def print_start_game(game_name: str) -> None:
