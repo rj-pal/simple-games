@@ -1,9 +1,9 @@
 """
 prompting.py 
 Author: Robert Pal
-Updated: 2025-08-19
+Updated: 2025-08-20
 
-This module contains helper functrions for Command Line Applications.
+This module contains all prompting and move validation helper functions for Command Line Applications.
 """
 import shutil
 from time import sleep
@@ -13,8 +13,8 @@ from utils.clitools.printing import print_menu_screen
 from utils.game_options import GameOptions
 from typing import Union, Optional
 
-
-def menu_select(valid_selections: GameOptions, load_message: bool=True):
+# Function for dprompting menu options from the user - used with print_menu_screen from printing module
+def menu_select(valid_selections: GameOptions, load_message: bool=True) -> GameOptions:
     """Obtains a user's game selection from the menu of game options.
 
     This function continuously prompts the user until a valid selection is made from the `GameOptions` Enum of availble games for play.
@@ -24,7 +24,7 @@ def menu_select(valid_selections: GameOptions, load_message: bool=True):
         load_message: If True, simulates a classic game loading screen. Defaults to True.
 
     Returns:
-        The valid choice of game selected by the user.
+        The valid choice of game selected by the user or `GameOptions` Enum value.
     """
     print()
     columns, _ = shutil.get_terminal_size()
@@ -115,59 +115,55 @@ def play_again() -> bool:
         else:
             print(error_message)
 
-def print_first_player(name: str) -> None:
-    """Prints who plays first and their marker."""
-    delay_effect([f'\n{name} plays first.'])
-    input('\nPress Enter to start the game.')
+def get_validated_int_input(prompt: str, valid_input: set, error_message: str) -> int:
+    """Gets and validates an integer input from the user.
 
-def print_player_turn_prompt_tictactoe(name: str) -> None:
-    """Prints the prompt for the player's turn."""
-    delay_effect([f"\nIt is {name}'s turn. Select a row and column\n"])
+    This helper function prompts the user for an integer until validate input in allowed range is entered.
 
-def print_player_turn_prompt_connect4(name: str) -> None:
-    """Prints the prompt for the player's turn."""
-    delay_effect([f"\nIt is {name}'s turn. Select the column you want to drop your piece in.\n"], 0)
+    Args:
+        prompt: The message to display to the user.
+        valid_input: A set of valid integer values.
+        error_message: The message to display for invalid input.
 
-def print_square_occupied_prompt(name: str) -> None:
-    """Prints a prompt when the selected square is occupied."""
-    print("\nThe square is already occupied. Select another square.")
-    delay_effect([f"\nIt is {name}'s turn again. Select a free square.\n"])
-
-def print_current_move(name: str, row: int, column: int) -> None:
-    """Prints the last move made by the player."""
-    delay_effect([
-        f"\n{name} played the square in row {row + 1} and column {column + 1}.\n"
-    ])
-
-def prompt_int(value: str) -> int:
-    """Gets a valid integer input (1-3) for row/column."""
-    valid_input = {1, 2, 3}
+    Returns:
+        The validated integer input, adjusted for a 0-based index.
+    """
     while True:
         try:
-            input_value = int(input(f"Enter the {value}: "))
+            input_value = int(input(prompt))
             if input_value in valid_input:
-                return input_value - 1  # Needed for 0-based index
-            print(f"\nYou must enter 1, 2, or 3 only for the {value}.\n")
+                return input_value - 1
+            print(f"\n{error_message}\n")
         except ValueError:
             print("\nYou must enter a number. Try again.\n")
 
-def prompt_move() -> tuple[int, int]:
-    """Gets a valid row and column input from the player."""
-    row = prompt_int('row')
-    column = prompt_int('column')
-    return row, column
+def prompt_move(game_name: str, valid_input_range: int) -> Union[tuple[int, int], int]:
+    """Gets a valid move from the player based on the game.
 
-def prompt_column_move():
-    """Gets a valid column input from player."""
-    valid_input = {i + 1 for i in range(7)}
-    while True:
-        try:
-            input_value = int(input(f"Enter the column: "))
-            if input_value in valid_input:
-                return input_value - 1  # Needed for 0-based index
-            print(f"\nYou must enter a free column from 1 to 7 only.\n")
-        except ValueError:
-            print("\nYou must enter a number. Try again.\n")
+    This function prompts the user for the necessary inputs, either a row and column for Tic-Tac-Toe, or a single column for Connect 4, 
+    and validates it using the `get_validated_int_input` helper function.
+
+    Args:
+        game_name: The name of the game ('TicTacToe' or 'Connect4').
+        valid_input_range: The maximum value for the column number.
+
+    Returns:
+        If `game_name` is 'TicTacToe', returns a tuple containing the 0-based row and column indices. 
+        If `game_name` is not 'TicTacToe', returns a single integer representing the 0-based column index.
+    """
+    valid_input = {i + 1 for i in range(valid_input_range)}
+    if game_name == 'TicTacToe':
+        error_message = f"You must enter a number from 1 to  {valid_input_range} only."
+        row = get_validated_int_input(prompt="Enter the row: ", valid_input=valid_input, error_message=error_message)
+        column = get_validated_int_input(prompt="Enter the column: ",valid_input=valid_input, error_message=error_message)
+        return row, column
+    else:
+        column = get_validated_int_input(prompt="Enter the column: ",
+                                         valid_input={i + 1 for i in range(valid_input_range)}, 
+                                         error_message=f"You must enter a column from 1 to {valid_input_range} only.")
+        return column
+
+
 def select_klondike_draw_number():
     valid_input = ["1", "3"]
     while True:

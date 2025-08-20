@@ -1,7 +1,7 @@
 """
 ConnectFourCLI.py 
 Author: Robert Pal
-Updated: 2025-08-05
+Updated: 2025-08-20
 
 This module contains all control flow logic for running the Connect Four Command Line Application.
 It includes:
@@ -39,8 +39,8 @@ def play_game(game) -> None:
          
         # Display a welcome message and the initial prompt on first round to start game.
         if i == 0:
-            GameCLI.print_first_player(name=player.name)
-            GameCLI.print_player_turn_prompt_connect4(name=player.name)
+            utils.clitools.printing.print_first_player(name=player.name)
+            # utils.clitools.printing.print_player_turn_prompt(name=player.name, game_name='Connect4')
         
         # Store the board state before any move to correctly handle screen updates, messaging to user and command line dispaly glitches.
         board_state_before_move = game.board.get_board(mutable=True)
@@ -48,18 +48,18 @@ def play_game(game) -> None:
 
         # Get validated column on board for human player or AI player to make move
         if player.is_human:
-            GameCLI.print_player_turn_prompt_connect4(name=player.name)
+            utils.clitools.printing.print_player_turn_prompt(name=player.name, game_name='Connect4')
             while True:
-                current_col = GameCLI.prompt_column_move()
+                current_col = GameCLI.prompt_move(game_name='Connect4')
                 if not game.is_full(col=current_col):
                     break
                 else:
-                    GameCLI.print_square_occupied_prompt(name=player.name)
+                    utils.clitools.printing.print_square_occupied_prompt(name=player.name)
         else:
             utils.clitools.printing.print_computer_thinking(name=player.name, time_delay=2)
             current_col = player.move() # Use AI player method to get validated column
         
-        # Updated the game state with validated column or else exit program
+        # Updated the game state with validated column or else exit program - safety check
         if not game.make_move(col=current_col, marker=player.marker):
             print("Critical Error: Invalid move was attempted after move validation. Exiting the program.")
             exit(1)
@@ -67,10 +67,10 @@ def play_game(game) -> None:
         # Reprint the pre-move board and prompt to avoid screen glitches caused by the input prompt and ensure smooth user experience
         if player.is_human:
             utils.clitools.printing.print_board_with_spacing(game_board=board_state_before_move.get_board())
-            GameCLI.print_player_turn_prompt_connect4(name=player.name)
+            utils.clitools.printing.print_player_turn_prompt(name=player.name, game_name='Connect4', delay_rate=0)
         
         # Display validation of last successful move to user before board animation
-        GameCLI.print_current_move(player.name, *game.move_list[i])
+        utils.clitools.printing.print_current_move(player.name, *game.move_list[i])
         GameCLI.sleep(2)
         GameCLI.clear_screen()
         

@@ -25,9 +25,9 @@ from utils.strings import SIMPLE_GAMES_START
 ### Quick Running of a game for testing new feature or change to avoid menu options screen ###
 def test():
     """Running command line app directly for testing. Comment out the games that are not being tested at the time."""
-    TicTacToeCLI.run()
+    # TicTacToeCLI.run()
     # SolitaireCLI.run()
-    # ConnectFourCLI.run()
+    ConnectFourCLI.run()
     exit()
 
 

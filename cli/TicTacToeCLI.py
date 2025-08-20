@@ -1,7 +1,7 @@
 """
 TicTacToeCLI.py 
 Author: Robert Pal
-Updated: 2025-08-05
+Updated: 2025-08-20
 
 This module contains all control flow logic for running the Tic Tac Toe Command Line Application.
 It includes:
@@ -56,18 +56,18 @@ def play_game(game) -> None:
         # Get the name for dipslay purposes
         name = player.get_name()
         if i == 0:
-            GameCLI.print_first_player(name)
+            utils.clitools.printing.print_first_player(name)
             GameCLI.clear_screen()
 
         # Handles human player logic, prompts and input
         if isinstance(player, TicTacToe.TicTacToePlayer):
-            GameCLI.print_player_turn_prompt_tictactoe(name)
+            utils.clitools.printing.print_player_turn_prompt(name, 'TicTacToe') 
             while True:
-                row, col = GameCLI.prompt_move()
+                row, col = GameCLI.prompt_move(game_name='TicTacToe', valid_input_range=3)
                 if game.make_move(row, col, player.marker):
                     break
                 else:
-                    GameCLI.print_square_occupied_prompt(name)
+                    utils.clitools.printing.print_square_occupied_prompt(name)
         # Handles AI player logic
         elif isinstance(player, TicTacToe.AIPlayer):
             utils.clitools.printing.print_computer_thinking(name)
@@ -76,7 +76,7 @@ def play_game(game) -> None:
         
         # Displays board and other info to the user about the most current move
         GameCLI.clear_screen()
-        GameCLI.print_current_move(name, row, col)
+        utils.clitools.printing.print_current_move(name, row, col)
         utils.clitools.printing.print_board(game.board.get_board(), "TicTacToe")
 
         # Ends the game before the final round if a winner is found

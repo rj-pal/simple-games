@@ -1,7 +1,7 @@
 """
 printing.py 
 Author: Robert Pal
-Updated: 2025-08-19
+Updated: 2025-08-20
 
 This module contains all game related display and print functions for Command Line Applications.
 """
@@ -239,6 +239,53 @@ def print_computer_thinking(name: str="Computer", time_delay: int=1.5) -> None:
     print()
     sleep(time_delay)
 
+def print_player_turn_prompt(name: str, game_name: str, delay_rate: float=0.015) -> None:
+    """Print the prompt for the player's turn.
+
+    Args:
+        name: The name of the current player.
+        game_name: The name of the game ('TicTacToe' or 'Connect4').
+        delay_rate: The speed of the typewriter effect. Defaults to 0.015.
+
+    Raises:
+        ValueError: If `game_name` is not 'TicTacToe' or 'Connect4'.
+    """
+    if game_name not in {'TicTacToe', 'Connect4'}:
+        raise ValueError("Invalid game argument passed. Must be 'TicTacToe' or 'Connect4'.")
+    if game_name == 'TicTacToe':
+        turn_prompt = f"\nIt is {name}'s turn. Select a row and column\n"
+    elif game_name == 'Connect4':
+        turn_prompt = f"\nIt is {name}'s turn. Select the column you want to drop your piece in.\n"
+    delay_effect(strings=[turn_prompt], delay=delay_rate)
+
+
+def print_first_player(name: str) -> None:
+    """Prints who plays first and their marker.
+
+    Args:
+        name: The name of the first player.
+    """
+    delay_effect([f'\n{name} plays first.'])
+    input('\nPress Enter to start the game.')
+
+def print_square_occupied_prompt(name: str) -> None:
+    """Prints a message when the selected square is occupied.
+    
+    Args:
+        name: The name of the current player.
+    """
+    print("\nThe square is already occupied. Select another square.")
+    delay_effect([f"\nIt is {name}'s turn again. Select a free square.\n"])
+
+def print_current_move(name: str, row: int, column: int) -> None:
+    """Prints the last move made by the current player.
+
+    Args:
+        name: The name of the current player.
+    """
+    delay_effect([
+        f"\n{name} played the square in row {row + 1} and column {column + 1}.\n"
+    ])
 
 def print_game_over(winner_mark: str) -> None:
     """Displays flashing ascii art game over messages when a winner is found.
@@ -307,3 +354,5 @@ def print_start_game(game_name: str) -> None:
         string_dict = solitaire_strings
     print(string_dict["welcome"])
     delay_effect(strings=[string_dict["intro"]])
+
+
