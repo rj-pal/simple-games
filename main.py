@@ -27,7 +27,7 @@ def test():
     """Running command line app directly for testing. Comment out the games that are not being tested at the time."""
     # TicTacToeCLI.run()
     # SolitaireCLI.run()
-    ConnectFourCLI.run()
+    # ConnectFourCLI.run()
     exit()
 
 
@@ -48,6 +48,6 @@ def main():
         raise ValueError("Invalid choice. See you next time.")
 
 if __name__ == '__main__':
-    # main()
+    main()
     ### Use when testing
-    test()
+    # test()

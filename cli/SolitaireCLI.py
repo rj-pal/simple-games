@@ -1,7 +1,7 @@
 """
 SolitaireCLI.py 
 Author: Robert Pal
-Updated: 2025-08-19
+Updated: 2025-08-21
 
 This module contains all control flow logic for running the Solitaire Command Line Application.
 
@@ -10,7 +10,7 @@ This game is still in development.
 
 from games.solitaire import Solitare
 import utils.clitools.console as GameCLI
-from utils.clitools.printing import print_start_game
+from utils.clitools.printing import print_card_table, print_start_game
 from utils.clitools.prompting import select_klondike_draw_number
 # from utils.clitools.clitools import print_card_table
 from utils.errors import *
@@ -105,12 +105,12 @@ def play_game(test):
         # print(type(draw))
         # print(type(waste))
 
-        GameCLI.print_card_table(tab, fp, draw, waste)
+        print_card_table(tab, fp, draw, waste)
         # test.show_stock_pile()
 
-        print("\nPress 1: To build to the tableau from the waste pile.\nPress 2: To move one or more cards on the tableau.\n" \
-                    "Press 3: To build to the foundation piles from the waste pile or tableau.\nPress 4: To move a card from the foundation pile.\n" \
-                    "Press 5: To draw from the stock pile to the waste pile.\nPress 6: To reset the stock pile.\n")
+        print("\nPress 1: To build to the tableau from the draw pile.\nPress 2: To move one or more cards on the tableau.\n" \
+                    "Press 3: To build to the foundation piles from the draw pile or tableau.\nPress 4: To move a card from the foundation pile.\n" \
+                    "Press 5: To draw from the draw pile.\nPress 6: To reset the draw pile.\n")
         move = move_validator()
         if move == 1:
             try:

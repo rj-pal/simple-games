@@ -1,7 +1,7 @@
 """
 printing.py 
 Author: Robert Pal
-Updated: 2025-08-20
+Updated: 2025-08-21
 
 This module contains all game related display and print functions for Command Line Applications.
 """
@@ -355,4 +355,134 @@ def print_start_game(game_name: str) -> None:
     print(string_dict["welcome"])
     delay_effect(strings=[string_dict["intro"]])
 
+# ==== Functions for displaying the complete Solitaire Game Table ====
+def print_tableau(tableau_lists: list[list]) -> None:
+    """Displays all piles in the tableau.
 
+    This function normalizes the card widths and aligns all piles correctly with proper spacing. Shorter piles are padded with blank spaces to ensure all
+    piles have the same height.
+
+    Args:
+        tableau_lists: A list of lists representing the tableau piles.
+    """
+    def normalize_cards_in_stack(card_stack: list, width: int=12) -> list:
+        """Normalizes all cards in a stack to a uniform length.
+
+        This helper function ensures proper in-line printing on the command line. Values require specific adjustments based on the terminal's font and size
+        due to the varying widths of emojis.
+
+        Args:
+            card_stack: A list of cards within a single tableau pile.
+            width: The target width for each card. Defaults to 12.
+
+        Returns:
+            A new list with all cards padded to the same width.
+        """
+        new_card_stack = []
+        for card in card_stack:
+            # Face down card needs to be be defaulted to hard wiring code of 11 for proper spacing
+            if card == "🎴":
+                card = card.center(11)
+            # For setting a blank draw when the pile has less cards than other piles
+            elif card == " ":
+                card = card.center(width)
+            # For setting other cards in deck which have slightly different widths.
+            else:
+                card = card.center(width + 1)
+            new_card_stack.append(card)
+        return new_card_stack
+
+    def print_labels(column_width: int=17) -> None:
+        """Adds labels and a nameplate for the tableau piles.
+
+        This functiuon contains hard-wired numbers for proper viewing alignment.
+        """
+        print("TABLEAU")
+        tableau_labels = ["Stack 1", "Stack 2", "Stack 3", "Stack 4", "Stack 5", "Stack 6", "Stack 7"]
+        print()
+        for label in tableau_labels:
+            # Add the proper amount of spacing to the label for each pile
+            print(f"{label:^{column_width}}", end='')
+        print()
+        # Add bottom line to label: Values need to be tweaked to align properly
+        print(" " * 4 + (" -------" + " " * 9) * 7)
+
+    # Get the number for the largest tableau card pile to add blank cards for padding of column stacks
+    max_height = max(len(stack) for stack in tableau_lists)
+
+    # Ensure all card stacks are the same length by adding blank spaces to shorter piles that have fewer cards
+    padded_tableau = [
+        stack + [" "] * (max_height - len(stack)) for stack in tableau_lists
+    ]
+
+    # Ensure all cards are padded to the same size for alignment in columns
+    padded_cards_and_tableau = [normalize_cards_in_stack(card_stack) for card_stack in padded_tableau]
+
+    # Print name and labels for tableau
+    print_labels()
+    # Customized spacing
+    column_space = " " * 5
+    # Print the cards row by row each pile using custom spacing for properly tweaked alignment
+    for row in zip(*padded_cards_and_tableau):
+        print(column_space.join(card for card in row))
+
+
+def print_foundation_piles(piles: dict) -> None:
+    """Displays the foundation piles.
+
+    If a pile is empty, it displays the suit; otherwise, it shows the face of the top card on the stack.
+
+    Args:
+        piles: A dictionary of card piles representing the foundation piles.
+    """
+    print("FOUNDATION PILES\n")
+    # Card stack has optionally atribute called 'suit' for displaying a foundation pile that hasn't been built on yet
+    top_cards = [
+        card_stack.get_stack_suit() if card_stack.is_empty()
+        else card_stack.top_card().face
+        for card_stack in piles.values()
+    ]
+    print("   |   ".join(top_cards)) # Divider
+
+
+def print_draw_pile(pile_is_empty: bool, pile:list, centering_value=6) -> None:
+    """Displays the stock and waste piles.
+
+    The stock pile is represented as a face-down card deck emoji, or an empty deck emoji if the pile is empty. The waste pile shows the top card(s)
+    or an empty deck emoji. The number of cards in the waste pile matches the klondike value of 1 or 3.
+
+    Args:
+        pile: The draw pile.
+        centering_value: The value used to center the emoji. Defaults to 6.
+    """
+    print("DRAW PILE")
+    print()
+    if not pile_is_empty:
+        print("🎴".center(centering_value))
+    else:
+        print("⚔️".center(centering_value))
+    print()
+    if len(pile) == 0:
+        print("⚔️".center(centering_value))
+    else:
+        for card in pile:
+            print(card)
+
+
+def print_card_table(tableau: list, foundation_piles: dict, stock_pile_is_empty: bool, waste_pile: list) -> None:
+    """Displays the complete Solitaire table.
+
+    This function calls four helper functions to display the complete solitaire table: foundation, tableau, draw, and waste piles.
+
+    Args:
+        tableau: A list of lists representing the tableau piles.
+        foundation_piles: A dictionary of the foundation piles.
+        draw_pile: A boolean indicating if the draw pile has cards.
+        waste_pile: A list of cards in the waste pile.
+    """
+    print_foundation_piles(foundation_piles)
+    print()
+    print_tableau(tableau)
+    print()
+    print_draw_pile(stock_pile_is_empty, waste_pile)
+    print()
