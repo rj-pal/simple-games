@@ -58,10 +58,8 @@ class ConnectFour:
 
     def get_current_player(self):
         """Returns the current player based on the round count. Red player moves first and is at index 0 in players list."""
-        if self.go_first:
-            return self.players[self.round_count % 2]
-        else:
-            return self.players[self.round_count % 2 - 1]
+        return self.players[self.round_count % 2] if self.go_first else self.players[self.round_count % 2 - 1]
+        
 
     def _add_ai_players_for_testing(self, difficulty_one: bool=True, difficulty_two: bool=True, hard_test=True):
         """Adds two AI players with specified difficulties for testing purposes. Defaults to testing both players in hard-mode."""

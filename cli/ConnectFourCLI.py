@@ -1,7 +1,7 @@
 """
 ConnectFourCLI.py 
 Author: Robert Pal
-Updated: 2025-08-20
+Updated: 2025-08-26
 
 This module contains all control flow logic for running the Connect Four Command Line Application.
 It includes:
@@ -11,13 +11,17 @@ It includes:
 """
 from games.connect4 import ConnectFour
 import utils.clitools.prompting as prompt
-import utils.clitools.printing
-import utils.clitools.console
+import utils.clitools.printing as display
+import utils.clitools.console as console
 
 def set_up_game():
-    """
-    Sets up game play configurations for one or two players. If one player, sets the AI difficulty to easy, intermediate or hard.
-    Player one plays 'Red' and player two or AI plays 'Yellow'. Red moves first. Players can select name or default name assigned if skipped.
+    """Sets up the game configurations for one or two players.
+
+    This function prompts the user for the number of players, sets the AI difficulty if a single player is chosen, and allows players to customize their names.
+    Player one is assigned the 'Red' marker, and player two or the AI is assigned the 'Yellow' marker. 'Red' moves first.
+
+    Returns:
+        An instance of the `ConnectFour` class with the configured game settings and name updates.
     """
     game = ConnectFour()
     if prompt.one_player():
@@ -33,65 +37,74 @@ def set_up_game():
     return game
 
 def play_game(game) -> None:
-    """Runs the game control flow for a single game controling all user input and display using Command Line Tools."""
+    """Runs the game control flow for a single game.
+
+    This function manages user input, displays the game board, and controls the flow for both human and AI player turns. It also includes the board animation
+    and checks for a winner after each move.
+
+    Args:
+        game: An instance of the `ConnectFour` game class.
+    """
     for i in range(game.board_size):
-        player = game.get_current_player()
-         
-        # Display a welcome message and the initial prompt on first round to start game.
-        if i == 0:
-            utils.clitools.printing.print_first_player(name=player.name)
-            # utils.clitools.printing.print_player_turn_prompt(name=player.name, game_name='Connect4')
+        player = game.get_current_player() 
+        name = player.name
+        marker = player.marker
+        if i == 0: # introduce the start of game to user
+            display.print_first_player(name=name)
         
         # Store the board state before any move to correctly handle screen updates, messaging to user and command line dispaly glitches.
         board_state_before_move = game.board.get_board(mutable=True)
-        utils.clitools.printing.print_board_with_spacing(game_board=board_state_before_move.get_board())
-
-        # Get validated column on board for human player or AI player to make move
+        display.print_board_with_spacing(game_board=board_state_before_move.get_board())
+        # Handles human player validation 
         if player.is_human:
-            utils.clitools.printing.print_player_turn_prompt(name=player.name, game_name='Connect4')
+            display.print_player_turn_prompt(name=name, game_name='Connect4')
             while True:
-                current_col = prompt.prompt_move(game_name='Connect4', valid_input_range=7)
+                current_col = prompt.prompt_move(game_name='Connect4', valid_input_range=game.columns)
                 if not game.is_full(col=current_col):
                     break
                 else:
-                    utils.clitools.printing.print_square_occupied_prompt(name=player.name)
+                    display.print_square_occupied_prompt(name=name)
+        # Handles AI player move validation
         else:
-            utils.clitools.printing.print_computer_thinking(name=player.name, time_delay=2)
-            current_col = player.move() # Use AI player method to get validated column
+            display.print_computer_thinking(name=name, time_delay=2)
+            current_col = player.move()
         
         # Updated the game state with validated column or else exit program - safety check
-        if not game.make_move(col=current_col, marker=player.marker):
+        if not game.make_move(col=current_col, marker=marker):
             print("Critical Error: Invalid move was attempted after move validation. Exiting the program.")
             exit(1)
         
         # Reprint the pre-move board and prompt to avoid screen glitches caused by the input prompt and ensure smooth user experience
         if player.is_human:
-            utils.clitools.printing.print_board_with_spacing(game_board=board_state_before_move.get_board())
-            utils.clitools.printing.print_player_turn_prompt(name=player.name, game_name='Connect4', delay_rate=0)
+            display.print_board_with_spacing(game_board=board_state_before_move.get_board())
+            display.print_player_turn_prompt(name=name, game_name='Connect4', delay_rate=0)
         
         # Display validation of last successful move to user before board animation
-        utils.clitools.printing.print_current_move(player.name, *game.move_list[i])
+        display.print_current_move(name=name, *game.move_list[i])
         prompt.sleep(2)
         prompt.clear_screen()
         
         # Animation of game piece using a dropping effect
-        board_states = game.get_board_animation_states(player_marker=player.marker)
-        utils.clitools.printing.print_board_dropping_effect(board_states=board_states)
+        board_states = game.get_board_animation_states(player_marker=marker)
+        display.print_board_dropping_effect(board_states=board_states)
         
         # Check for a winner and end the game if a win condition is met. The game can only be won after a minimum of 7 moves (i>=6).
         if i >= 6 and game.check_winner():
             game.update_winner_info()
             game.update_players_stats()
-            utils.clitools.printing.print_game_over(winner_mark=player.marker)
+            display.print_game_over(winner_mark=marker)
             prompt.clear_screen()
-            utils.clitools.printing.print_board(game_board=game.board.get_board(), game_name="Connect4")
+            display.print_board(game_board=game.board.get_board(), game_name="Connect4")
             game.print_winner()
             break
 
 def run():
+    """Runs the main game control flow for Connect 4.
+    This function initiates a game, sets up the game state, and controls the flow for a single session. It optimizes the console window size and 
+    displays the initial game message.
+    """
     # Optimized console window size for display for smooth user experience.
-    utils.clitools.console.set_console_window_size(100, 48)
-    utils.clitools.printing.print_start_game_message("Connect4")
+    console.set_console_window_size(100, 48)
+    display.print_start_game_message("Connect4")
     game = set_up_game()
-    play_game(game)
-    exit()
+    play_game(game=game)

@@ -117,6 +117,6 @@ def run(width: int=85, height: int=30, multiplay: bool=True) -> None:
     while multiplay:
         display.print_scoreboard(player_list=game.get_players_info_string_as_list()) # Show games history
         game.reset_board()
-        play_game(game)
+        play_game(game=game)
         multiplay = prompt.play_again()
     display.print_scoreboard(player_list=game.get_players_info_string_as_list())
