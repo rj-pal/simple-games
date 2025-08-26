@@ -15,7 +15,8 @@ from typing import List, Tuple, Union, Optional
 
 class TicTacToe:
 
-    def __init__(self):
+    def __init__(self, board_dimension: int=3):
+         self._dimension: int = board_dimension
          self.board: List[List] = self.create_board()
          self.move_list: List = []
          self.round_count: int = 0
@@ -27,8 +28,13 @@ class TicTacToe:
          self.__win: LineChecker = LineChecker(self.board, 3)
          self.players = self.create_human_players() # Default to two player mode
 
+    @property
+    def dimension(self) -> int:
+        """Returns the dimension of the game board."""
+        return self._dimension
+
     def create_board(self):
-        return Board(3,3)
+        return Board(self.dimension, self.dimension)
 
     def create_human_players(self) -> Tuple[Player, Player]:
         return (
@@ -72,12 +78,12 @@ class TicTacToe:
         for player in self.players:
             print(player.__str__())
 
-    def is_valid(self, row, col):
+    def is_valid(self, row: int, col: int):
         if 0 <= (row * col) < self.board_size: # validate the move is on the board
             return not self.board.square_is_occupied(row, col)
         return False
 
-    def make_move(self, row, col, marker):
+    def make_move(self, row: int, col: int, marker: str):
         if self.is_valid(row, col):
             self.board.add_to_square(row, col, marker)
             self.move_list.append((row, col))

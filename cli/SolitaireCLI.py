@@ -10,7 +10,7 @@ This game is still in development.
 
 from games.solitaire import Solitare
 import utils.clitools.console as GameCLI
-from utils.clitools.printing import print_card_table, print_start_game
+from utils.clitools.printing import print_card_table, print_start_game_message
 from utils.clitools.prompting import select_klondike_draw_number
 # from utils.clitools.clitools import print_card_table
 from utils.errors import *
@@ -220,6 +220,6 @@ def set_up_game():
 
 def run():
     GameCLI.set_console_window_size(120, 50)  # console dimensions: width, height
-    print_start_game('Solitaire')
+    print_start_game_message('Solitaire')
     game = set_up_game()
     play_game(game)

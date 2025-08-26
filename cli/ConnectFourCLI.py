@@ -10,7 +10,7 @@ It includes:
 - play_game() which controls the all actual game play logic and commands
 """
 from games.connect4 import ConnectFour
-import utils.clitools.prompting as GameCLI
+import utils.clitools.prompting as prompt
 import utils.clitools.printing
 import utils.clitools.console
 
@@ -20,13 +20,13 @@ def set_up_game():
     Player one plays 'Red' and player two or AI plays 'Yellow'. Red moves first. Players can select name or default name assigned if skipped.
     """
     game = ConnectFour()
-    if GameCLI.one_player():
-        difficulty = GameCLI.select_difficulty_level("Connect4")
+    if prompt.one_player():
+        difficulty = prompt.select_difficulty_level("Connect4")
         game.create_ai_player(difficulty=difficulty)
-        red_player_1_name = GameCLI.get_player_names(two_players=False)
+        red_player_1_name = prompt.get_player_names(two_players=False)
         game.update_player_name(red_player_1_name, "r")
     else:
-        red_player_1_name, yellow_player_2_name = GameCLI.get_player_names(two_players=True)
+        red_player_1_name, yellow_player_2_name = prompt.get_player_names(two_players=True)
         game.update_player_name(red_player_1_name, "r")
         game.update_player_name(yellow_player_2_name, "y")
 
@@ -50,7 +50,7 @@ def play_game(game) -> None:
         if player.is_human:
             utils.clitools.printing.print_player_turn_prompt(name=player.name, game_name='Connect4')
             while True:
-                current_col = GameCLI.prompt_move(game_name='Connect4', valid_input_range=7)
+                current_col = prompt.prompt_move(game_name='Connect4', valid_input_range=7)
                 if not game.is_full(col=current_col):
                     break
                 else:
@@ -71,8 +71,8 @@ def play_game(game) -> None:
         
         # Display validation of last successful move to user before board animation
         utils.clitools.printing.print_current_move(player.name, *game.move_list[i])
-        GameCLI.sleep(2)
-        GameCLI.clear_screen()
+        prompt.sleep(2)
+        prompt.clear_screen()
         
         # Animation of game piece using a dropping effect
         board_states = game.get_board_animation_states(player_marker=player.marker)
@@ -83,7 +83,7 @@ def play_game(game) -> None:
             game.update_winner_info()
             game.update_players_stats()
             utils.clitools.printing.print_game_over(winner_mark=player.marker)
-            GameCLI.clear_screen()
+            prompt.clear_screen()
             utils.clitools.printing.print_board(game_board=game.board.get_board(), game_name="Connect4")
             game.print_winner()
             break
@@ -91,7 +91,7 @@ def play_game(game) -> None:
 def run():
     # Optimized console window size for display for smooth user experience.
     utils.clitools.console.set_console_window_size(100, 48)
-    utils.clitools.printing.print_start_game("Connect4")
+    utils.clitools.printing.print_start_game_message("Connect4")
     game = set_up_game()
     play_game(game)
     exit()

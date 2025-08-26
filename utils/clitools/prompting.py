@@ -1,7 +1,7 @@
 """
 prompting.py 
 Author: Robert Pal
-Updated: 2025-08-21
+Updated: 2025-08-26
 
 This module contains all prompting and move validation helper functions for Command Line Applications.
 """
@@ -197,7 +197,7 @@ def prompt_move(game_name: str, valid_input_range: int) -> Union[tuple[int, int]
     """
     valid_input = {i + 1 for i in range(valid_input_range)}
     if game_name == 'TicTacToe':
-        error_message = f"You must enter a number from 1 to  {valid_input_range} only."
+        error_message = f"You must enter a number from 1 to {valid_input_range} only."
         row = get_valid_int(prompt="Enter the row: ", valid_input=valid_input, error_message=error_message)
         column = get_valid_int(prompt="Enter the column: ",valid_input=valid_input, error_message=error_message)
         return row, column

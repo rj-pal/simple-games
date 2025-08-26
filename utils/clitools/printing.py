@@ -335,7 +335,7 @@ def print_menu_screen(delay: float=0.025) -> None:
         delay_effect(strings=[line], delay=delay) # Use delay_effect for typewriter printing effect
 
 
-def print_start_game(game_name: str) -> None:
+def print_start_game_message(game_name: str) -> None:
     """Prints the welcome and introduction message for a specific game.
 
     Args:
