@@ -62,6 +62,13 @@ class TicTacToe:
     @property
     def board_size(self):
         return self.board.rows * self.board.columns
+    
+    def get_winner_string(self):
+        if self.win_index == -1:
+            win_location = f"the {self.win_type.replace('_', ' ')}"
+        else:
+            win_location = f"{self.win_type} {self.win_index + 1}"
+        return f"{self.winner_name} wins in {win_location}."
 
     def print_winner(self):
         print(f"Winning Player: {self.winner_name}")

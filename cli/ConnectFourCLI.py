@@ -80,7 +80,7 @@ def play_game(game) -> None:
             display.print_player_turn_prompt(name=name, game_name='Connect4', delay_rate=0)
         
         # Display validation of last successful move to user before board animation
-        display.print_current_move(name=name, *game.move_list[i]) # move list uses row, column
+        display.print_current_move(name, *game.move_list[i]) # move list uses row, column
         prompt.sleep(2)
         prompt.clear_screen()
         
