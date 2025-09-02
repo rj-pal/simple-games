@@ -25,14 +25,14 @@ def set_up_game():
     """
     game = ConnectFour()
     if prompt.one_player():
-        difficulty = prompt.select_difficulty_level("Connect4")
+        difficulty = prompt.select_difficulty_level(game_name="Connect4")
         game.create_ai_player(difficulty=difficulty)
         red_player_1_name = prompt.get_player_names(two_players=False)
-        game.update_player_name(red_player_1_name, "r")
+        game.update_player_name(name=red_player_1_name, marker="r")
     else:
         red_player_1_name, yellow_player_2_name = prompt.get_player_names(two_players=True)
-        game.update_player_name(red_player_1_name, "r")
-        game.update_player_name(yellow_player_2_name, "y")
+        game.update_player_name(name=red_player_1_name, marker="r")
+        game.update_player_name(name=yellow_player_2_name, marker="y")
 
     return game
 
@@ -45,7 +45,7 @@ def play_game(game) -> None:
     Args:
         game: An instance of the `ConnectFour` game class.
     """
-    for i in range(game.board_size):
+    for i in range(game.board_size): # standard board size is 6 x 7
         player = game.get_current_player() 
         name = player.name
         marker = player.marker
@@ -80,7 +80,7 @@ def play_game(game) -> None:
             display.print_player_turn_prompt(name=name, game_name='Connect4', delay_rate=0)
         
         # Display validation of last successful move to user before board animation
-        display.print_current_move(name=name, *game.move_list[i])
+        display.print_current_move(name=name, *game.move_list[i]) # move list uses row, column
         prompt.sleep(2)
         prompt.clear_screen()
         
@@ -105,6 +105,6 @@ def run():
     """
     # Optimized console window size for display for smooth user experience.
     console.set_console_window_size(100, 48)
-    display.print_start_game_message("Connect4")
+    display.print_start_game_message(game_name="Connect4")
     game = set_up_game()
     play_game(game=game)
