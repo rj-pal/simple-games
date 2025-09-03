@@ -63,6 +63,9 @@ class TicTacToe:
     def board_size(self):
         return self.board.rows * self.board.columns
     
+    def board_is_full(self):
+        return len(self.move_list) == self.board_size
+    
     def get_winner_string(self):
         if self.win_index == -1:
             win_location = f"the {self.win_type.replace('_', ' ')}"
