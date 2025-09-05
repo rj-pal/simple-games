@@ -171,6 +171,7 @@ class TicTacToe:
         def __init__(self, name: str = None, marker: str = None):
             super().__init__(name, marker)  # Initialize the name first
             self.marker = marker  # Use the property setter for validation
+            self.is_ai_player = False
 
         @Player.name.setter
         def name(self, value):
@@ -196,6 +197,7 @@ class TicTacToe:
             self.game = game
             self._difficulty = None  # Backing private attribute
             self.difficulty = difficulty  # None is easy mode, False is intermediate mode, True is hard mode
+            self.is_ai_player = True
             self.corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
             self.insides = [(0, 1), (1, 0), (1, 2), (2, 1)]
 
