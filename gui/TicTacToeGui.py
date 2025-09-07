@@ -1,7 +1,7 @@
 """
 TicTacToeGui.py 
 Author: Robert Pal
-Updated: 2025-09-03
+Updated: 2025-09-06
 
 This module contains all control flow logic for running the Tic Tac Toe Desktop Application.
 It includes:
@@ -20,17 +20,16 @@ class TicTacToeGUI:
     def __init__(self, master):
         self.master = master
         master.title("Tic Tac Toe")
+        
+        # Set GUI widget colours
         self.master_colour = "#37353E"
         self.master_text_colour = "#FFFCFB"
-
         self.master_label_colour = "#44444E"
         self.master_label_text="#ecf0f1"
-
         self.master_button_text_highlight_colour = "#34495e"
 
-        
+        # Set overall GUI widget settings
         master.configure(bg=self.master_colour)
-
         master.geometry("800x600")
         master.resizable(True, True)
        
@@ -40,7 +39,7 @@ class TicTacToeGUI:
         self.player_1 = None 
         self.player_2 = None
 
-        # Game state variables
+        # GUI game state variables
         self.buttons = []
         self.game_over = False
         self.difficulty_options_frame = None
@@ -105,12 +104,12 @@ class TicTacToeGUI:
             "intmed": False,
             "hard": True
         }
-
         name_dictionary = {
             "easy": "CPU Easy",
             "intmed": "CPU Intermediate",
             "hard": "CPU Hard"
         }
+
         # Use two mappings to set the correct difficulty level and CPU Name
         if self.game_mode.get() == 1:
              self.game.create_ai_player(name=name_dictionary[self.difficulty.get()], difficulty=difficulty_dictionary[self.difficulty.get()]) 
@@ -173,7 +172,7 @@ class TicTacToeGUI:
         # Create a reset button with modern styling
         self.reset_button = tk.Button(control_frame, text="Reset", font=("Inter", 16), command=self.reset_game,
                                       fg=self.master_button_text_highlight_colour, activebackground="#34495e", 
-                                      highlightbackground=self.master_button_text_highlight_colour, 
+                                      #highlightbackground=self.master_button_text_highlight_colour, 
                                       relief="raised", takefocus=0)
         self.reset_button.grid(row=1, column=0, columnspan=3, pady=10)
 
@@ -184,7 +183,7 @@ class TicTacToeGUI:
         # Create an end session button with modern styling
         self.end_session_button = tk.Button(control_frame, text="End Session", font=("Inter", 16), command=self.end_session,
                                       fg=self.master_button_text_highlight_colour, activebackground="#34495e", 
-                                      highlightbackground=self.master_button_text_highlight_colour, 
+                                      #highlightbackground=self.master_button_text_highlight_colour, 
                                       relief="raised")
         # self.end_session_button.grid(row=2, column=0, columnspan=3, pady=10)
 
@@ -194,7 +193,6 @@ class TicTacToeGUI:
         self.game.update_winner_info()
         self.game.update_players_stats()
         self.game_over = True
-
 
     def display_custom_message(self, title, message):
         """Creates and displays a custom message dialog using a Toplevel window."""
@@ -213,21 +211,11 @@ class TicTacToeGUI:
                               bg="#2ecc71", fg="white", activebackground="#27ae60", relief="raised")
         ok_button.pack(pady=10)
 
-    def handle_end_of_game(self, message_title, message_text):
-        """Handles all UI updates and game state changes that occur at the end of a game."""
-        self.game.update_winner_info()
-        self.game.update_players_stats()
-        self.game_over = True
-        
-        self.display_custom_message(message_title, message_text)
-        self.reset_button.config(text="Play Again")
-        self.end_session_button.grid(row=5, column=0, columnspan=3, pady=10)
-    
 
     def display_final_message(self, message_title, message_text):
         """Displays info message box for game win or draw and displays updated end-of-game buttons."""
-        # messagebox.showinfo(message_title, message_text)
-        self.display_custom_message(message_title, message_text)
+        messagebox.showinfo(message_title, message_text)
+        # self.display_custom_message(message_title, message_text)
         
         self.reset_button.config(text="Play Again") # change the reset button to play again at end of session
         self.end_session_button.grid(row=5, column=0, columnspan=3, pady=10) # have a end session or quit button
@@ -322,7 +310,6 @@ class TicTacToeGUI:
         self.reset_button.config(text="Reset") # change the reset button back
         self.end_session_button.grid_forget() # hide the end session button
         self.check_ai_player_turn()
-
 
     def end_session(self):
         """Ends the game session and closes the application."""
