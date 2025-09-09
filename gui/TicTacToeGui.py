@@ -299,6 +299,7 @@ class TicTacToeGUI:
         # === Resetting the UI board ===
         # Resets the first player to be the player who lost the current game or the last player to move in case of draw
         self.set_current_player()
+        ### FOR DEBUGGING
         print(self.game.move_list)
         if self.game.go_first:
             print("Player human")

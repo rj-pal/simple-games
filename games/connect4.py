@@ -73,7 +73,7 @@ class ConnectFour:
         return self.height_list[col] == 0 # quick validation of column to play
 
     def is_valid(self, row, col):
-        """Validates if a move is on the board aby checking if square is not occupied."""
+        """Validates if a move is on the board by checking if square is not occupied."""
         if 0 <= col < self.columns: # validate the move is on the board and free
             return not self.board.square_is_occupied(row, col)
         return False
@@ -206,6 +206,9 @@ class ConnectFour:
         for player in self.players:
             print(player.__str__())
 
+    def get_players_info_string_as_list(self) -> list[str]:
+        return [str(player) for player in self.players]
+
     class ConnectFourWinChecker(LineChecker):
         def __init__(self, board, win_value=4):
             super().__init__(board, win_value)
@@ -274,12 +277,17 @@ class ConnectFour:
             """AIPlayer is a child class of Player"""
             super().__init__(name, marker)
             self.game = game
+            self.marker_name = self._get_marker_name()
             self.score = 0
 
         @property
         def is_human(self):
             """Ensure the is_human boolean tag is False."""
             return False
+        
+        def _get_marker_name(self):
+            """Determine the marker name based on the marker value."""
+            return "Red" if self._marker == "r" else "Yellow"
 
         def get_random_column(self):
                 return randint(0, self.game.columns - 1)

@@ -7,25 +7,129 @@ class ConnectFourGame:
         self.master = master
         master.title("Connect Four")
         self.master_colour = "#4682B4"  # Steel Blue
+        self.master_text_colour = "#000000"
+        self.master_red =  "#CD5C5C" # "#B22222" <- darker red #  #"Red" 
+        self.master_yellow = "#F0E68C" #"#DAA520" <- a bit darker #"Yellow"
         self.master.configure(bg=self.master_colour)
+        master.geometry("800x650")
+        master.resizable(True, True)
 
         # Initialize the backend game state
         self.game = ConnectFour()
-        self.player_1 = self.game.get_player(0)
-        self.player_2 = self.game.get_player(1)
-        self.current_player = self.player_1 
+        self.player_1 = None # self.game.get_player(0)
+        self.player_2 = None # self.game.get_player(1)
+        self.current_player = None # self.player_1 
         
         self.board = [['' for _ in range(7)] for _ in range(6)]
         self.game_over = False
         self.buttons = []
         self.column_buttons = []
+
+        self.difficulty = tk.StringVar(value="easy") 
+        self.game_mode = tk.IntVar(value=1) # 1 for single player, 2 for two players
+
+        self.create_start_menu()
+
+    def create_start_menu(self):
+        """Creates the initial start screen widgets to set 1 or 2 player game mode and difficulty level for AI player."""
+        # Use a main frame to contain all widgets for centering
+        self.main_frame = tk.Frame(self.master, bg=self.master_colour)
+        self.main_frame.pack(expand=True, padx=20, pady=20)
+
+        title_label = tk.Label(self.main_frame, text="Connect Four", font=("Inter", 36, "bold"),
+                               bg=self.master_colour, fg=self.master_text_colour)
+        title_label.pack(pady=(0, 20))
+
+        # Game Mode selection
+        mode_label = tk.Label(self.main_frame, text="Select the Game Play Mode:", font=("Inter", 16),
+                              bg=self.master_colour, fg=self.master_text_colour)
+        mode_label.pack(pady=(10, 5))
+
+        tk.Radiobutton(self.main_frame, text="One Player (vs AI Player)", font=("Inter", 14), variable=self.game_mode, value=1,
+                       bg=self.master_colour, fg=self.master_text_colour, selectcolor="#34495e", command=self.update_difficulty_options).pack(pady=2)
+        tk.Radiobutton(self.main_frame, text="Two Players", font=("Inter", 14), variable=self.game_mode, value=2,
+                       bg=self.master_colour, fg=self.master_text_colour, selectcolor="#34495e", command=self.update_difficulty_options).pack(pady=2)    
+
+        # AI Difficulty selection, wrapped in a frame to easily hide/show
+        self.difficulty_options_frame = tk.Frame(self.main_frame, bg=self.master_colour)
+        self.difficulty_options_frame.pack(pady=(20, 5))
+
+        difficulty_label = tk.Label(self.difficulty_options_frame, text="Select AI Difficulty Level:", font=("Inter", 16),
+                                    bg=self.master_colour, fg=self.master_text_colour)
+        difficulty_label.pack(pady=(0, 5))
+
+        tk.Radiobutton(self.difficulty_options_frame, text="Blind", font=("Inter", 14), variable=self.difficulty, value="easy",
+                       bg=self.master_colour, fg=self.master_text_colour, selectcolor="#34495e").pack(pady=2)
+        tk.Radiobutton(self.difficulty_options_frame, text="Intermediate", font=("Inter", 14), variable=self.difficulty, value="intmed",
+                       bg=self.master_colour, fg=self.master_text_colour, selectcolor="#34495e").pack(pady=2)
+        # tk.Radiobutton(self.difficulty_options_frame, text="Impossible", font=("Inter", 14), variable=self.difficulty, value="hard",
+        #                bg=self.master_colour, fg=self.master_text_colour, selectcolor="#34495e").pack(pady=2)
+
+        # Start Button
+        self.start_button_frame = tk.Frame(self.main_frame, bg=self.master_colour)
+        self.start_button_frame.pack(pady=(20, 5))
+        start_button = tk.Button(self.start_button_frame, text="Start Game", font=("Inter", 16), command=self.start_game,
+                                 fg=self.master_colour, highlightbackground=self.master_text_colour, 
+                                 highlightthickness=3, relief="raised")
+        start_button.pack(pady=20)
+
+
+    def start_game(self):
+        """Initializes the game and switches from the start menu to the game board."""
+        # Destroy start menu widgets
+        self.main_frame.destroy()
+        
+        # Initialize the backend game state based on selections
+        difficulty_dictionary = {
+            "easy": None, 
+            "intmed": False
+            # "hard": True
+        }
+        name_dictionary = {
+            "easy": "CPU Easy",
+            "intmed": "CPU Intermediate"
+            # "hard": "CPU Hard"
+        }
+
+        # Use two mappings to set the correct difficulty level and CPU Name
+        if self.game_mode.get() == 1:
+             self.game.create_ai_player(difficulty=difficulty_dictionary[self.difficulty.get()]) 
+       
+        self.player_1 = self.game.get_player(0)
+        self.player_2 = self.game.get_player(1)
+        self.current_player = self.player_1
+
+        # Create and display the game board
         self.create_game_board_gui()
+        self.check_ai_player_turn()
 
     def create_game_board_gui(self):
         """Creates and places all GUI widgets for the main game board."""
         self.main_frame = tk.Frame(self.master, bg=self.master_colour)
         self.main_frame.pack(expand=True, padx=20, pady=20)
+
+        player_frame = tk.Frame(self.main_frame, bg=self.master_colour)
+        player_frame.pack()
+        self.status_label = tk.Label(player_frame, text=f"● plays", font=("Inter", 18, "bold"),
+                                     bg="white", fg=self.get_current_colour(),
+                                     padx=10, pady=5, relief="raised", borderwidth=2)
+        # Use pack with side='left' to push it to the left
+        self.status_label.pack(side='left', padx=(0, 60), expand=True, fill='x')
+
+        self.reset_button = tk.Button(player_frame, text="Reset", font=("Inter", 18), command=self.reset_game,
+                                      bg="white", fg="black", activebackground="#34495e",
+                                      relief="raised", takefocus=0)
+        # Use pack with side='right' to push it to the right
+        self.reset_button.pack(side='right', padx=(60, 0), expand=True, fill='x')
+
+        self.end_session_button = tk.Button(player_frame, text="End Session", font=("Inter", 18), command=self.end_session,
+                                      fg="black", activebackground="#34495e", 
+                                      relief="raised",takefocus=0)
         
+        # Add space after the player_frame
+        spacer = tk.Frame(self.main_frame, height=20, bg=self.master_colour)
+        spacer.pack()
+
         # Create a frame for the column buttons
         column_button_frame = tk.Frame(self.main_frame, bg=self.master_colour)
         column_button_frame.pack(pady=10)
@@ -33,7 +137,7 @@ class ConnectFourGame:
         # Create 7 buttons, one for each column
         for col in range(7):
             button = tk.Button(column_button_frame, text="▼", font=("Inter", 24, "bold"), width=2,
-                               bg="#3498db", fg="#ffffff", activebackground="#2980b9",
+                               fg="#ffffff", activebackground=self.get_current_colour(),
                                command=lambda c=col: self.column_click(c), relief="raised")
             button.pack(side=tk.LEFT, padx=5)
             self.column_buttons.append(button)
@@ -54,43 +158,121 @@ class ConnectFourGame:
                 button_row.append(canvas)
             self.buttons.append(button_row)
 
+
     def column_click(self, col):
         """Handles a click on a column button."""
-        if not self.game_over: #and not self.current_player.is_ai_player:
+        if not self.game_over and self.current_player.is_human:
             # Send the move to the backend Connect 4 for processing if valid
             is_valid_move = self.make_valid_move(col=col, marker=self.current_player.marker)
             
             # Updates the UI and Connect 4 Game after a valid move
             if is_valid_move:
-                winner = self.game.check_winner()
-                if winner:
-                    messagebox.showinfo("Game Over", f"{self.current_player.name} wins the game!")
-                    exit()
-                if not self.game_over:
-                    self.change_current_player()
-                    # self.check_ai_player_turn()
+                winner = self.end_game_if_winner()
+                if not winner:  
+                    if not self.game_over:
+                        self.change_current_player()
+                        self.status_label.config(text=f"● plays", fg=self.get_current_colour())
+                        self.check_ai_player_turn()
         print(f"Column {col} was clicked.")
+
+    def end_game_if_winner(self):
+        winner = self.game.check_winner()
+        if winner:
+            messagebox.showinfo("Game Over", f"{self.current_player.marker_name} wins the game!")
+            self.update_final_game_state()
+            self.reset_button.config(text="Play Again")
+            self.end_session_button.pack(side='left', padx=20, expand=True, fill='x')
+            return True
+        else:
+            return False
+    
+    def update_square(self, col):
+        row = self.game.height_list[col] # Game height list tells us which row is available for play for any column
+        canvas_to_update = self.buttons[row][col]
+        canvas_to_update.itemconfig(canvas_to_update.find_all()[0], fill=self.get_current_colour())
 
     def make_valid_move(self, col, marker):
         # Updates the UI and Connect 4 Game after valid move
         is_valid = self.game.make_move(col=col, marker=self.current_player.marker)
         if is_valid:
-            row = self.game.height_list[col]
-            canvas_to_update = self.buttons[row][col]
-            if self.current_player.marker == 'r':
-                circle_colour = "#CD5C5C" # "#B22222" <- darker red #  #"Red" 
-            else:
-                circle_colour = "#F0E68C" #"#DAA520" <- a bit darker #"Yellow" 
-            canvas_to_update.itemconfig(canvas_to_update.find_all()[0], fill=circle_colour)
+            self.update_square(col=col)
             return True
-
         else:
             return False
+
         
+    def make_ai_move(self):
+        """Handles the AI player's move."""
+        if not self.game_over and not self.current_player.is_human:
+            # AI move is validated in Player Class by move()
+            col = self.current_player.move()
+            self.game.make_move(col, self.current_player.marker)
+           
+            # Make the move and update the UI
+            self.update_square(col)
+            winner = self.end_game_if_winner()
+            if not winner:
+                self.change_current_player()
+                self.status_label.config(text=f"● plays", fg=self.get_current_colour())
+  
+        
+    def update_difficulty_options(self):
+        """Shows or hides the difficulty selection based on the game mode."""
+        if self.game_mode.get() == 1:
+            self.start_button_frame.pack_forget()
+            self.difficulty_options_frame.pack(pady=(20, 5))
+            self.start_button_frame.pack(pady=20)
+        else:
+            self.difficulty_options_frame.pack_forget()
+        
+    def update_final_game_state(self):
+        """Updates the game winner attributes, player statistics and game over boolean."""
+        self.game.update_winner_info()
+        self.game.update_players_stats()
+        self.game_over = True
+
+    def reset_game(self):
+        """Resets the Connect Four Game state and GUI states."""
+        self.game.reset_game_state()
+        self.game_over = False
+       
+        print("RESET CALLED")
+
+        # === Resetting the UI board ===
+        # Resets the first player to be the player who lost the current game or the last player to move in case of draw
+        self.change_current_player()
+        self.status_label.config(text=f"● plays", fg=self.get_current_colour())
+        
+        for row in range(6):
+            for col in range(7):
+                canvas = self.buttons[row][col]
+                # Get the ID of the oval (the only item on the canvas)
+                oval_id = canvas.find_all()[0]
+                # Change the oval's fill color back to the original gray
+                canvas.itemconfig(oval_id, fill="#ecf0f1")
+        self.reset_button.config(text="Reset") # change the reset button back
+        self.end_session_button.pack_forget() # hide the end session button
+        self.check_ai_player_turn()
+
+    def get_current_colour(self):
+        return self.master_red if self.current_player.marker == 'r' else self.master_yellow
+
 
     def change_current_player(self):
         self.current_player = self.player_2 if self.current_player.marker == 'r' else self.player_1
         # self.status_label.config(text=f"{self.current_player.name}'s turn")
+
+    def check_ai_player_turn(self):
+        if not self.current_player.is_human:
+            self.master.after(575, self.make_ai_move) # Wait a moment before the AI move for user experience   
+
+    def end_session(self):
+        """Ends the game session and closes the application."""
+        end_message = "Game Session Ended.\n\n"
+        for statistics in self.game.get_players_info_string_as_list():
+            end_message += statistics
+        messagebox.showinfo("Session Stats", end_message)
+        self.master.destroy()
         
 def main():
     root = tk.Tk()
