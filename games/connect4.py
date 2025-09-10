@@ -1,7 +1,7 @@
 """
 connect4.py 
 Author: Robert Pal
-Updated: 2025-08-06
+Updated: 2025-09-10
 
 This module contains code for connect4.
 """
@@ -19,12 +19,13 @@ class ConnectFour:
          self.rows = rows
          self.columns = columns
          self.board: List[List] = self.create_board() # Public attribute available as mutable copy or nested list data structure for display purposes
+         self._win: LineChecker = self.ConnectFourWinChecker(self.board) # Private attribute for checking winner lines and updating winner attributes.
+         self.players = self.create_human_players() # Default to two player mode
+
          self.move_list: List = []
          self.height_list: List = [self.rows] * self.columns # Tracks how full a column on the board is, for quick move validation and AI strategy
          self.round_count: int = 0
          self.go_first: bool = True
-         self._win: LineChecker = self.ConnectFourWinChecker(self.board) # Private attribute for checking winner lines and updating winner attributes.
-         self.players = self.create_human_players() # Default to two player mode
          
          self.winner_name: str = None  # Winner attributes used for tracking winner info, stats or display (default to None or -1 when no winner)
          self.winner_marker: str = None
@@ -68,6 +69,10 @@ class ConnectFour:
             self.AITestPlayer(name="AI two", marker="o", game=self, difficulty=difficulty_two, hard_test=hard_test),
         )
 
+    def is_full_board(self):
+        """Checks if there are any available moves for game or game ends in a draw if full."""
+        return len(self.move_list) == self.board_size
+
     def is_full(self, col: int):
         """Checks if a given column is full."""
         return self.height_list[col] == 0 # quick validation of column to play
@@ -100,20 +105,17 @@ class ConnectFour:
         """Checks the board for a winning condition."""
         return self._win._check_for_winner()
     
-    def reset_board(self) -> None:
+    def reset_game_state(self):
+        """Resets the board, winner information, move history, and round count to start a new game."""
+        self.reset_board_state()
+        self.reset_winner_attributes()
+        self.reset_game_play_variables()
+    
+    def reset_board_state(self) -> None:
         """Sets each square in the board to a blank."""
         self.board.reset_board()
 
-    def reset_game_state(self):
-        """Resets the board, winner information, move history, and round count to start a new game."""
-        self.reset_board()
-        self.reset_board()
-        self.reset_winner()
-        self.move_list = []
-        self.round_count = 0
-        self.go_first = not self.go_first
-
-    def reset_winner(self):
+    def reset_winner_attributes(self):
         """Resets all winner-related attributes to their default values."""
         self._win.reset_win_info()
         self.winner_name = None
@@ -121,6 +123,12 @@ class ConnectFour:
         self.win_type = None
         self.win_row = -1
         self.win_column = -1
+
+    def reset_game_play_variables(self):
+        self.height_list = [self.rows] * self.columns
+        self.move_list = []
+        self.round_count = 0
+        self.go_first = not self.go_first
 
     def get_winner_info(self):
         """Returns a dictionary with the winner's information."""
@@ -269,6 +277,12 @@ class ConnectFour:
         def is_human(self):
             """Ensure the is_human boolean tag is True."""
             return True
+        
+        def __str__(self) -> str:
+            """Returns a string of key information on the player statistics used for printing in the Game Class."""
+            player_string = f"\n{self.marker_name}: {self.name}\nWin: {self.win_count}, Loss: {self.lost_count}, " \
+                            f"Draw: {self.draw_count}\n"
+            return player_string
 
 
     class AIPlayer(Player):
@@ -277,6 +291,7 @@ class ConnectFour:
             """AIPlayer is a child class of Player"""
             super().__init__(name, marker)
             self.game = game
+            self.difficulty = difficulty
             self.marker_name = self._get_marker_name()
             self.score = 0
 
@@ -287,7 +302,13 @@ class ConnectFour:
         
         def _get_marker_name(self):
             """Determine the marker name based on the marker value."""
-            return "Red" if self._marker == "r" else "Yellow"
+            return "Red" if self._marker == "r" else "Yellow" 
+                
+        def __str__(self) -> str:
+            """Returns a string of key information on the player statistics used for printing in the Game Class."""
+            player_string = f"\n{self.marker_name}: {self.name}\nWin: {self.win_count}, Loss: {self.lost_count}, " \
+                            f"Draw: {self.draw_count}\n"
+            return player_string
 
         def get_random_column(self):
                 return randint(0, self.game.columns - 1)
@@ -303,14 +324,8 @@ class ConnectFour:
         def move(self):
 
             if (move:= self.win_or_block()) is not None:
-                # print("Played WIN or BLOCK")
-                # print(f"Computer's move {move}")
-                # sleep(5)
                 return move
-            ### Debugging
-            # print(self.game.height_list)
-            # print("Played RANDOM")
-            # sleep(5)
+           
             return self.random_int()
 
         # def get_empty_move_positions(self):
@@ -318,10 +333,11 @@ class ConnectFour:
         #         return [(self.game.height_list[column] - 1, column) for column in range(self.game.board.columns)]
 
         def win_or_block(self):
-            block_position = -1
+            block_position = -1 # Initialize with no block position
             horizontal_midpoint = self.game.board.columns // 2
 
             def marker_check(line):
+                """Returns True if all elements in line segment are 'y' or False if 'r'; otherwise, returns None"""
                 if marker := LineChecker.check_all_same(line):
                     if marker == 'y':
                             return True
@@ -335,9 +351,9 @@ class ConnectFour:
                 nonlocal block_position
                 win_or_block = marker_check(line)
                 if win_or_block is True:
-                    return column  # Winning move
+                    return column  # Found winning move for AI player and return position immediately to make the winning move
                 elif win_or_block is False:
-                    block_position = column  # Possible block move
+                    block_position = column  # Updates the block position to stop human player from winning and will only be used if no win is found
                 return None
 
             def left_right_pattern(line, square):
@@ -383,6 +399,10 @@ class ConnectFour:
                 if (move := check_and_update(column_line(row=row_height, col=column, length = 3), row, column)) is not None:
                     # print(f"WON in DOWN COL at move {move}")
                     return move
+                
+                ### For variation in the easy vs intermediate mode, easy mode doesn't check for diagonals
+                if self.difficulty is None:
+                    return None
 
                 diagonal_line = self.game.board.get_diagonal_segment
                 if (move := check_and_update(diagonal_line(row=row_height, col=column + 1, length = 3, up=False, right=True), row, column)) is not None:
@@ -413,6 +433,10 @@ class ConnectFour:
                 )
                 if (move := check_and_update(two_one_pattern, row, column)):
                     return move
+                
+                ### For variation on easy mode, do not check diagonal patterns
+                if self.difficulty is None:
+                    return None
 
                 diagonal_line = self.game.board.get_diagonal_segment
                 if (move := check_and_update(diagonal_line(row=row - 1, col=column + 1, length=3, up=True, right=True), row, column)):
@@ -449,6 +473,7 @@ class ConnectFour:
 
             for column, row_height in enumerate(self.game.height_list):
                 # Check if column is full; height list at 0 means the top row is occupied and there are no moves in the column
+              
                 if row_height == 0:
                     continue
 
@@ -462,9 +487,14 @@ class ConnectFour:
                         return move
 
                 # Check all diagonal directions with one-two or two-one patterns
-                if move:= star_pattern_check(row, row_height, column):
-                    # print(f"Won in a Star at {move}")
-                    return move
+                #### For variation, only do star check pattern for intermediate mode
+                if self.difficulty is not None:
+
+                    if move:= star_pattern_check(row, row_height, column):
+                        # print(f"Won in a Star at {move}")
+                        return move
+                    
+                ### Check all right or left blocks/wins for both AI player modes
 
                 left_value = self.game.board.get_square_value(row, column - 1)
                 right_value = self.game.board.get_square_value(row, column + 1)
