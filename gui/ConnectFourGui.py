@@ -1,8 +1,18 @@
+"""
+ConnectFourGui.py 
+Author: Robert Pal
+Updated: 2025-09-11
+
+This module contains all control flow logic for running the Connect Four Desktop Application.
+It includes:
+- button_click() which acts as the main() game running function
+- helper functions to manage game states and UI display
+"""
 import tkinter as tk
 from tkinter import messagebox
 from games.connect4 import ConnectFour
 
-class ConnectFourGame:
+class ConnectFourGUI:
     def __init__(self, master):
         self.master = master
         master.title("Connect Four")
@@ -281,10 +291,10 @@ class ConnectFourGame:
         messagebox.showinfo("Session Stats", end_message)
         self.master.destroy()
         
-def main():
+def run():
     root = tk.Tk()
-    game = ConnectFourGame(root)
+    app = ConnectFourGUI(root)
     root.mainloop()
 
 if __name__ == "__main__":
-    main()
+    run()
