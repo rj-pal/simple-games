@@ -1,7 +1,7 @@
 """
 TicTacToeGui.py 
 Author: Robert Pal
-Updated: 2025-09-11
+Updated: 2025-09-12
 
 This module contains all control flow logic for running the Tic Tac Toe Desktop Application.
 It includes:
@@ -17,6 +17,8 @@ class TicTacToeGUI:
     def __init__(self, master):
         self.master = master
         master.title("Tic Tac Toe")
+        self.master.option_add('*name', 'Tic Tac Toe')
+        # self.master.tk.call('::tk::mac::setApplicationName', 'Tic Tac Toe')
         
         # Set GUI widget colours
         self.master_colour = "#37353E"
@@ -47,7 +49,48 @@ class TicTacToeGUI:
         self.difficulty = tk.StringVar(value="easy") # Three modes: None for easy, False for intermedia, True for hard
         self.game_mode = tk.IntVar(value=1) # 1 for single player, 2 for two players
 
+        self.create_top_menu()
         self.create_start_menu()
+
+    def create_top_menu(self):
+        # Create the menu bar
+        menu_bar = tk.Menu(self.master)
+        
+        # Add the 'App' menu (macOS application menu)
+        app_menu = tk.Menu(menu_bar, tearoff=0)
+        app_menu.add_command(label="About Tic Tac Toe", command=self.on_about)
+        app_menu.add_separator()
+        app_menu.add_command(label="Quit", command=self.on_quit)
+
+        # Add the 'File' menu
+        file_menu = tk.Menu(menu_bar, tearoff=0)
+        file_menu.add_command(label="New Game", command=self.new_game)
+        file_menu.add_command(label="Save", command=self.save_game)
+        file_menu.add_separator()
+        file_menu.add_command(label="Quit", command=self.on_quit)
+
+        # Add the menus to the menu bar
+        menu_bar.add_cascade(label="Tic Tac Toe", menu=app_menu)
+        menu_bar.add_cascade(label="File", menu=file_menu)
+
+        # Configure the root window to use the menu bar
+        self.master.config(menu=menu_bar)
+        
+        # For macOS: set the application name in the menu
+        self.master.option_add("*tearOff", False)
+
+    def on_quit(self):
+        self.master.quit()
+
+    def on_about(self):
+        messagebox.showinfo("About", "This is a simple Tic Tac Toe game for one or two player.")
+
+    def new_game(self):
+        print("Starting a new game...")
+
+    def save_game(self):
+        print("Game saved.")
+
 
     def create_start_menu(self):
         """Creates the initial start screen widgets to set 1 or 2 player game mode and difficulty level for AI player."""
