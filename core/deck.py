@@ -1,19 +1,32 @@
+"""
+deck.py 
+Author: Robert Pal
+Updated: 2026-08-04
+
+This module contains foundational code for a card deck that mimicks the behaviour of a physical deck of cards.
+
+The original intent of this data structure was to implement and demonstrate implementations of a stack using a linked list and node.
+"""
+
 from random import shuffle
-from utils.errors import EmptyPileError
+# from utils.errors import EmptyPileError
 
 # Python program to demonstrate
 # stack implementation using a linked list.
 # node class
 
 class CardNode:
+    
     def __init__(self, value):
+        """Base wrapper node class for implementation of various deck of cards. Basic linked list data structure."""
         self.value = value
         self.next = None
 
 class CardQueue:
 
     def __init__(self):
-        self.head = CardNode("Empty Stack of Cards")
+        """Card Queue data structure with Blank Card Head acting as dummy head. Implements a linked list with the principle of first in, first out."""
+        self.head = CardNode(Card("B", 0))
         self._size = 0
     
     @property
@@ -22,12 +35,13 @@ class CardQueue:
         return self._size 
 
     def is_empty(self):
+        """Returns the number of nodes in the queue."""
         return self._size == 0
     
-    # String representation of the stack of cards
     def __str__(self):
+        """Prints a simple string representation of the CardQueue"""
         if self.is_empty():
-            return self.head.value
+            return self.head.value.face
         
         current_card = self.head.next
         card_queue = ""
@@ -36,8 +50,10 @@ class CardQueue:
             current_card = current_card.next
         return card_queue
 
-    # Push a value into the stack.
     def add_to(self, value):
+        """Pushes a new card node to the head of the queue."""
+        if not isinstance(value, Card):
+            raise Exception("Only objects of Type Card() are allowed in Card Queue")
         card_node = CardNode(value)
         temp_card_node = self.head
         while temp_card_node.next:
@@ -47,8 +63,8 @@ class CardQueue:
     
         self._size += 1
 
-    # Remove a value from the stack and return.
     def remove_from(self):
+        """Removes the first card node from the queue. Returns the removed card."""
         if self.is_empty():
             raise Exception("Popping from an empty queue")
         remove_card = self.head.next
@@ -57,6 +73,7 @@ class CardQueue:
         return remove_card.value
     
     def top_card(self):
+        """Returns the head of the card queue"""
         if self.is_empty():
             return self.head.value
         return self.head.next.value
@@ -69,8 +86,8 @@ class CardStack:
     # Use a Dummy Head Card Node for indicating if the stack of cards is empty or not
     # Suit property is optional
     def __init__(self):
+        """Card Stack data structure with Blank Card head acting as dummy card. Implements a linked list with the principle of first in, last out."""
         self.head = CardNode(Card("B", 0))
-        # self.head = CardNode("Empty stack of cards.")
         self._size = 0
         self._suit = None
 
@@ -96,7 +113,7 @@ class CardStack:
     # String representation of the stack of cards
     def __str__(self):
         if self.is_empty():
-            return self.head.value
+            return self.head.value.face
         
         current_card = self.head.next
         card_stack = ""
@@ -108,8 +125,7 @@ class CardStack:
     
     def to_list(self):
         if self.is_empty():
-            return [" "]
-        
+            return [" "]   
         current_card = self.head.next
         card_list = []
         while current_card:
@@ -118,7 +134,6 @@ class CardStack:
             else:
                 # card_list.append(" ")
                 card_list.append("🎴")
-
             current_card = current_card.next
         return card_list
 
@@ -267,39 +282,40 @@ class CardDeck:
             print("CardDeck is empty.")
             return None
         return self.deck.popleft()
+    
+    def __str__(self):
+        return str(self.size)
+
+
+suit_dict = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️", "B": "🎴"}
+suit_alt_dict = {"S": "♠", "H": "♥", "D": "♦", "C": "♣", "B": "🎴"}
+face_dict = {0: "Blank", 1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 7: " 7",
+                        8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"}
+card_emojis = {
+            'A♠': '🂡', '2♠': '🂢', '3♠': '🂣', '4♠': '🂤', '5♠': '🂥', '6♠': '🂦', '7♠': '🂧',
+            '8♠': '🂨', '9♠': '🂩', 'T♠': '🂪', 'J♠': '🂫', 'Q♠': '🂭', 'K♠': '🂮',
+            'A♥': '🂱', '2♥': '🂲', '3♥': '🂳', '4♥': '🂴', '5♥': '🂵', '6♥': '🂶', '7♥': '🂷',
+            '8♥': '🂸', '9♥': '🂹', 'T♥': '🂺', 'J♥': '🂻', 'Q♥': '🂽', 'K♥': '🂾',
+            'A♦': '🃁', '2♦': '🃂', '3♦': '🃃', '4♦': '🃄', '5♦': '🃅', '6♦': '🃆', '7♦': '🃇',
+            '8♦': '🃈', '9♦': '🃉', 'T♦': '🃊', 'J♦': '🃋', 'Q♦': '🃍', 'K♦': '🃎',
+            'A♣': '🃑', '2♣': '🃒', '3♣': '🃓', '4♣': '🃔', '5♣': '🃕', '6♣': '🃖', '7♣': '🃗',
+            '8♣': '🃘', '9♣': '🃙', 'T♣': '🃚', 'J♣': '🃛', 'Q♣': '🃝', 'K♣': '🃞'
+        }
 
 class Card:
-    def __init__(self, suit: int, value: str):
+    def __init__(self, suit: str, value: int):
         self._suit = suit
         self._value = value 
         self._visible = False
         self.face = self.create_face()
         self.name = self.create_name()
         
-    def create_face(self):
-        
-        suit_dict = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️", "B": "🎴"}
-        # suit_dict = {"S": "♠", "H": "♥", "D": "♦", "C": "♣", "B": "🎴"}
-        face_dict = {0: "Blank", 1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 7: " 7",
-                        8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"}
-        # face_dict = {0: "Blank", 1: "A", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7",
-        #                 8: "8", 9: "9", 10: "T", 11: "J", 12: "Q", 13: "K"}
-        # card_emojis = {
-        #     'A♠': '🂡', '2♠': '🂢', '3♠': '🂣', '4♠': '🂤', '5♠': '🂥', '6♠': '🂦', '7♠': '🂧',
-        #     '8♠': '🂨', '9♠': '🂩', 'T♠': '🂪', 'J♠': '🂫', 'Q♠': '🂭', 'K♠': '🂮',
-        #     'A♥': '🂱', '2♥': '🂲', '3♥': '🂳', '4♥': '🂴', '5♥': '🂵', '6♥': '🂶', '7♥': '🂷',
-        #     '8♥': '🂸', '9♥': '🂹', 'T♥': '🂺', 'J♥': '🂻', 'Q♥': '🂽', 'K♥': '🂾',
-        #     'A♦': '🃁', '2♦': '🃂', '3♦': '🃃', '4♦': '🃄', '5♦': '🃅', '6♦': '🃆', '7♦': '🃇',
-        #     '8♦': '🃈', '9♦': '🃉', 'T♦': '🃊', 'J♦': '🃋', 'Q♦': '🃍', 'K♦': '🃎',
-        #     'A♣': '🃑', '2♣': '🃒', '3♣': '🃓', '4♣': '🃔', '5♣': '🃕', '6♣': '🃖', '7♣': '🃗',
-        #     '8♣': '🃘', '9♣': '🃙', 'T♣': '🃚', 'J♣': '🃛', 'Q♣': '🃝', 'K♣': '🃞'
-        # }
-        # card_rank = f"{face_dict[self.value]}{suit_dict[self.suit]}" 
-        # return card_emojis[card_rank] if self.value != 0 else "Empty card pile."
-        
+    def create_face(self, faces: dict=face_dict, suits: dict=suit_dict):
+        """Creates a physical card face based on the type of emoji"""   
         return f"{face_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "Empty card pile."
     
     def create_name(self):
+        """Creates basic string name for each card."""
         suit_dict = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
         name_dict = {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
                         8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
@@ -346,24 +362,45 @@ class Card:
             return self.face
         return "Hidden"
 # Driver Code
-if __name__ == "__main__":
-    card = Card("S", 12)
-    card.visible = True
-    pile = CardStack()
-    print(pile.head)
-    # pile.top_card().visible = True
-    print(pile.top_card())
-    
-    pile.add_to(card)
-    print(pile.head.next.value)
-    # print(pile.top_card().next.next)
+q = CardQueue()
+print(q)
+print(q.top_card())
+# q.remove_from()
+q.add_to(Card("S", 4))
+q.add_to(Card("H", 0))
+# q.add_to("Two")
+# q.add_to("Three")
+print(q)
+print(q.size)
+r = q.remove_from()
+print(r)
+print(q)
+print(q.top_card())
+
+
+    # # deck = CardDeck()
+    # # print(deck)
+    # # deck.deal(2)
+    # # print(deck.__str__())
+    # exit()
+    # # card = Card("S", 12)
+    # card.visible = True
+    # pile = CardStack()
     # print(pile.head)
+    # # pile.top_card().visible = True
+    # print(pile.top_card())
+    
+    # pile.add_to(card)
+    # print(pile.head.next.value)
+    # # print(pile.top_card().next.next)
+    # # print(pile.head)
 
-    hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
+    # hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
+    # print(hands)
 
-    for i, hand in enumerate(hands, start=1):
-        print(f"Player {i}'s hand: {hand.__str__()}")
-    exit()
+    # for i, hand in enumerate(hands, start=1):
+    #     print(f"Player {i}'s hand: {hand.__str__()}")
+    # exit()
 
 
 

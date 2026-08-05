@@ -92,13 +92,14 @@ def number_of_cards_validator():
 
 
 def play_game(test):
-
-    for i in range(30):
+    i = 1
+    while True:
         print(f"Round {i + 1}\n")
 
         tab = test.get_tableau_for_print()
         fp = test.get_foundation_piles()
-        draw = test.check_stock_pile()
+        draw = test.get_stock_pile()
+        # draw = test.check_stock_pile()
         waste = test.show_waste_pile()
         # print(type(tab))
         # print(type(fp))
@@ -206,8 +207,14 @@ def play_game(test):
 
         if test.check_win():
             print("You Win!")
+        elif i == 3:
+            print("Game Over")
+            break
+        else:
+            i += 1
 
         GameCLI.clear_screen()
+        
 
 
 def set_up_game():
