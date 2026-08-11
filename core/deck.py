@@ -26,7 +26,8 @@ class CardQueue:
 
     def __init__(self):
         """Card Queue data structure with Blank Card Head acting as dummy head. Implements a linked list with the principle of first in, first out."""
-        self.head = CardNode(Card("B", 0))
+        self.head = CardNode(Card("B", 0)) # dummy head node is flipped blank card indicating a deck of cards exists
+        self.head.value.flip_card()
         self._size = 0
     
     @property
@@ -88,6 +89,7 @@ class CardStack:
     def __init__(self):
         """Card Stack data structure with Blank Card head acting as dummy card. Implements a linked list with the principle of first in, last out."""
         self.head = CardNode(Card("B", 0))
+        self.head.value.flip_card()
         self._size = 0
         self._suit = None
 
@@ -312,7 +314,7 @@ class Card:
         
     def create_face(self, faces: dict=face_dict, suits: dict=suit_dict):
         """Creates a physical card face based on the type of emoji"""   
-        return f"{face_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "Empty card pile."
+        return f"{face_dict[self.value]} of {suit_dict[self.suit]}" #if self.value != 0 else "This is a place card."
     
     def create_name(self):
         """Creates basic string name for each card."""
@@ -320,7 +322,7 @@ class Card:
         name_dict = {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
                         8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
         
-        return f"{name_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "Empty card pile."
+        return f"{name_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "This is a place card."
     
     @property
     def value(self):
@@ -362,15 +364,21 @@ class Card:
             return self.face
         return "Hidden"
 # Driver Code
+# c = Card("B", 0)
+# c.flip_card()
+# print(c)
 q = CardQueue()
 print(q)
-print(q.top_card())
+# print("This is the top card")
+# print(q.top_card())
+# exit()
 # q.remove_from()
 q.add_to(Card("S", 4))
 q.add_to(Card("H", 0))
-# q.add_to("Two")
+q.add_to(Card("D", 8))
 # q.add_to("Three")
 print(q)
+exit()
 print(q.size)
 r = q.remove_from()
 print(r)
