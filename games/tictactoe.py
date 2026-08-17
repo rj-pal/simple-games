@@ -62,6 +62,16 @@ class TicTacToe:
     @property
     def board_size(self):
         return self.board.rows * self.board.columns
+    
+    def board_is_full(self):
+        return len(self.move_list) == self.board_size
+    
+    def get_winner_string(self):
+        if self.win_index == -1:
+            win_location = f"the {self.win_type.replace('_', ' ')}"
+        else:
+            win_location = f"{self.win_type} {self.win_index + 1}"
+        return f"{self.winner_name} wins in {win_location}."
 
     def print_winner(self):
         print(f"Winning Player: {self.winner_name}")
@@ -161,6 +171,7 @@ class TicTacToe:
         def __init__(self, name: str = None, marker: str = None):
             super().__init__(name, marker)  # Initialize the name first
             self.marker = marker  # Use the property setter for validation
+            self.is_ai_player = False
 
         @Player.name.setter
         def name(self, value):
@@ -186,6 +197,7 @@ class TicTacToe:
             self.game = game
             self._difficulty = None  # Backing private attribute
             self.difficulty = difficulty  # None is easy mode, False is intermediate mode, True is hard mode
+            self.is_ai_player = True
             self.corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
             self.insides = [(0, 1), (1, 0), (1, 2), (2, 1)]
 

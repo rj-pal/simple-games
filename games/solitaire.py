@@ -1,9 +1,9 @@
 """
 solitaire.py 
 Author: Robert Pal
-Updated: 2025-08-06
+Updated: 2026-08-04
 
-This module contains code for solitaire.
+This module contains foundational code for the game solitaire.
 """
 
 from core.deck import Card, CardDeck, CardStack
@@ -27,7 +27,7 @@ class Solitare:
 
     @size.setter
     def size(self, value):
-        if value not in {6, 7, 8, 9, 10}:
+        if value not in {6, 7, 8, 9, 10}: # Allow other sizes if a variation from the standard solitaire is desired; defaults to standard 7
             raise ValueError("The size must be from 6 to 10 to determine he number of columns in play on the tableau.")
         self._size = value
 
@@ -49,9 +49,8 @@ class Solitare:
 
     def reset_pile(self):
         if not self.draw_pile.is_empty():
-            raise InvalidMoveError("Cannot reset the stock pile that is not empty.")
+            raise InvalidMoveError("Cannot reset the stock pile when it is not empty.")
         number_of_waste_cards = self.waste_pile.size
-        print(self.waste_pile)
         while not self.waste_pile.is_empty():
             waste_card = self.waste_pile.remove_from(flip=True)
             self.card_deck.add_card(waste_card)
@@ -101,12 +100,13 @@ class Solitare:
             except EmptyPileError:
                 break
         if cards_drawn_for_play == 0:
+            # print(self.draw_pile)
             raise EmptyPileError("The draw pile is empty. There are no cards to draw from.")
 
         return True
 
     def move_to_foundation(self, from_pile: str, stack_number: int=-1):
-        """Move a card from the waste pile or tableau to the foundation pile of the selected card's suit. Defaults to move from waste pile."""
+        """Move a card from the waste pile or tableau to the foundation pile of the selected card's suit. Defaults to move from waste pile int -1."""
         # Get the pile the player is trying to move from
         if from_pile == "tableau":
             if not 0 <= stack_number < self._size:
@@ -194,9 +194,11 @@ class Solitare:
         if not from_card.visible:
             raise InvalidMoveError(f"The card you selected for transfer to another stack is face down.")
 
-        # Validate move before moving cards between stacks             
+        # Validate move before moving cards between stacks  
+        # print(from_card)
+        # print(self.tableau[to_stack].top_card())           
         if not self.check_move(from_card=from_card, to_card=self.tableau[to_stack].top_card()):
-            raise InvalidMoveError(f"The card or cards you wish to move from stack {from_stack} cannot be placed on stack {to_stack}.")
+            raise InvalidMoveError(f"The card or cards you wish to move from stack {from_stack + 1} cannot be placed on stack {to_stack + 1}.")
 
         # Create a temp card stack to move the cards from one tableau to another tableau card stack
         temp_stack = CardStack()
@@ -251,9 +253,19 @@ class Solitare:
     def get_foundation_piles(self):
 
         return self.foundation_piles
+    
+    def check_win(self):
+        for suit, foundation_pile in self.foundation_piles.items():
+            print(f"Suit {suit}: Size {foundation_pile.size}")
+        total_foundation_cards = sum(foundation_pile.size for foundation_pile in self.foundation_piles.values())
+    
+        return total_foundation_cards == 52
 
-    def check_stock_pile(self):
+    def check_empty_stock_pile(self):
         return self.draw_pile.is_empty()
+    
+    def check_empty_waste_pile(self):
+        return self.waste_pile.is_empty()
 
     # def check_tableau(self, number):
     #     if number < 0 < self._size:
@@ -276,7 +288,7 @@ class Solitare:
             print(card_stack)
 
     def show_stock_pile(self):
-        if self.check_stock_pile():
+        if self.check_empty_stock_pile():
             print(self.draw_pile.head.value.value)
         else:
             print(self.get_stock_pile())
@@ -315,3 +327,12 @@ class Solitare:
             return False
         self.tableau[stack_number].top_card().flip_card()
         return True
+    
+# if __name__ == "__main__":
+#     test = Solitare()
+#     print(type(test.draw_pile))
+#     print(test.draw_pile.head.value.look_card())
+#     for i in range(20):
+#         test.draw()
+#         print(test.draw_pile.head.value.look_card())
+#         print(test.draw_pile.top_card().value)
