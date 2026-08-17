@@ -162,18 +162,19 @@ class CardQueue:
         self.head.next = remove_card.next
         remove_card.previous = None
         self._size -= 1
-        return remove_card.value
+        return remove_card.value.suit, remove_card.value.value
 
     def remove_from_top(self):
         if self.is_empty():
             raise Exception("Popping from an empty queue")
         remove_card = self.tail
         
-        remove_card.previous = None
+        remove_card.previous.next = None
         self.tail = remove_card.previous
         self.tail.next = None
+        self._size -= 1
        
-        return remove_card.value
+        return remove_card.value.suit, remove_card.value.value
 
     
     def top_card(self):
@@ -331,15 +332,42 @@ class CardDeck:
 
     @property
     def size(self):
-        return len(self.deck)
+        return self.deck.size
+        # return len(self.deck)
         
     def create_deck(self):
         suit_values = ("S", "H", "D", "C")
-        return deque([Card(suit=suit, value=value) for suit in suit_values for value in range(1, 14)])
+        deck = self.get_empty_card_queue()
+        for suit in suit_values:
+            for value in range(1, 14):
+                deck.add_to(Card(suit, value))
+        return deck
+
+    def show_deck(self):
+        print(self.deck)
+
+    def to_list(self):
+        card_list = []
+        while not self.deck.is_empty():
+            card_list.append(self.deck.remove_from()) 
+        # self.show_deck()
+        return card_list
+
+    def recreate_deck(self, deck_as_list):
+        # self.show_deck()
+        deck = self.get_empty_card_queue()
+        for card_data in deck_as_list:
+            # print(card_data)
+            deck.add_to(Card(*card_data))
+        self.deck = deck
     
     def shuffle_deck(self):
-        shuffle(self.deck)
-    
+        temp_deck = self.to_list()
+        # print(temp_deck)
+        shuffle(temp_deck)
+        self.recreate_deck(temp_deck)
+
+
     def get_deck(self):
         return self.deck
     
@@ -356,7 +384,8 @@ class CardDeck:
         if self.size == 0:
             print("CardDeck is empty.")
             return None
-        card = self.deck.pop()      
+        card_data = self.deck.remove_from()
+        card = Card(*card_data)     
         card.visible = not facedown
         return card
     
@@ -380,8 +409,10 @@ class CardDeck:
     def pile(self, facedown=True):
         card_stack = CardStack()
         # print(self.deck)
-        while self.size != 0:
-            card = self.deck.popleft()
+        while self.deck.size != 0:
+            card_data = self.deck.remove_from_top()
+            print(card_data)
+            card = Card(*card_data)
             card.visible = not facedown
             card_stack.add_to(card)      
         # print("Piling is finished")
@@ -389,42 +420,54 @@ class CardDeck:
         return card_stack
     
     def get_first_card(self):
-        if self.size == 0:
+        if self.deck.size == 0:
             print("CardDeck is empty.")
             return None
-        return self.deck.popleft()
+        card_data = self.deck.remove_from_top()
+        return Card(*card_data)
+        # if self.size == 0:
+        #     print("CardDeck is empty.")
+        #     return None
+        # return self.deck.popleft()
     
-    def __str__(self):
-        return str(f"This is a card deck with {self.size} card(s)")
+    # def __str__(self):
+    #     return str(f"This is a card deck with {self.size} card(s)")
 
 if __name__=="__main__":
     # CARD QUEUE TESTING
-    q = CardQueue()
-    print(q)
-    q.add_to(Card("S", 4))
-    q.add_to(Card("H", 0))
-    q.add_to(Card("H", 12))
-    q.add_to(Card("S", 11))
-    q.add_to(Card("D", 8))
-    # q.add_to("Three")
-    print(q)
-    # exit()
-    print(q.size)
-    r = q.remove_from()
-    print(r)
-    q.remove_from()
-    # print("TAIl")
-    # print(q.tail)
-    d = q.remove_from_top()
-    print(d.look_card())
+    # q = CardQueue()
     # print(q)
-    # # q.remove_from_top()
-    print(q)
-    exit()
+    # q.add_to(Card("S", 4))
+    # q.add_to(Card("H", 0))
+    # q.add_to(Card("H", 12))
+    # q.add_to(Card("S", 11))
+    # q.add_to(Card("D", 8))
+    # # q.add_to("Three")
+    # print(q)
+    # # exit()
+    # print(q.size)
+    # r = q.remove_from()
+    # print(r)
+    # q.remove_from()
+    # # print("TAIl")
+    # # print(q.tail)
+    # d = q.remove_from_top()
+    # # print(d.look_card())
+    # print(d)
+    # # print(q)
+    # # # q.remove_from_top()
+    # print(q)
+    # exit()
 
     # CARD DECK TESTING
     deck = CardDeck()
-    print(deck)
+    deck.pile()
+    # print(deck)
+    # deck.show_deck()
+    # # print(deck.to_list())
+    # deck.shuffle_deck()
+    # deck.show_deck()
+    # exit()
     players = deck.deal(2, 6)
     print(deck.__str__())
     for p in players:
