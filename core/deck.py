@@ -9,6 +9,7 @@ The original intent of this data structure was to implement and demonstrate impl
 """
 
 from random import shuffle
+from collections import deque
 # from utils.errors import EmptyPileError
 
 # Python program to demonstrate
@@ -21,6 +22,97 @@ class CardNode:
         """Base wrapper node class for implementation of various deck of cards. Basic linked list data structure."""
         self.value = value
         self.next = None
+        self.previous = None
+
+# Currently in use for GUI in Solitaire software
+SUITS = {
+       "S": {"name": "Spades", "emoji": "♠️", "alt": "♠"},
+       "H": {"name": "Hearts", "emoji": "❤️", "alt": "♥"},
+       "D": {"name": "Diamonds", "emoji": "♦️", "alt": "♦"},
+       "C": {"name": "Clubs", "emoji": "♣️", "alt": "♣"},
+       "B": {"name": "Blank", "emoji": "🎴", "alt": "🂠"},
+   }
+
+FACES = {
+        0: "Blank", 1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 
+        7: " 7", 8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"
+    }
+
+# Possible use in future GUI for Solitaire or other card game software
+CARDS = {
+            'A♠': '🂡', '2♠': '🂢', '3♠': '🂣', '4♠': '🂤', '5♠': '🂥', '6♠': '🂦', '7♠': '🂧',
+            '8♠': '🂨', '9♠': '🂩', 'T♠': '🂪', 'J♠': '🂫', 'Q♠': '🂭', 'K♠': '🂮',
+            'A♥': '🂱', '2♥': '🂲', '3♥': '🂳', '4♥': '🂴', '5♥': '🂵', '6♥': '🂶', '7♥': '🂷',
+            '8♥': '🂸', '9♥': '🂹', 'T♥': '🂺', 'J♥': '🂻', 'Q♥': '🂽', 'K♥': '🂾',
+            'A♦': '🃁', '2♦': '🃂', '3♦': '🃃', '4♦': '🃄', '5♦': '🃅', '6♦': '🃆', '7♦': '🃇',
+            '8♦': '🃈', '9♦': '🃉', 'T♦': '🃊', 'J♦': '🃋', 'Q♦': '🃍', 'K♦': '🃎',
+            'A♣': '🃑', '2♣': '🃒', '3♣': '🃓', '4♣': '🃔', '5♣': '🃕', '6♣': '🃖', '7♣': '🃗',
+            '8♣': '🃘', '9♣': '🃙', 'T♣': '🃚', 'J♣': '🃛', 'Q♣': '🃝', 'K♣': '🃞'
+        }
+
+class Card:
+    def __init__(self, suit: str, value: int):
+        """Card data structure that is used in a Card Node."""
+        self._suit = suit
+        self._value = value 
+        self._visible = False
+        self.face = self.create_face()
+        self.name = self.create_name()
+        
+    def create_face(self, faces: dict=FACES, suits: dict=SUITS, suit_type: str="emoji"):
+        """Creates a physical card face based on the type of emoji"""   
+        if self.value == 0:
+            return suits[self.suit]["alt"]
+        else:
+            return f"{faces[self.value]} of {suits[self.suit][suit_type]}"
+    
+    def create_name(self):
+        """Creates basic string name for each card."""
+        suit_dict = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
+        name_dict = {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
+                        8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
+        
+        return f"{name_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "This is a place card."
+    
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def suit(self):
+        return self._suit
+    
+    @property
+    def visible(self):
+        return self._visible
+
+    @visible.setter
+    def visible(self, new_visibility: bool):
+        if isinstance(new_visibility, bool):
+            self._visible = new_visibility
+        else:
+            raise ValueError("Visible must be a boolean value.")
+
+    @property
+    def is_black(self):
+        return self.suit in {"S", "C"}
+    
+    def is_visible(self):
+        return self.visible
+    
+    def look_card(self):
+        return self.face
+    
+    def flip_card(self):
+        self._visible = not self._visible
+
+    def __repr__(self):
+        return f"Suit: {self.suit}, Value: {self.value}, Visible: {self.visible}, Face: {self.face}"
+    
+    def __str__(self):
+        if self.visible:
+            return self.face
+        return "Hidden"
 
 class CardQueue:
 
@@ -28,6 +120,7 @@ class CardQueue:
         """Card Queue data structure with Blank Card Head acting as dummy head. Implements a linked list with the principle of first in, first out."""
         self.head = CardNode(Card("B", 0)) # dummy head node is flipped blank card indicating a deck of cards exists
         self.head.value.flip_card()
+        self.tail = self.head
         self._size = 0
     
     @property
@@ -36,7 +129,7 @@ class CardQueue:
         return self._size 
 
     def is_empty(self):
-        """Returns the number of nodes in the queue."""
+        """Returns if the queue is empty or not."""
         return self._size == 0
     
     def __str__(self):
@@ -54,14 +147,11 @@ class CardQueue:
     def add_to(self, value):
         """Pushes a new card node to the head of the queue."""
         if not isinstance(value, Card):
-            raise Exception("Only objects of Type Card() are allowed in Card Queue")
+            raise TypeError("Only objects of Type Card() are allowed in Card Queue")
         card_node = CardNode(value)
-        temp_card_node = self.head
-        while temp_card_node.next:
-            temp_card_node = temp_card_node.next
-            
-        temp_card_node.next = card_node
-    
+        self.tail.next = card_node
+        card_node.previous = self.tail
+        self.tail = card_node
         self._size += 1
 
     def remove_from(self):
@@ -70,8 +160,21 @@ class CardQueue:
             raise Exception("Popping from an empty queue")
         remove_card = self.head.next
         self.head.next = remove_card.next
+        remove_card.previous = None
         self._size -= 1
         return remove_card.value
+
+    def remove_from_top(self):
+        if self.is_empty():
+            raise Exception("Popping from an empty queue")
+        remove_card = self.tail
+        
+        remove_card.previous = None
+        self.tail = remove_card.previous
+        self.tail.next = None
+       
+        return remove_card.value
+
     
     def top_card(self):
         """Returns the head of the card queue"""
@@ -87,7 +190,13 @@ class CardStack:
     # Use a Dummy Head Card Node for indicating if the stack of cards is empty or not
     # Suit property is optional
     def __init__(self):
-        """Card Stack data structure with Blank Card head acting as dummy card. Implements a linked list with the principle of first in, last out."""
+        """
+        Card Stack data structure with Blank Card head acting as dummy card. Implements a linked list with the principle of first in, last out.
+        
+        A Card Stack suit defaults to None. A Card Stack without a set suit value will be displayed as a filler card, like on a card
+        table. However, if a suit is set for a Card Stack, that suit will be displayed as a filler card.
+        
+        """
         self.head = CardNode(Card("B", 0))
         self.head.value.flip_card()
         self._size = 0
@@ -120,8 +229,8 @@ class CardStack:
         current_card = self.head.next
         card_stack = ""
         while current_card:
-            # card_stack += repr(current_card.value) + " ->\n"
-            card_stack += str(current_card.value) + " ->\n"
+            card_stack += repr(current_card.value) + " ->\n"
+            # card_stack += str(current_card.value) + " ->\n"
             current_card = current_card.next
         return card_stack
     
@@ -214,7 +323,7 @@ class CardStack:
     #         remove_card.value.flip_card()
 
     #     return remove_card.value
-from collections import deque
+
 
 class CardDeck:
     def __init__(self):
@@ -229,7 +338,7 @@ class CardDeck:
         return deque([Card(suit=suit, value=value) for suit in suit_values for value in range(1, 14)])
     
     def shuffle_deck(self):
-        return shuffle(self.deck)
+        shuffle(self.deck)
     
     def get_deck(self):
         return self.deck
@@ -286,158 +395,118 @@ class CardDeck:
         return self.deck.popleft()
     
     def __str__(self):
-        return str(self.size)
+        return str(f"This is a card deck with {self.size} card(s)")
 
-
-suit_dict = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️", "B": "🎴"}
-suit_alt_dict = {"S": "♠", "H": "♥", "D": "♦", "C": "♣", "B": "🎴"}
-face_dict = {0: "Blank", 1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 7: " 7",
-                        8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"}
-card_emojis = {
-            'A♠': '🂡', '2♠': '🂢', '3♠': '🂣', '4♠': '🂤', '5♠': '🂥', '6♠': '🂦', '7♠': '🂧',
-            '8♠': '🂨', '9♠': '🂩', 'T♠': '🂪', 'J♠': '🂫', 'Q♠': '🂭', 'K♠': '🂮',
-            'A♥': '🂱', '2♥': '🂲', '3♥': '🂳', '4♥': '🂴', '5♥': '🂵', '6♥': '🂶', '7♥': '🂷',
-            '8♥': '🂸', '9♥': '🂹', 'T♥': '🂺', 'J♥': '🂻', 'Q♥': '🂽', 'K♥': '🂾',
-            'A♦': '🃁', '2♦': '🃂', '3♦': '🃃', '4♦': '🃄', '5♦': '🃅', '6♦': '🃆', '7♦': '🃇',
-            '8♦': '🃈', '9♦': '🃉', 'T♦': '🃊', 'J♦': '🃋', 'Q♦': '🃍', 'K♦': '🃎',
-            'A♣': '🃑', '2♣': '🃒', '3♣': '🃓', '4♣': '🃔', '5♣': '🃕', '6♣': '🃖', '7♣': '🃗',
-            '8♣': '🃘', '9♣': '🃙', 'T♣': '🃚', 'J♣': '🃛', 'Q♣': '🃝', 'K♣': '🃞'
-        }
-
-class Card:
-    def __init__(self, suit: str, value: int):
-        self._suit = suit
-        self._value = value 
-        self._visible = False
-        self.face = self.create_face()
-        self.name = self.create_name()
-        
-    def create_face(self, faces: dict=face_dict, suits: dict=suit_dict):
-        """Creates a physical card face based on the type of emoji"""   
-        return f"{face_dict[self.value]} of {suit_dict[self.suit]}" #if self.value != 0 else "This is a place card."
-    
-    def create_name(self):
-        """Creates basic string name for each card."""
-        suit_dict = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
-        name_dict = {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
-                        8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
-        
-        return f"{name_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "This is a place card."
-    
-    @property
-    def value(self):
-        return self._value
-
-    @property
-    def suit(self):
-        return self._suit
-    
-    @property
-    def visible(self):
-        return self._visible
-
-    @visible.setter
-    def visible(self, new_visibility: bool):
-        if isinstance(new_visibility, bool):
-            self._visible = new_visibility
-        else:
-            raise ValueError("Visible must be a boolean value.")
-
-    @property
-    def is_black(self):
-        return self.suit in {"S", "C"}
-    
-    def is_visible(self):
-        return self.visible
-    
-    def look_card(self):
-        return self.face
-    
-    def flip_card(self):
-        self._visible = not self._visible
-
-    def __repr__(self):
-        return f"Suit: {self.suit}, Value: {self.value}, Visible: {self.visible}, Face: {self.face}"
-    
-    def __str__(self):
-        if self.visible:
-            return self.face
-        return "Hidden"
-# Driver Code
-# c = Card("B", 0)
-# c.flip_card()
-# print(c)
-q = CardQueue()
-print(q)
-# print("This is the top card")
-# print(q.top_card())
-# exit()
-# q.remove_from()
-q.add_to(Card("S", 4))
-q.add_to(Card("H", 0))
-q.add_to(Card("D", 8))
-# q.add_to("Three")
-print(q)
-exit()
-print(q.size)
-r = q.remove_from()
-print(r)
-print(q)
-print(q.top_card())
-
-
-    # # deck = CardDeck()
-    # # print(deck)
-    # # deck.deal(2)
-    # # print(deck.__str__())
+if __name__=="__main__":
+    # CARD QUEUE TESTING
+    q = CardQueue()
+    print(q)
+    q.add_to(Card("S", 4))
+    q.add_to(Card("H", 0))
+    q.add_to(Card("H", 12))
+    q.add_to(Card("S", 11))
+    q.add_to(Card("D", 8))
+    # q.add_to("Three")
+    print(q)
     # exit()
-    # # card = Card("S", 12)
+    print(q.size)
+    r = q.remove_from()
+    print(r)
+    q.remove_from()
+    # print("TAIl")
+    # print(q.tail)
+    d = q.remove_from_top()
+    print(d.look_card())
+    # print(q)
+    # # q.remove_from_top()
+    print(q)
+    exit()
+
+    # CARD DECK TESTING
+    deck = CardDeck()
+    print(deck)
+    players = deck.deal(2, 6)
+    print(deck.__str__())
+    for p in players:
+        tc = p.top_card()
+        tc.flip_card()
+        tc.visible = False
+        print(tc)
+    s1 = players[0]
+    print(s1.suit)
+    t1 =s1.top_card()
+    t1.flip_card()
+    print(t1)
+    
+    print(s1.to_list())
+    print(s1)
+    s1.suit = "H"
+    print(s1.suit)
+    for _ in range(s1.size):
+        s1.remove_from()
+    print(s1)
+    # print(s1.suit)
+    
+    exit()
+    
+    # card = Card("S", 12)
+    # print(card)
+    # print(card.visible)
+    # card.value = 8
     # card.visible = True
-    # pile = CardStack()
-    # print(pile.head)
-    # # pile.top_card().visible = True
-    # print(pile.top_card())
-    
-    # pile.add_to(card)
-    # print(pile.head.next.value)
-    # # print(pile.top_card().next.next)
-    # # print(pile.head)
+    # print(card)
 
-    # hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
-    # print(hands)
-
-    # for i, hand in enumerate(hands, start=1):
-    #     print(f"Player {i}'s hand: {hand.__str__()}")
     # exit()
 
 
+    pile = CardStack()
+    print(pile.head.value)
+    print(pile.top_card())
+    # pile.top_card().visible = True
+    print(pile.top_card())
+
+    exit()
+        
+        # pile.add_to(card)
+        # print(pile.head.next.value)
+        # # print(pile.top_card().next.next)
+        # # print(pile.head)
+
+        # hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
+        # print(hands)
+
+        # for i, hand in enumerate(hands, start=1):
+        #     print(f"Player {i}'s hand: {hand.__str__()}")
+        # exit()
 
 
-#     deck = CardDeck()
-#     queue = deck.pile()
-#     print(queue)
-#     for i in range(50):
-#         queue.remove_from()
-#     print(queue)
-#     exit()
 
 
-    
-#     stack = deck.deal_cards(13, True)
-#     stack1 = deck.deal_cards(13, True)
-#     stack2 = deck.deal_cards(20, True)
-#     print(stack2.top_card())
-#     print(f"Stack 2: {stack2}, size {stack2.size}")
-#     stack3 = deck.deal_cards(13, True)
-#     stack4 = deck.deal_cards(13)
-#     # print(f"Stack: {stack}")
-#     # print(f"Stack: {stack1}")
-#     # print(f"Stack: {stack2}, size {stack2.size}")
-#     print(f"Stack 3: {stack3}, size {stack3.size}")
-#     print(f"Stack 4: {stack4}")
+    #     deck = CardDeck()
+    #     queue = deck.pile()
+    #     print(queue)
+    #     for i in range(50):
+    #         queue.remove_from()
+    #     print(queue)
+    #     exit()
 
-#     # for _ in range(1, 6):
-#     #     top_value = stack.remove_from()
-#     #     print(f"Pop: {top_value}") # variable name changed
-#     # print(f"Stack: {stack}")
-#     # print(stack.top_card())
+
+        
+    #     stack = deck.deal_cards(13, True)
+    #     stack1 = deck.deal_cards(13, True)
+    #     stack2 = deck.deal_cards(20, True)
+    #     print(stack2.top_card())
+    #     print(f"Stack 2: {stack2}, size {stack2.size}")
+    #     stack3 = deck.deal_cards(13, True)
+    #     stack4 = deck.deal_cards(13)
+    #     # print(f"Stack: {stack}")
+    #     # print(f"Stack: {stack1}")
+    #     # print(f"Stack: {stack2}, size {stack2.size}")
+    #     print(f"Stack 3: {stack3}, size {stack3.size}")
+    #     print(f"Stack 4: {stack4}")
+
+    #     # for _ in range(1, 6):
+    #     #     top_value = stack.remove_from()
+    #     #     print(f"Pop: {top_value}") # variable name changed
+    #     # print(f"Stack: {stack}")
+    #     # print(stack.top_card())
