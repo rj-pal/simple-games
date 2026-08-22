@@ -57,7 +57,7 @@ def suit_validator():
                 input(
                     "Press 1: for Spade, 2 for Heart, 3 for Diamond, 4 for Club: "
                 ))
-            if suit in {1, 2, 3, 4, 5}:
+            if suit in {1, 2, 3, 4}:
                 return suit_dictionary[suit]
             else:
                 print(
@@ -150,8 +150,7 @@ def play_game(test):
         elif move == 3:
             try:
                 while True:
-                    location = int(
-                        input(
+                    location = int(input(
                             "\nPress 1: To move a card from waste pile.\nPress 2: To move from the tableau.\n\nEnter your response: "
                         ))
                     if location not in {1, 2}:
@@ -197,17 +196,20 @@ def play_game(test):
                     print("\nMove successful\n")
             except GameError as e:
                 print(f"\n{e}\n")
+            test.show_waste_pile()
             input("Press ENTER or RETURN to Continue.")
         elif move == 6:
-
-            if test.reset_pile():
-                print("\nMove successful\n")
+            try:
+                if test.reset_pile():
+                    print("\nMove successful\n")
+            except GameError as e:
+                print(f"\n{e}\n")
 
             input("Press ENTER or RETURN to Continue.")
 
         if test.check_win():
             print("You Win!")
-        elif i == 3:
+        elif i == 300:
             print("Game Over")
             break
         else:

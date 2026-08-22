@@ -1,16 +1,26 @@
 """
 deck.py 
 Author: Robert Pal
-Updated: 2026-08-04
+Updated: 2026-08-21
 
 This module contains foundational code for a card deck that mimicks the behaviour of a physical deck of cards.
 
-The original intent of this data structure was to implement and demonstrate implementations of a stack using a linked list and node.
+The primary user-facing classes are CardDeck, a custom class that acts as a master deck of cards, and Card, a custom calss for a playing card.
+
+The two secondary classes are CardQueue and CardStack, two classes that act as piles or decks of cards. These are used in the card deck to manage
+cards that are used in play. 
+
+CardDeck interfaces using a deck attribute, which is itself a CardQueue, to allow for shuffling and dealing card from either the top or bottom of 
+the deck. When dealing hands of cards, or creating a pile of cards, the card deck will return CardStack objects, which act on the principle of access
+to the cards through the top card, moving down to the bottom card. 
+
+These two custom Card Objects are Linked Lists, which use a wrapper CardNode class for implementation.
+
+The original intent of this data structure was to demonstrate implementations of a stacks and queues using a linked list and node design pattern.
 """
 
 from random import shuffle
-from collections import deque
-# from utils.errors import EmptyPileError
+from utils.errors import EmptyPileError
 
 # Python program to demonstrate
 # stack implementation using a linked list.
@@ -19,12 +29,20 @@ from collections import deque
 class CardNode:
     
     def __init__(self, value):
-        """Base wrapper node class for implementation of various deck of cards. Basic linked list data structure."""
+        """
+        Base wrapper node class for Card Objects (CardQueue and CardStack) in the CardDeck Object that use a Card Object. 
+        
+        Implements these objects using single or double linked list data structures.
+
+        For 'value', only Card Objects are permitted to be included in a node
+        """
+        if not isinstance(value, Card):
+            raise TypeError("Only objects of Type Card() are allowed in CardNode")
         self.value = value
         self.next = None
         self.previous = None
 
-# Currently in use for GUI in Solitaire software
+# Currently in use for both CLI and GUI Solitaire Software
 SUITS = {
        "S": {"name": "Spades", "emoji": "♠️", "alt": "♠"},
        "H": {"name": "Hearts", "emoji": "❤️", "alt": "♥"},
@@ -52,7 +70,16 @@ CARDS = {
 
 class Card:
     def __init__(self, suit: str, value: int):
-        """Card data structure that is used in a Card Node."""
+        """
+        Card data structure that is used in a Card Node Object and are primary user facing objects in Solitaire Card Game.
+
+        Contains key data for card:
+        suit - string
+        value - number (or number substitute for a face)
+        visible - boolean
+        face - custom-emoji based string
+        name - basic card string 
+        """
         self._suit = suit
         self._value = value 
         self._visible = False
@@ -104,7 +131,8 @@ class Card:
         return self.face
     
     def flip_card(self):
-        self._visible = not self._visible
+        if self.value != 0:
+            self._visible = not self._visible
 
     def __repr__(self):
         return f"Suit: {self.suit}, Value: {self.value}, Visible: {self.visible}, Face: {self.face}"
@@ -112,7 +140,7 @@ class Card:
     def __str__(self):
         if self.visible:
             return self.face
-        return "Hidden"
+        return SUITS["B"]["emoji"]#"Hidden"
 
 class CardQueue:
 
@@ -146,41 +174,67 @@ class CardQueue:
 
     def add_to(self, value):
         """Pushes a new card node to the head of the queue."""
-        if not isinstance(value, Card):
-            raise TypeError("Only objects of Type Card() are allowed in Card Queue")
-        card_node = CardNode(value)
+        if not isinstance(value, (Card, CardNode)):
+            raise TypeError("Only objects of Type Card() or CardNode() are allowed in CardQueue")
+
+        if isinstance(value, Card):
+            card_node = CardNode(value)
+        else:
+            card_node = value
+
         self.tail.next = card_node
         card_node.previous = self.tail
         self.tail = card_node
         self._size += 1
 
-    def remove_from(self):
+    def remove_from_top(self, return_type: str="card"):
         """Removes the first card node from the queue. Returns the removed card."""
         if self.is_empty():
             raise Exception("Popping from an empty queue")
         remove_card = self.head.next
         self.head.next = remove_card.next
-        remove_card.previous = None
+        if remove_card != self.tail:
+            remove_card.next.previous = self.head
+        else:
+            self.tail = self.head
         self._size -= 1
-        return remove_card.value
 
-    def remove_from_top(self):
+        remove_card.next = None
+        remove_card.previous = None
+
+        return remove_card
+
+        # if return_type == "card":
+        #     return remove_card.value
+        
+        # if return_type == "card_data":
+        #     return remove_card.value.suit, remove_card.value.value
+
+    def remove_from(self, return_type: str="card"):
         if self.is_empty():
             raise Exception("Popping from an empty queue")
         remove_card = self.tail
         
-        remove_card.previous = None
+        remove_card.previous.next = None
         self.tail = remove_card.previous
-        self.tail.next = None
-       
-        return remove_card.value
+        self._size -= 1
 
+        remove_card.next = None
+        remove_card.previous = None
+
+        return remove_card
+
+        # if return_type == "card":
+        #     return remove_card.value
+
+        # if return_type == "card_data":
+        #     return remove_card.value.suit, remove_card.value.value
     
     def top_card(self):
         """Returns the head of the card queue"""
         if self.is_empty():
             return self.head.value
-        return self.head.next.value
+        return self.tail.value
 
 
 class CardStack:
@@ -293,8 +347,15 @@ class CardStack:
 
 
     # Push a value into the stack.
-    def add_to(self, card: 'Card'):
-        card_node = CardNode(card)
+    def add_to(self, card):
+        if not isinstance(card, (Card, CardNode)):
+            raise TypeError("Only objects of Type Card() or CardNode() are allowed in CardQueue")
+
+        if isinstance(card, Card):
+            card_node = CardNode(card)
+        else:
+            card_node = card
+        # card_node = CardNode(card)
         card_node.next = self.head.next # Make the new node point to the current head
         self.head.next = card_node # Update the head to be the new node
         self._size += 1
@@ -309,6 +370,8 @@ class CardStack:
         self._size -= 1
         if flip:
             remove_card.value.flip_card()
+
+        remove_card.next = None
 
         return remove_card.value
     
@@ -331,15 +394,42 @@ class CardDeck:
 
     @property
     def size(self):
-        return len(self.deck)
+        return self.deck.size
+        # return len(self.deck)
         
     def create_deck(self):
         suit_values = ("S", "H", "D", "C")
-        return deque([Card(suit=suit, value=value) for suit in suit_values for value in range(1, 14)])
+        deck = self.get_empty_card_queue()
+        for suit in suit_values:
+            for value in range(1, 14):
+                deck.add_to(Card(suit, value))
+        return deck
+
+    def show_deck(self):
+        print(self.deck)
+
+    def to_list(self):
+        """Stores the data of each card currently in the card queue"""
+        card_list = []
+        while not self.deck.is_empty():
+            card_list.append(self.deck.remove_from()) # remove each card into a list 
+        # self.show_deck()
+        return card_list
+
+    def recreate_deck(self, deck_as_list):
+        # self.show_deck()
+        deck = self.get_empty_card_queue()
+        for card_data in deck_as_list:
+            # print(card_data)
+            deck.add_to(card_data)
+        self.deck = deck
     
     def shuffle_deck(self):
-        shuffle(self.deck)
-    
+        temp_deck = self.to_list()
+        # print(temp_deck)
+        shuffle(temp_deck)
+        self.recreate_deck(temp_deck)
+
     def get_deck(self):
         return self.deck
     
@@ -350,81 +440,121 @@ class CardDeck:
         return CardQueue()
     
     def add_card(self, card):
-        self.deck.append(card)
+        self.deck.add_to(card)
+        # self.deck.append(card)
 
     def deal_card(self, facedown=True):
+        """Removes a single card from the deck or deals a card"""
         if self.size == 0:
             print("CardDeck is empty.")
             return None
-        card = self.deck.pop()      
-        card.visible = not facedown
+        card = self.deck.remove_from_top()
+        # card = Card(*card_data)     
+        card.value.visible = not facedown # Set 'visibile' attribute to False to make the card facedown
         return card
     
     def deal_cards(self, number_of_cards=52, facedown=True):
+        """Removes muliptle cards from the deck and adds to a stack, or deals a hand of cards. Imitates dealing a hand of cards with the 
+        first card dealt on the bottom and the last card on the top"""
         card_stack = CardStack()
+        # print("I'm in the STACK")
         for i in range(number_of_cards):
+            print(number_of_cards)
             if card := self.deal_card(facedown):
+                # print("dealing")
+                # print(card)
                 card_stack.add_to(card)
             else:
                 print("Dealing is finished.")
                 break   
         return card_stack
     
-    def deal(self, number_of_players, number_of_cards=52, facedown=True, shuffle=False):
+    def deal(self, number_of_hands, number_of_cards=52, facedown=True, shuffle=False):
+        """Creates an array of hands by dealing the desired number of cards in a hand"""
+        # print("I'm HERE!!")
+        # print(number_of_cards)
         if shuffle:
             self.shuffle_deck()
-        players = [self.deal_cards(number_of_cards, facedown) for _ in range(number_of_players)]
-        return players
+        hands = [self.deal_cards(number_of_cards, facedown) for _ in range(number_of_hands)]
+        return hands
 
     
     def pile(self, facedown=True):
+        # The purpose of this function is to remove any remaining cards in the deck and pile them into one card pile
         card_stack = CardStack()
         # print(self.deck)
-        while self.size != 0:
-            card = self.deck.popleft()
-            card.visible = not facedown
+        while self.deck.size != 0:
+            card = self.deck.remove_from_top(return_type="card_data")
+            # print(card_data)
+            # card = Card(*card_data)
+            card.value.visible = not facedown
             card_stack.add_to(card)      
         # print("Piling is finished")
         # print(card_stack)
         return card_stack
-    
-    def get_first_card(self):
-        if self.size == 0:
+
+    def get_last_card(self):
+        if self.deck.size == 0:
             print("CardDeck is empty.")
             return None
-        return self.deck.popleft()
+        card = self.deck.remove_from_top()
+        return card
     
-    def __str__(self):
-        return str(f"This is a card deck with {self.size} card(s)")
+    def get_first_card(self):
+        if self.deck.size == 0:
+            print("CardDeck is empty.")
+            return None
+        card = self.deck.remove_from(return_type="card_data")
+        return card
+        # if self.size == 0:
+        #     print("CardDeck is empty.")
+        #     return None
+        # return self.deck.popleft()
+    
+    # def __str__(self):
+    #     return str(f"This is a card deck with {self.size} card(s)")
 
 if __name__=="__main__":
     # CARD QUEUE TESTING
-    q = CardQueue()
-    print(q)
-    q.add_to(Card("S", 4))
-    q.add_to(Card("H", 0))
-    q.add_to(Card("H", 12))
-    q.add_to(Card("S", 11))
-    q.add_to(Card("D", 8))
-    # q.add_to("Three")
-    print(q)
-    # exit()
-    print(q.size)
-    r = q.remove_from()
-    print(r)
-    q.remove_from()
-    # print("TAIl")
-    # print(q.tail)
-    d = q.remove_from_top()
-    print(d.look_card())
+    # q = CardQueue()
     # print(q)
-    # # q.remove_from_top()
-    print(q)
-    exit()
+    # q.add_to(Card("S", 4))
+    # q.add_to(Card("H", 0))
+    # q.add_to(Card("H", 12))
+    # q.add_to(Card("S", 11))
+    # q.add_to(Card("D", 8))
+    # # q.add_to("Three")
+    # print(q)
+    # exit()
+    # print(q.size)
+    # r = q.remove_from()
+    # print(r)
+    # q.remove_from()
+    # # print("TAIl")
+    # # print(q.tail)
+    # d = q.remove_from_top()
+    # # print(d.look_card())
+    # print(d)
+    # # print(q)
+    # # # q.remove_from_top()
+    # print(q)
+    # exit()
 
     # CARD DECK TESTING
     deck = CardDeck()
-    print(deck)
+    print(deck.deal_card())
+    print(deck.deal_cards(3, False))
+    hands = deck.deal(3, 4, True)
+    for hand in hands:
+        print(hand)
+    exit()
+    # deck.pile()
+    # print(deck)
+    # deck.show_deck()
+    # # print(deck.to_list())
+    # deck.shuffle_deck()
+    # deck.show_deck()
+    # exit()
     players = deck.deal(2, 6)
     print(deck.__str__())
     for p in players:
@@ -432,6 +562,7 @@ if __name__=="__main__":
         tc.flip_card()
         tc.visible = False
         print(tc)
+        print(p)
     s1 = players[0]
     print(s1.suit)
     t1 =s1.top_card()
