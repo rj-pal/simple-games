@@ -6,7 +6,7 @@ Updated: 2026-08-04
 This module contains foundational code for the game solitaire.
 """
 
-from core.deck import Card, CardDeck, CardStack
+from core.deck import Card, CardDeck, CardStack, CardQueue
 from utils.errors import EmptyPileError, InvalidMoveError, InvalidStackError
 
 class Solitare:
@@ -50,17 +50,31 @@ class Solitare:
     def reset_pile(self):
         if not self.draw_pile.is_empty():
             raise InvalidMoveError("Cannot reset the stock pile when it is not empty.")
-        number_of_waste_cards = self.waste_pile.size
+        # number_of_waste_cards = self.waste_pile.size
         while not self.waste_pile.is_empty():
-            waste_card = self.waste_pile.remove_from(flip=True)
-            self.card_deck.add_card(waste_card)
-        for card in self.card_deck.deck:
-            print(card)
-        temp_stack = self.card_deck.get_empty_card_stack()
-        for i in range(number_of_waste_cards):
-            bottom_card = self.card_deck.get_first_card()
-            temp_stack.add_to(bottom_card)
-        self.draw_pile = temp_stack
+            # waste_card = self.waste_pile.remove_from(flip=True)
+            # print("HEREERERE")
+            waste_card = self.waste_pile.remove_from()
+            waste_card.value.flip_card()
+            # waste_card = Card(*waste_card_data)
+            self.draw_pile.add_to(waste_card)
+        # self.card_deck.show_deck()
+        # self.draw_pile = self.card_deck.pile()
+
+        # temp_stack = self.card_deck.get_empty_card_stack()
+        # for i in range(number_of_waste_cards):
+        #     bottom_card = self.card_deck.get_first_card() # self.card_deck.get_first_card()
+        #     print(bottom_card)
+        #     temp_stack.add_to(bottom_card)
+        # self.draw_pile = temp_stack
+
+        # for card in self.card_deck.deck:
+        #     print(card)
+        # temp_stack = self.card_deck.get_empty_card_stack()
+        # for i in range(number_of_waste_cards):
+        #     bottom_card = self.card_deck.get_first_card()
+        #     temp_stack.add_to(bottom_card)
+        # self.draw_pile = temp_stack
         return True
 
     def check_move(self, from_card: Card, to_card: Card):
@@ -79,9 +93,10 @@ class Solitare:
             return card.value == 1
         return card.value == foundation_pile.top_card().value + 1
 
-    def move_card(self, from_card_stack: CardStack, to_card_stack: CardStack, flip_card: bool=False):
+    def move_card(self, from_card_stack: CardStack, to_card_stack: CardQueue, flip_card: bool=False):
         """Moves a single card from one card stack to another. Valid Card Stacks: tabelau, foundation pile, draw pile, or waste pile."""
         card = from_card_stack.remove_from(flip_card)
+        print(card)
         to_card_stack.add_to(card)
         return True
 
@@ -90,8 +105,10 @@ class Solitare:
 
     def draw(self):
         """Draw a card from the stock pile and flip it over for move."""
+        print(self.card_deck)
         cards_drawn_for_play = 0
         for _ in range(self._klondike_value):
+            self.card_deck.show_deck()
             try:
                 self.move_card(from_card_stack=self.draw_pile, to_card_stack=self.waste_pile, flip_card=True)
                 # card_for_play = self.draw_pile.remove_from(flip=True)         
@@ -237,8 +254,7 @@ class Solitare:
         return draw_pile
 
     def make_waste_pile(self):
-        return self.card_deck.get_empty_card_stack()
-
+        return self.card_deck.deck #
 
     def get_deck(self):
         return self.card_deck
@@ -295,14 +311,16 @@ class Solitare:
 
     def show_waste_pile(self):
         waste_pile = []
-        temp_card = self.get_waste_pile().head.next
+        temp_card = self.get_waste_pile().tail
+        # temp_card = self.get_waste_pile().head.next
         for _ in range(self._klondike_value):
             if temp_card is not None:
                 waste_pile.append(temp_card.value)
             else:
                 break
 
-            temp_card = temp_card.next
+            # temp_card = temp_card.next
+            temp_card = temp_card.previous
         return waste_pile[::-1]
 
 
