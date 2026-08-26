@@ -103,7 +103,7 @@ class SolitaireGUI:
         if self.game.check_empty_waste_pile():
             self.waste_label.config(text=self.card_back_empty_pile, relief="flat")
         else:
-            last_card_id = self.game.waste_pile.top_card().face
+            last_card_id = self.game.waste_pile.get_card_in_play().face
             self.waste_label.config(text=last_card_id, relief="flat")
             # default one card transfer and index -1 as only one card available for transfer 
             self.waste_label.bind("<Button-1>", lambda card_event, number_of_cards_for_transfer=1, pile_index=-1: 
@@ -117,15 +117,15 @@ class SolitaireGUI:
                 self.foundation_labels[i].config(text=VALID_SUITS[suit], relief="flat")
 
             else:
-                top_card_id = cards.top_card().value
-                emoji = self.card_emojis.get((top_card_id, suit), top_card_id)
+                get_card_in_play_id = cards.get_card_in_play().value
+                emoji = self.card_emojis.get((get_card_in_play_id, suit), get_card_in_play_id)
                 foreground_colour = "red"
                 if suit in {"S", "C"}:
                     foreground_colour = "black"
                 self.foundation_labels[i].config(text=emoji, relief="flat", fg=foreground_colour) #, font=("Segoe UI Emoji", 36))
                 print("FOUNDATION PILE INFO")
                 print("CARD")
-                print(top_card_id)
+                print(get_card_in_play_id)
                 print("EMOJI")
                 print(emoji)
             
@@ -204,7 +204,7 @@ class SolitaireGUI:
             if self.foundation_suit_in_play is not None:
                 return
             if source_pile_index == -1:
-                source_card_suit = self.game.waste_pile.top_card().suit
+                source_card_suit = self.game.waste_pile.get_card_in_play().suit
             else:
                 source_card_suit = self.game.get_tableau_card(source_pile_index).suit
             print(f"Selected Card suit is {source_card_suit}")
@@ -247,8 +247,8 @@ class SolitaireGUI:
             print(number_of_cards_for_transfer)
             # print(source_card_id)
             # print(destination_card_id)
-            # source_card = self.game.tableau[source_pile_index].top_card()
-            # destination_card = self.game.tableau[destination_pile_index].top_card()
+            # source_card = self.game.tableau[source_pile_index].get_card_in_play()
+            # destination_card = self.game.tableau[destination_pile_index].get_card_in_play()
 
             try:
                 if self.foundation_suit_in_play is not None:
@@ -429,8 +429,8 @@ if __name__ == "__main__":
 #         self.stock_label.config(text=self.card_back_emoji if game_state['stock'] else "", relief="flat")
         
 #         # Draw waste pile
-#         if game_state['waste'].top_card():
-#             last_card_id = game_state['waste'].top_card().face
+#         if game_state['waste'].get_card_in_play():
+#             last_card_id = game_state['waste'].get_card_in_play().face
 #             emoji = self.card_emojis.get(last_card_id, last_card_id)
 #             self.waste_label.config(text=emoji)
 #         else:

@@ -1,7 +1,7 @@
 """
 deck.py 
 Author: Robert Pal
-Updated: 2026-08-21
+Updated: 2026-08-25
 
 This module contains foundational code for a card deck that mimicks the behaviour of a physical deck of cards.
 
@@ -56,6 +56,11 @@ FACES = {
         7: " 7", 8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"
     }
 
+suit_dict = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
+
+NAMES = {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
+                        8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
+
 # Possible use in future GUI for Solitaire or other card game software
 CARDS = {
             'A♠': '🂡', '2♠': '🂢', '3♠': '🂣', '4♠': '🂤', '5♠': '🂥', '6♠': '🂦', '7♠': '🂧',
@@ -69,45 +74,75 @@ CARDS = {
         }
 
 class Card:
-    def __init__(self, suit: str, value: int):
+    def __init__(self, suit: str, value: int, card_type="standard"):
         """
         Card data structure that is used in a Card Node Object and are primary user facing objects in Solitaire Card Game.
 
         Contains key data for card:
         suit - string
         value - number (or number substitute for a face)
-        visible - boolean
+        visible - boolean (set initial to 'False' indicating face down card)
         face - custom-emoji based string
-        name - basic card string 
+        name - basic card string for display messaging
         """
+        self._card_type = card_type
         self._suit = suit
-        self._value = value 
+        self._value = value
         self._visible = False
         self.face = self.create_face()
         self.name = self.create_name()
-        
+
+    @property
+    def card_type(self):
+        return self._card_type
+
+    @card_type.setter
+    def card_type(self, new_card_type):
+        if isinstance(new_card_type, str):
+            if new_card_type in {"standard", "non_standard"}:
+                self._card_type = new_card_type
+            else:
+                raise ValueError("Only Card Type standard or non_standard allowed")
+        else:
+            raise ValueError("Card Type must be a string (standard or non_standard)")
+
+    @property
+    def suit(self):
+        return self._suit
+
+    @property
+    def value(self):
+        return self._value
+
+    @suit.setter
+    def suit(self, new_suit):
+        if self._card_type == "standard":
+            if not isinstance(new_suit, str):
+                raise ValueError("Suit must be a string")
+            if new_suit not in SUITS:
+                raise ValueError(f"Suit must be one of {list(SUITS.keys())} for standard cards")
+        self._suit = new_suit
+
+    @value.setter
+    def value(self, new_value):
+        if self._card_type == "standard":
+            if not isinstance(new_value, int):
+                raise ValueError("Value must be an integer")
+            if new_value not in FACES:
+                raise ValueError(f"Value must be one of {list(FACES.keys())} for standard cards")
+        self._value = new_value
+         
     def create_face(self, faces: dict=FACES, suits: dict=SUITS, suit_type: str="emoji"):
-        """Creates a physical card face based on the type of emoji"""   
+        """Creates a physical card face based on the type of emoji from the SUITS dictionary"""   
         if self.value == 0:
             return suits[self.suit]["alt"]
         else:
             return f"{faces[self.value]} of {suits[self.suit][suit_type]}"
     
-    def create_name(self):
+    def create_name(self, names: dict=NAMES, suits: dict=SUITS, name: str="name"):
         """Creates basic string name for each card."""
-        suit_dict = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
-        name_dict = {1: "Ace", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
-                        8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King"}
         
-        return f"{name_dict[self.value]} of {suit_dict[self.suit]}" if self.value != 0 else "This is a place card."
-    
-    @property
-    def value(self):
-        return self._value
-
-    @property
-    def suit(self):
-        return self._suit
+        return f"{names[self.value]} of {suits[self.suit][name]}" if self.value != 0 else "This is a place card."
     
     @property
     def visible(self):
@@ -119,7 +154,7 @@ class Card:
             self._visible = new_visibility
         else:
             raise ValueError("Visible must be a boolean value.")
-
+        
     @property
     def is_black(self):
         return self.suit in {"S", "C"}
@@ -187,10 +222,10 @@ class CardQueue:
         self.tail = card_node
         self._size += 1
 
-    def remove_from_top(self, return_type: str="card"):
+    def remove_from_front(self, flip: bool=False):
         """Removes the first card node from the queue. Returns the removed card."""
         if self.is_empty():
-            raise Exception("Popping from an empty queue")
+            raise EmptyPileError#Exception("Popping from an empty queue")
         remove_card = self.head.next
         self.head.next = remove_card.next
         if remove_card != self.tail:
@@ -201,18 +236,28 @@ class CardQueue:
 
         remove_card.next = None
         remove_card.previous = None
+        print(remove_card.value)
+        print("Im in the remove from top function")
 
+        if flip:
+            remove_card.value.flip_card()
         return remove_card
 
+        # if return_type == "node":
+        #     return remove_card
+
         # if return_type == "card":
+        #     remove_card.value.flip_card()
+        #     print(remove_card.value)
         #     return remove_card.value
+       
         
         # if return_type == "card_data":
         #     return remove_card.value.suit, remove_card.value.value
 
-    def remove_from(self, return_type: str="card"):
+    def remove_from(self, flip: bool=False):
         if self.is_empty():
-            raise Exception("Popping from an empty queue")
+            raise EmptyPileError#Exception("Popping from an empty queue")
         remove_card = self.tail
         
         remove_card.previous.next = None
@@ -222,6 +267,9 @@ class CardQueue:
         remove_card.next = None
         remove_card.previous = None
 
+        if flip:
+            remove_card.value.flip_card()
+
         return remove_card
 
         # if return_type == "card":
@@ -230,11 +278,28 @@ class CardQueue:
         # if return_type == "card_data":
         #     return remove_card.value.suit, remove_card.value.value
     
-    def top_card(self):
-        """Returns the head of the card queue"""
+    def get_card_in_play(self):
+        """Returns the tail of the card queue. Current card in play."""
         if self.is_empty():
             return self.head.value
         return self.tail.value
+
+    def look_at(self, queue_index):
+        """Traverses card queue to retrieve card at the requested queue_index position from the back."""
+        if queue_index < 0 or queue_index >= self._size: 
+            raise IndexError(f"Index {queue_index} out of bounds for queue of size {self._size}.")
+        
+        current_card_node = self.tail
+        
+        for _ in range(queue_index): 
+            if not current_card_node: 
+                raise IndexError("Index {queue_index} out of bounds with None pointer.")
+            current_card_node = current_card_node.previous
+        
+        if current_card_node:
+            return current_card_node.value
+        else: 
+            raise IndexError("Could not retrieve card due to internal error.")
 
 
 class CardStack:
@@ -269,11 +334,11 @@ class CardStack:
     @suit.setter
     def suit(self, value):
         """Sets the suit only if it is one of the four valid values."""
-        if value not in self.VALID_SUITS.keys():
-            raise ValueError(f"Invalid suit '{value}'. Must be one of {self.VALID_SUITS.keys()} or None.")
+        if value not in SUITS:
+            raise ValueError(f"Invalid suit '{value}'. Must be one of {SUITS} or None.")
         self._suit = value
         # self.head.value = self.VALID_SUITS[self._suit]
-        self.head.value.face = self.VALID_SUITS[self._suit]
+        self.head.value.face = SUITS[self._suit]
 
     # String representation of the stack of cards
     def __str__(self):
@@ -314,7 +379,7 @@ class CardStack:
             return None
 
     # Get the top card of the card stack
-    def top_card(self):
+    def get_card_in_play(self):
         """Returns the top card of the card stack"""
         if self.is_empty():
             # raise Exception("This pile of cards is empty.")
@@ -396,6 +461,9 @@ class CardDeck:
     def size(self):
         return self.deck.size
         # return len(self.deck)
+
+    def is_empty(self):
+        return self.deck.is_empty()
         
     def create_deck(self):
         suit_values = ("S", "H", "D", "C")
@@ -412,7 +480,7 @@ class CardDeck:
         """Stores the data of each card currently in the card queue"""
         card_list = []
         while not self.deck.is_empty():
-            card_list.append(self.deck.remove_from()) # remove each card into a list 
+            card_list.append(self.deck.remove_from_front()) # remove each card into a list 
         # self.show_deck()
         return card_list
 
@@ -448,7 +516,7 @@ class CardDeck:
         if self.size == 0:
             print("CardDeck is empty.")
             return None
-        card = self.deck.remove_from_top()
+        card = self.deck.remove_from_front()
         # card = Card(*card_data)     
         card.value.visible = not facedown # Set 'visibile' attribute to False to make the card facedown
         return card
@@ -481,10 +549,11 @@ class CardDeck:
     
     def pile(self, facedown=True):
         # The purpose of this function is to remove any remaining cards in the deck and pile them into one card pile
-        card_stack = CardStack()
+        # card_stack = CardStack()
+        card_stack = CardQueue()
         # print(self.deck)
         while self.deck.size != 0:
-            card = self.deck.remove_from_top(return_type="card_data")
+            card = self.deck.remove_from_front()
             # print(card_data)
             # card = Card(*card_data)
             card.value.visible = not facedown
@@ -493,11 +562,17 @@ class CardDeck:
         # print(card_stack)
         return card_stack
 
+    def remove_from(self, flip):
+        card_node = self.deck.remove_from_top()
+        if flip:
+            card_node.value.flip_card()
+        return card_node
+
     def get_last_card(self):
         if self.deck.size == 0:
             print("CardDeck is empty.")
             return None
-        card = self.deck.remove_from_top()
+        card = self.deck.remove_from_front()
         return card
     
     def get_first_card(self):
@@ -558,14 +633,14 @@ if __name__=="__main__":
     players = deck.deal(2, 6)
     print(deck.__str__())
     for p in players:
-        tc = p.top_card()
+        tc = p.get_card_in_play()
         tc.flip_card()
         tc.visible = False
         print(tc)
         print(p)
     s1 = players[0]
     print(s1.suit)
-    t1 =s1.top_card()
+    t1 =s1.get_card_in_play()
     t1.flip_card()
     print(t1)
     
@@ -592,15 +667,15 @@ if __name__=="__main__":
 
     pile = CardStack()
     print(pile.head.value)
-    print(pile.top_card())
-    # pile.top_card().visible = True
-    print(pile.top_card())
+    print(pile.get_card_in_play())
+    # pile.get_card_in_play().visible = True
+    print(pile.get_card_in_play())
 
     exit()
         
         # pile.add_to(card)
         # print(pile.head.next.value)
-        # # print(pile.top_card().next.next)
+        # # print(pile.get_card_in_play().next.next)
         # # print(pile.head)
 
         # hands = CardDeck().deal(number_of_players=5, number_of_cards=15, shuffle=True)
@@ -626,7 +701,7 @@ if __name__=="__main__":
     #     stack = deck.deal_cards(13, True)
     #     stack1 = deck.deal_cards(13, True)
     #     stack2 = deck.deal_cards(20, True)
-    #     print(stack2.top_card())
+    #     print(stack2.get_card_in_play())
     #     print(f"Stack 2: {stack2}, size {stack2.size}")
     #     stack3 = deck.deal_cards(13, True)
     #     stack4 = deck.deal_cards(13)
@@ -640,4 +715,4 @@ if __name__=="__main__":
     #     #     top_value = stack.remove_from()
     #     #     print(f"Pop: {top_value}") # variable name changed
     #     # print(f"Stack: {stack}")
-    #     # print(stack.top_card())
+    #     # print(stack.get_card_in_play())

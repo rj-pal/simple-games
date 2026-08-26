@@ -100,14 +100,14 @@ def play_game(test):
         fp = test.get_foundation_piles()
         draw = test.get_stock_pile()
         # draw = test.check_stock_pile()
-        waste = test.show_waste_pile()
+        waste = test.get_waste_pile_for_print()
         # print(type(tab))
         # print(type(fp))
         # print(type(draw))
         # print(type(waste))
 
         print_card_table(tab, fp, draw, waste)
-        # test.show_stock_pile()
+        test.show_stock_pile()
 
         print("\nPress 1: To build to the tableau from the draw pile.\nPress 2: To move one or more cards on the tableau.\n" \
                     "Press 3: To build to the foundation piles from the draw pile or tableau.\nPress 4: To move a card from the foundation pile.\n" \

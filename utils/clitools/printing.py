@@ -437,12 +437,12 @@ def print_foundation_piles(piles: dict) -> None:
     """
     print("FOUNDATION PILES\n")
     # Card stack has optionally atribute called 'suit' for displaying a foundation pile that hasn't been built on yet
-    top_cards = [
+    get_card_in_plays = [
         card_stack.get_stack_suit() if card_stack.is_empty()
-        else card_stack.top_card().face
+        else card_stack.get_card_in_play().face
         for card_stack in piles.values()
     ]
-    print("   |   ".join(top_cards)) # Divider
+    print("   |   ".join(get_card_in_plays)) # Divider
 
 
 def print_draw_pile(pile_is_empty: bool, pile:list, centering_value=6) -> None:
