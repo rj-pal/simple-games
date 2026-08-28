@@ -232,11 +232,17 @@ class SolitaireGUI:
             # No card selected, so this is the first click.
             # Store the card data and the widget reference for highlighting.
             self.selected_item = (number_of_cards_for_transfer, pile_index) # Stores key information for first selected item
-            self.highlighted_widget = card_event.widget
-            self.highlighted_widget.config(relief="sunken", borderwidth=2)
-            test_number=self.selected_item
-            print("HERE IN SELECT ITEM IS NONE")
-            print(test_number)
+            if self.game.tableau[pile_index].is_empty():
+                print("Cannot Select an empty tableau pile in the first move")
+                self.selected_item = None
+                pass
+                
+            else:
+                self.highlighted_widget = card_event.widget
+                self.highlighted_widget.config(relief="sunken", borderwidth=2)
+                test_number=self.selected_item
+                print("HERE IN SELECT ITEM IS NONE")
+                print(test_number)
 
         else:
             # A card is already selected, so this is the second click (a move).
@@ -264,7 +270,8 @@ class SolitaireGUI:
                     self.game.transfer(source_pile_index, destination_pile_index, source_number_of_cards_for_transfer)
                     self.draw_game()
             except GameError as e:
-                messagebox.showinfo("NAN", "Invalid move")
+                # message = str(e)
+                messagebox.showinfo(f"NAN", f"Invalid move {e}")
                 pass
                         
             # else:
