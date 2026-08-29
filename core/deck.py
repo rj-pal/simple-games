@@ -21,6 +21,7 @@ The original intent of this data structure was to demonstrate implementations of
 
 from random import shuffle
 from utils.errors import EmptyPileError
+from utils.emojis import SUITS, FACES, FACEDOWNEMOJI
 
 # Python program to demonstrate
 # stack implementation using a linked list.
@@ -43,18 +44,8 @@ class CardNode:
         self.previous = None
 
 # Currently in use for both CLI and GUI Solitaire Software
-SUITS = {
-       "S": {"name": "Spades", "emoji": "♠️", "alt": "♠"},
-       "H": {"name": "Hearts", "emoji": "❤️", "alt": "♥"},
-       "D": {"name": "Diamonds", "emoji": "♦️", "alt": "♦"},
-       "C": {"name": "Clubs", "emoji": "♣️", "alt": "♣"},
-       "B": {"name": "Blank", "emoji": "🎴", "alt": "🂠"},
-   }
 
-FACES = {
-        0: "Blank", 1: " A", 2: " 2", 3: " 3", 4: " 4", 5: " 5", 6: " 6", 
-        7: " 7", 8: " 8", 9: " 9", 10: "10", 11: " J", 12: " Q", 13: " K"
-    }
+
 
 suit_dict = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
 
@@ -89,6 +80,7 @@ class Card:
         self._suit = suit
         self._value = value
         self._visible = False
+        self.face_down_card = SUITS["B"]["emoji"]
         self.face = self.create_face()
         self.name = self.create_name()
 
@@ -175,7 +167,7 @@ class Card:
     def __str__(self):
         if self.visible:
             return self.face
-        return SUITS["B"]["emoji"]
+        return self.face_down_card
 
 class CardQueue:
 

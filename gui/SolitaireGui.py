@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from games.solitaire import Solitare
 from utils.errors import *
+from utils.emojis import *
 class SolitaireGUI:
     """SolitaireGUI class manages the GUI and backend state for a Solitaire desktop application."""
     def __init__(self, master):
@@ -9,6 +10,8 @@ class SolitaireGUI:
         master.title("Solitaire - Emoji Edition")
         master.geometry("1200x1000")
         master.configure(bg="#006400") # Dark green felt color
+        # master.configure(bg="#640032") # Test color
+
        
         # Initialize the Solitaire backend game state within the GUI class
         self.game = Solitare(klondike_value=1)
@@ -17,30 +20,10 @@ class SolitaireGUI:
         self.foundation_suit_in_play = None
         self.reset = False
         
-        # Define the emoji card characters
-        self.card_back_emoji = "🎴"
-        self.card_back_empty_pile = "⚔️"
-        self.card_emojis = {
-            (1, 'S'): 'A♠',  (2, 'S'): '2♠',  (3, 'S'): '3♠',  (4, 'S'): '4♠',
-            (5, 'S'): '5♠',  (6, 'S'): '6♠',  (7, 'S'): '7♠',  (8, 'S'): '8♠',
-            (9, 'S'): '9♠', (10, 'S'): 'T♠', (11, 'S'): 'J♠', (12, 'S'): 'Q♠',
-            (13, 'S'): 'K♠',
-
-            (1, 'H'): 'A♥',  (2, 'H'): '2♥',  (3, 'H'): '3♥',  (4, 'H'): '4♥',
-            (5, 'H'): '5♥',  (6, 'H'): '6♥',  (7, 'H'): '7♥',  (8, 'H'): '8♥',
-            (9, 'H'): '9♥', (10, 'H'): 'T♥', (11, 'H'): 'J♥', (12, 'H'): 'Q♥',
-            (13, 'H'): 'K♥',
-
-            (1, 'D'): 'A♦',  (2, 'D'): '2♦',  (3, 'D'): '3♦',  (4, 'D'): '4♦',
-            (5, 'D'): '5♦',  (6, 'D'): '6♦',  (7, 'D'): '7♦',  (8, 'D'): '8♦',
-            (9, 'D'): '9♦', (10, 'D'): 'T♦', (11, 'D'): 'J♦', (12, 'D'): 'Q♦',
-            (13, 'D'): 'K♦',
-
-            (1, 'C'): 'A♣',  (2, 'C'): '2♣',  (3, 'C'): '3♣',  (4, 'C'): '4♣',
-            (5, 'C'): '5♣',  (6, 'C'): '6♣',  (7, 'C'): '7♣',  (8, 'C'): '8♣',
-            (9, 'C'): '9♣', (10, 'C'): 'T♣', (11, 'C'): 'J♣', (12, 'C'): 'Q♣',
-            (13, 'C'): 'K♣'
-        }
+        # Define the emoji card characters from utilities
+        self.card_back_emoji = SUITS["B"]["emoji"]
+        self.card_back_empty_pile = EMPTYPILEEMOJI
+        self.card_emojis = EMOJIDICTIONARY
 
         self.create_widgets()
         self.draw_game()
@@ -48,25 +31,26 @@ class SolitaireGUI:
     def create_widgets(self):
         # Frame for the top section
         self.top_frame = tk.Frame(self.master, bg="#006400")
-        self.top_frame.pack(pady=20)
+        self.top_frame.pack(pady=(20, 0))
 
         # Reset Game label
-        self.reset_label = tk.Label(self.top_frame, text="↩️", font=("Arial", 20, "bold"), bg="#006400", fg="white",
+        ### N.B. -  Arial 20 here, others are 40 ###
+        self.reset_label = tk.Label(self.top_frame, text="↩️", font=("Arial", 22, "bold"), bg="#006400", fg="white",
             cursor="pirate"
         )
 
         # Stock pile
-        self.stock_label = tk.Label(self.top_frame, text=self.card_back_emoji, font=("Arial", 40), bg="#006400", fg="white", cursor="fleur")
+        self.stock_label = tk.Label(self.top_frame, text=self.card_back_emoji, font=("Arial", 22), bg="#006400", fg="white", cursor="fleur")
         self.stock_label.pack(side=tk.LEFT, padx=10)
         
         # Waste pile
-        self.waste_label = tk.Label(self.top_frame, text=self.card_back_empty_pile, font=("Arial", 40), bg="#006400", fg="white")
+        self.waste_label = tk.Label(self.top_frame, text=self.card_back_empty_pile, font=("Arial", 22), bg="#006400", fg="white")
         self.waste_label.pack(side=tk.LEFT, padx=10)
 
         # Foundation piles
         self.foundation_labels = []
         for i in range(4):
-            label = tk.Label(self.top_frame, width=3, height=2, font=("Arial", 40), bg="#004d00", fg="white", relief="groove", borderwidth=2)
+            label = tk.Label(self.top_frame, width=3, height=2, font=("Arial", 22), bg="#004d00", fg="white", relief="groove", borderwidth=2)
             label.pack(side=tk.LEFT, padx=10)
             self.foundation_labels.append(label)
 
@@ -77,10 +61,10 @@ class SolitaireGUI:
         # Tableau piles as fixed-size frames
         self.tableau_piles = []
         for i in range(7):
-            pile_frame = tk.Frame(self.tableau_frame, bg="#006400", width=140, height=500)
+            pile_frame = tk.Frame(self.tableau_frame, bg="#006400", width=140)
             pile_frame.pack(side=tk.LEFT, padx=10, anchor='n')
             self.tableau_piles.append(pile_frame)
-            pile_frame.pack_propagate(False) # Prevents the frame from shrinking
+            # pile_frame.pack_propagate(False) # Prevents the frame from shrinking
 
     def draw_game(self):
         # The game state is directly accessible via self.game
@@ -156,7 +140,7 @@ class SolitaireGUI:
                     relief = "sunken"
 
 
-                card_label = tk.Label(self.tableau_piles[i], text=card_text, relief=relief, font=("Arial", 40), 
+                card_label = tk.Label(self.tableau_piles[i], text=card_text, relief=relief, font=("Arial", 22), 
                                       bg="#006400", fg='white')
                 card_label.pack(pady=0, anchor='n')
                 

@@ -1,7 +1,7 @@
 """
 printing.py 
 Author: Robert Pal
-Updated: 2025-08-21
+Updated: 2026-08-29
 
 This module contains all game related display and print functions for Command Line Applications.
 """
