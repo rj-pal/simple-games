@@ -1,22 +1,17 @@
 """
 deck.py 
 Author: Robert Pal
-Updated: 2026-08-30
+Updated: 2026-08-31
 
-This module contains foundational code for a card deck that mimicks the behaviour of a physical deck of cards.
+This module contains foundational code for CardDeck, a virtual deck of cards that mimicks the behaviour of a physical deck of cards.
 
-The primary user-facing classes are CardDeck, a custom class that acts as a master deck of cards, and Card, a custom calss for a playing card.
-
-The two secondary classes are CardQueue and CardStack, two classes that act as piles or decks of cards. These are used in the card deck to manage
-cards that are used in play. 
+The primary user-facing card class, this custom class that acts as a master deck of cards using a StandardCard object, a custom calss for a playing card.
+It also uses two secondary data card structure classes, CardQueue and CardStack. These two classes act as piles, hands, or decks of cards, and are used
+in the CardDeck to manage all cards that are used in play for a game. 
 
 CardDeck interfaces using a deck attribute, which is itself a CardQueue, to allow for shuffling and dealing card from either the top or bottom of 
 the deck. When dealing hands of cards, or creating a pile of cards, the card deck will return CardStack objects, which act on the principle of access
 to the cards through the top card, moving down to the bottom card. 
-
-These two custom Card Objects are Linked Lists, which use a wrapper CardNode class for implementation.
-
-The original intent of this data structure was to demonstrate implementations of a stacks and queues using a linked list and node design pattern.
 """
 
 from random import shuffle
@@ -25,6 +20,8 @@ from core.cards import StandardCard
 from core.card_structures import *
 
 Card = StandardCard
+CardStack = CardStack
+CardQueue = CardQueue
 
 
 class CardDeck:
@@ -129,15 +126,20 @@ class CardDeck:
         return hands
 
     
-    def pile(self, facedown=True):
+    def pile(self, facedown=True, card_pile_type="card_queue"):
         # The purpose of this function is to remove any remaining cards in the deck and pile them into one card pile
-        # card_stack = CardStack()
-        card_stack = CardQueue()
+        if card_pile_type == "card_queue":
+            card_pile = CardQueue()
+        elif card_pile_type == "card_stack":
+            card_pile = CardStack()
+        else:
+            raise TypeError
+        
         while self.deck.size != 0:
             card = self.deck.remove_from_front()
             card.value.visible = not facedown
-            card_stack.add_to(card)      
-        return card_stack
+            card_pile.add_to(card)      
+        return card_pile
 
     def remove_from(self, flip):
         card_node = self.deck.remove_from_top()
@@ -158,9 +160,6 @@ class CardDeck:
             return None
         card = self.deck.remove_from(return_type="card_data")
         return card
-    
-    # def __str__(self):
-    #     return str(f"This is a card deck with {self.size} card(s)")
 
 if __name__=="__main__":
     # CARD QUEUE TESTING

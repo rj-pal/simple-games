@@ -14,6 +14,21 @@ class StandardCard(Card):
     Concrete playing card implementation for a standard French-suited deck of cards.
 
     Inherits core card mechanics and interface requirements from abstract Card base class.
+
+    Creates card faces based on two core dictionaries and card strings following the contract inherited from the base class: 
+
+    SUITS = {"S": {"name": "Spades", "emoji": "♠️", "alt": "♠"}, "H": {"name": "Hearts", "emoji": "❤️", "alt": "♥"}, 
+    "D": {"name": "Diamonds", "emoji": "♦️", "alt": "♦"},"C": {"name": "Clubs", "emoji": "♣️", "alt": "♣"}, "B": {"name": "Blank", "emoji": "🎴", "alt": "🂠"},}
+
+    CARDS = {
+    0: {"short": "Blank", "full": "Blank"}, 1: {"short": " A", "full": "Ace"}, 2: {"short": " 2", "full": "Two"}, 3: {"short": " 3", "full": "Three"}, 
+    4: {"short": " 4", "full": "Four"}, 5: {"short": " 5", "full": "Five"}, 6: {"short": " 6", "full": "Six"}, 7: {"short": " 7", "full": "Seven"}, 
+    8: {"short": " 8", "full": "Eight"}, 9: {"short": " 9", "full": "Nine"}, 10: {"short": "10", "full": "Ten"}, 11: {"short": " J", "full": "Jack"}, 
+    12: {"short": " Q", "full": "Queen"}, 13: {"short": " K", "full": "King"},}
+
+    FACE_DOWN_EMOJI = SUITS["B"]["emoji"]
+
+    BLANK_CARD_EMOJI = SUITS["B"]["alt"]
     """
 
     # Required attributes required by abstract Card base class for key data in Card (attirbutes)
@@ -23,6 +38,7 @@ class StandardCard(Card):
     BLANK_CARD = BLANK_CARD_EMOJI
 
     def __init__(self, suit: str, value: int):
+        """Initiates Standard Card and inherits from ABC Card. Key card attributes are value, suit, visible, face and name."""
         # Validate prior to triggering super().__init__()
         self._validate_suit(suit)
         self._validate_value(value)

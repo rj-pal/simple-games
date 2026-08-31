@@ -1,11 +1,21 @@
+"""
+card_structures.py 
+Author: Robert Pal
+Updated: 2026-08-31
+
+This module contains foundational code for a two card data structures and one wrapper class: CardQueue, CardStack, CardNode
+
+These two custom Card Objects are Linked Lists, which use a wrapper CardNode class for implementation.
+
+The original intent of this data structure was to demonstrate implementations of a stacks and queues using a linked list and node design pattern.
+"""
+
 from core.base_card_model import Card
 from core.cards import StandardCard
 from utils.emojis import SUITS, FACE_DOWN_EMOJI
 from utils.errors import EmptyPileError
 
-# Python program to demonstrate
-# stack implementation using a linked list.
-# node class
+# Python script to demonstrate stack and queue implementation using linked lists and wrapper node class
 
 class CardNode:
     
@@ -23,6 +33,7 @@ class CardNode:
         self.next = None
         self.previous = None
 
+# Card Data Structures default to StandardCard, but Card Node can accept any Card object based on ABC Card
 
 class CardQueue:
 
@@ -33,10 +44,10 @@ class CardQueue:
         Card Queue also allows for popping from the end of the queue (the active card in play).
         """
         self.card_cls = card_cls
-        dummy_card = self.card_cls("B", 0)
-        dummy_card.flip_card()
+        dummy_head_card = self.card_cls("B", 0)
+        dummy_head_card.flip_card()
 
-        self.head = CardNode(dummy_card) # dummy head node is flipped blank card indicating a pile of cards exists
+        self.head = CardNode(dummy_head_card) # dummy head node is flipped blank card indicating a pile of cards exists, uses 'alt' display emoji
         self.tail = self.head
         self._size = 0
     
@@ -56,9 +67,7 @@ class CardQueue:
         elif isinstance(value, self.card_cls):
             card_node = CardNode(value)
         else:
-            raise TypeError(
-                f"Only objects of type {self.card_cls.__name__} or CardNode are allowed."
-            )
+            raise TypeError(f"Only objects of type {self.card_cls.__name__} or CardNode are allowed.")
 
         self.tail.next = card_node
         card_node.previous = self.tail
@@ -69,7 +78,9 @@ class CardQueue:
         """Removes the first card node from the queue. Returns the removed card."""
         if self.is_empty():
             raise EmptyPileError
+        
         remove_card = self.head.next
+
         self.head.next = remove_card.next
         if remove_card != self.tail:
             remove_card.next.previous = self.head
@@ -86,8 +97,10 @@ class CardQueue:
         return remove_card
 
     def remove_from(self, flip: bool=False):
+        """Removes the last card node from the queue. Last card is card active card in play. Returns the removed card."""
         if self.is_empty():
             raise EmptyPileError
+
         remove_card = self.tail
         
         remove_card.previous.next = None
@@ -103,7 +116,7 @@ class CardQueue:
         return remove_card
     
     def get_card_in_play(self):
-        """Returns the tail of the card queue. Active card in play."""
+        """Returns the tail of the card queue. Last card is active card in play. Return dummy head if empty."""
         if self.is_empty():
             return self.head.value
         return self.tail.value
@@ -128,8 +141,7 @@ class CardQueue:
     def __str__(self):
             """Prints a simple string representation of the CardQueue"""
             if self.is_empty():
-                return self.head.value.face
-            
+                return self.head.value.face  
             current_card = self.head.next
             card_queue = ""
             while current_card:
@@ -139,25 +151,21 @@ class CardQueue:
     
 
 class CardStack:
-    # VALID_SUITS = {"S": "♠️", "H": "❤️", "D": "♦️", "C": "♣️"} #
-    # SUITS = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Clubs"}
 
-    # Use a Dummy Head Card Node for indicating if the stack of cards is empty or not
-    # Suit property is optional
     def __init__(self, card_cls=StandardCard):
         """
         Card Stack data structure with Blank Card head acting as dummy card. Implements a linked list with the principle of first in, last out.
         
-        A Card Stack suit defaults to None. A Card Stack without a set suit value will be displayed as a filler card, like on a card
-        table. However, if a suit is set for a Card Stack, that suit will be displayed as a filler card.
-        
+        A Card Stack suit defaults to None, and is an optional attribute. A Card Stack without a set suit value will be displayed as a filler card, 
+        like on a card table, using the dummy head. However, if a suit is set for a Card Stack, that suit can be displayed as a filler card instad of 
+        the dummy card place holder. This must be implemented at the next level up in the software stack. 
         """
         self.card_cls = card_cls
 
-        dummy_card = self.card_cls("B", 0)
-        dummy_card.flip_card()
+        dummy_head_card = self.card_cls("B", 0)
+        dummy_head_card.flip_card()
 
-        self.head = CardNode(dummy_card)
+        self.head = CardNode(dummy_head_card)
         self._size = 0
         self._suit = None
 
