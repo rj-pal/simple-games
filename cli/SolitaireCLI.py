@@ -99,6 +99,7 @@ def play_game(test):
         tab = test.get_tableau_for_print()
         fp = test.get_foundation_piles()
         draw = test.get_stock_pile()
+        draw = test.check_empty_stock_pile()
         # draw = test.check_stock_pile()
         waste = test.get_waste_pile_for_print()
         # print(type(tab))
