@@ -44,10 +44,10 @@ class CardQueue:
         Card Queue also allows for popping from the end of the queue (the active card in play).
         """
         self.card_cls = card_cls
-        dummy_head_card = self.card_cls("B", 0)
-        dummy_head_card.flip_card()
+        dummy_head_card = self.card_cls("B", 0, True)
+        # dummy_head_card.flip_card()
 
-        self.head = CardNode(dummy_head_card) # dummy head node is flipped blank card indicating a pile of cards exists, uses 'alt' display emoji
+        self.head = CardNode(dummy_head_card) # dummy head node is visible blank card indicating a pile of cards exists, uses 'alt' display emoji
         self.tail = self.head
         self._size = 0
     
@@ -162,8 +162,9 @@ class CardStack:
         """
         self.card_cls = card_cls
 
-        dummy_head_card = self.card_cls("B", 0)
-        dummy_head_card.flip_card()
+        dummy_head_card = self.card_cls("B", 0, True)
+        print(dummy_head_card.__repr__())
+        # dummy_head_card.flip_card()
 
         self.head = CardNode(dummy_head_card)
         self._size = 0
@@ -254,12 +255,13 @@ class CardStack:
         return remove_card
     
     def to_list(self):
-        """Returns the current state of Card Stack as a list while maintaining the state of the cards stack."""
+        """Returns the current state of Card Stack as a list while maintaining the state of the cards stack in CLI app."""
         if self.is_empty():
             return [" "]   
         current_card = self.head.next
         card_list = []
         while current_card:
+            # card_list.append(current_card.value.face)
             if current_card.value.visible:
                 card_list.append(current_card.value.face)
             else:

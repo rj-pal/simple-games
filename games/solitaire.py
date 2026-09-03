@@ -6,7 +6,7 @@ Updated: 2026-08-04
 This module contains foundational code for the game solitaire.
 """
 
-from core.deck import Card, CardDeck, CardStack, CardQueue
+from core.deck import CardDeck, CardStack, CardQueue, StandardCard
 from utils.errors import EmptyPileError, InvalidMoveError, InvalidStackError
 
 class Solitare:
@@ -64,7 +64,7 @@ class Solitare:
        
         return True
 
-    def check_move(self, from_card: Card, to_card: Card):
+    def check_move(self, from_card: StandardCard, to_card: StandardCard):
         """Validates building to a tabelau stack in descending order and alternatie suit colour cards."""
         # check king move to empty stack as empty card pile returns a blank card with value 0
         if to_card.value == 0:
@@ -72,7 +72,7 @@ class Solitare:
         # check all other possible moves
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
 
-    def check_foundation_move(self, card: Card):
+    def check_foundation_move(self, card: StandardCard):
         """Validates buidling to a foundation pile in ascending order and same suit card."""
         # suit validation checked before calling this function
         foundation_pile = self.foundation_piles[card.suit]

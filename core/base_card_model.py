@@ -32,10 +32,10 @@ class Card(ABC):
     FACE_DOWN_CARD: str = ""
     BLANK_CARD: str = ""
 
-    def __init__(self, suit: str, value: int):
+    def __init__(self, suit: str, value: int, visible: bool=False):
         self._suit = suit
         self._value = value
-        self._visible = False
+        self._visible = visible
 
         # Set face-down and blank representations directly from enforced class attributes
         self.face_down_card = self.FACE_DOWN_CARD

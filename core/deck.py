@@ -15,23 +15,24 @@ to the cards through the top card, moving down to the bottom card.
 """
 
 from random import shuffle
-from utils.emojis import SUITS, FACES
-from core.cards import StandardCard
-from core.card_structures import *
-
-Card = StandardCard
-CardStack = CardStack
-CardQueue = CardQueue
+from core.cards import StandardCard, CustomCard
+from core.card_structures import CardQueue, CardStack
 
 
 class CardDeck:
-    STANDARDSUITS = ("S", "H", "D", "C")
-    def __init__(self, deck_type="standard"):
+    STANDARDSUITS = {"S", "H", "D", "C"}
+    DECKTYPES = {"standard", "non_standard"}
+    def __init__(self, deck_type="standard", alt_suits=None, alt_values=None):
         """
         Card Deck data structure acts like a dealer's deck. It's core object is a Card Queue that can deal cards into hands, and remove cards from
-        either it's front or back side. from the front
+        either it's front or back side. 
+
+        The default CardDeck is a standard 52-card set of French Playing cards. If a non-standard deck of cards is created, a set of valid suits must
+        be set at initiation using the optional variable alt_suits. A contract for the values that correspond to custom suits must also be passed.
         """
         self.deck_type = deck_type
+        self.alt_suits = alt_suits
+        self.alt_values = alt_values
         self.deck = self.create_deck()
 
     @property
@@ -41,7 +42,7 @@ class CardDeck:
     @deck_type.setter
     def deck_type(self, new_deck_type):
         if isinstance(new_deck_type, str):
-            if new_deck_type in {"standard", "non_standard"}:
+            if new_deck_type in self.DECKTYPES:
                 self._deck_type = new_deck_type
             else:
                 raise ValueError("Only Deck Type standard or non_standard allowed")
@@ -54,7 +55,11 @@ class CardDeck:
         if self._deck_type == "standard":
             for suit in self.STANDARDSUITS:
                 for value in range(1, 14):
-                    deck.add_to(Card(suit, value))
+                    deck.add_to(StandardCard(suit, value))
+        elif self.deck_type == "non_standard":
+            for suit in self.alt_suits:
+                for value in self. alt_values:
+                    deck.add_to(CustomCard(suit, value))
         return deck     
 
     @property
