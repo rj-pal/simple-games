@@ -19,6 +19,9 @@ class SolitaireGUI:
         self.highlighted_widget = None
         self.foundation_suit_in_play = None
         self.reset = False
+
+        self.waste_lable_event = lambda card_event, number_of_cards_for_transfer=1, pile_index=-1: self.on_click_card(card_event, 
+                                                                                        number_of_cards_for_transfer, pile_index)
         
         # Define the emoji card characters from utilities
         self.card_back_emoji = FACE_DOWN_EMOJI
@@ -35,26 +38,25 @@ class SolitaireGUI:
 
         # Reset Game label
         ### N.B. -  Arial 20 here, others are 40 ###
-        self.reset_label = tk.Label(self.top_frame, text="↩️", font=("Arial", 22, "bold"), bg="#006400", fg="white",
-            cursor="pirate"
-        )
+        self.reset_label = tk.Label(self.top_frame, text="🔄", font=("Arial", 22, "bold"), bg="#006400", fg="white",
+            cursor="pirate")
 
         # Stock pile
         label_text=self.game.get_stock_pile().get_card_in_play()
-        self.stock_label = tk.Label(self.top_frame, text=label_text, font=("Arial", 22), bg="#006400", fg="white", cursor="fleur")
+        self.stock_label = tk.Label(self.top_frame, text=label_text, font=("Arial", 36), bg="#006400", fg="white", cursor="fleur")
         # self.stock_label = tk.Label(self.top_frame, text=self.card_back_emoji, font=("Arial", 22), bg="#006400", fg="white", cursor="fleur")
-        self.stock_label.pack(side=tk.LEFT, padx=10)
+        self.stock_label.pack(side=tk.LEFT, padx=10, pady=(10, 0))
         
         # Waste pile
         label_text=self.game.get_waste_pile().get_card_in_play()
-        self.waste_label = tk.Label(self.top_frame, text=label_text, font=("Arial", 22), bg="#006400", fg="white")
+        self.waste_label = tk.Label(self.top_frame, text=label_text, font=("Arial", 48), bg="#006400", fg="white")
         # self.waste_label = tk.Label(self.top_frame, text=self.card_back_empty_pile, font=("Arial", 22), bg="#006400", fg="white")
         self.waste_label.pack(side=tk.LEFT, padx=10)
 
         # Foundation piles
         self.foundation_labels = []
         for i in range(4):
-            label = tk.Label(self.top_frame, width=3, height=2, font=("Arial", 22), bg="#004d00", fg="white", relief="groove", borderwidth=2)
+            label = tk.Label(self.top_frame, width=3, height=2, font=("Arial", 28), bg="#004d00", fg="white", relief="groove", borderwidth=2)
             label.pack(side=tk.LEFT, padx=10)
             self.foundation_labels.append(label)
 
@@ -78,12 +80,12 @@ class SolitaireGUI:
         # Draw stock pile and reset label if stock pile is empty
         label_text = self.game.get_stock_pile().get_card_in_play()
         if self.game.check_empty_stock_pile():
-            self.stock_label.config(text=label_text, relief="flat")
+            self.stock_label.config(text=label_text, font=("Arial", 48), relief="flat")
             # Stock pile button is not active when empty and reset button will appear
             self.reset_label.pack(side=tk.LEFT, padx=10, before=self.stock_label)
             self.reset_label.bind("<Button-1>", self.on_click_reset)
         else:
-            self.stock_label.config(text=label_text, relief="flat")
+            self.stock_label.config(text=label_text, font=("Arial", 36), relief="flat")
             self.stock_label.bind("<Button-1>", self.on_click_stock)
 
             # self.reset_label.pack_forget()
@@ -92,11 +94,13 @@ class SolitaireGUI:
         
         if self.game.check_empty_waste_pile():
             label_text = self.game.get_waste_pile().get_card_in_play()
-            self.waste_label.config(text=label_text, relief="flat")
+            self.waste_label.config(text=label_text, font=("Arial", 48), relief="flat")
+            self.waste_label.unbind("<Button-1>")
         else:  
             label_text=self.game.get_waste_pile_for_print()
-            self.waste_label.config(text="\n".join(label_text), relief="flat")
-            # default one card transfer and index -1 as only one card available for transfer 
+            label_font_size = 22 if self.game.klondike_value == 3 else 32
+            self.waste_label.config(text="\n".join(label_text), font=("Arial", label_font_size), relief="flat")
+            # default one card transfer and index -1, since it is not transfering from a numbered tableau pile
             self.waste_label.bind("<Button-1>", lambda card_event, number_of_cards_for_transfer=1, pile_index=-1: 
                                   self.on_click_card(card_event, number_of_cards_for_transfer, pile_index)) 
         
@@ -119,11 +123,15 @@ class SolitaireGUI:
                 print("EMOJI")
                 print(emoji)
             
-            self.foundation_labels[i].bind("<Button-1>", lambda e, s=suit: self.on_click_foundation(e, s))
+            self.foundation_labels[i].bind("<Button-1>", lambda card_event, card_suit=suit: self.on_click_foundation(card_event, card_suit))
             i += 1
             
 
         # Draw tableau piles
+        
+        longest_tableau = max(self.game.tableau, key=lambda tab: tab.size)
+        size_threshold = longest_tableau.size # for resizing of card tableau if a particular pile gets too long
+
         for i, pile in enumerate(self.game.tableau):
             # Clear existing cards in the pile throguh calling all current active children
             for widget in self.tableau_piles[i].winfo_children():
@@ -131,17 +139,19 @@ class SolitaireGUI:
             
             # Draw new cards
             # print(f"LENGHTH of PILE {i} is {pile.size}")
-            card_number = 0
+            card_number = 0 # For tracking the number of cards in a transfer if a middle card is selected
             card_list = []
             if pile.size == 0:
                 card_list.append(pile.get_card_in_play())
             for j in range(pile.size - 1, -1, -1):
                 card_list.append(pile.look_at(j))
-            
+            label_font_size = 32
+            if size_threshold > 15:
+                label_font_size = 22
             for card_id in card_list:     
                 card_text = card_id
                 relief ="flat"
-                card_label = tk.Label(self.tableau_piles[i], text=card_text, relief=relief, font=("Arial", 22), 
+                card_label = tk.Label(self.tableau_piles[i], text=card_text, relief=relief, font=("Arial", label_font_size), 
                                       bg="#006400", fg='white')
                 card_label.pack(pady=0, anchor='n')   
                 # Bind click event, passing the pile index
@@ -157,8 +167,6 @@ class SolitaireGUI:
         if self.selected_item is None:
             try:
                 self.game.draw()
-                # if self.game.check_stock_pile():
-                #     self.reset = True
             except GameError:
                 print("Pile is empty.")
                 pass
@@ -168,10 +176,6 @@ class SolitaireGUI:
         self.game.reset_pile()
         self.reset = False
         self.reset_label.pack_forget()
-        self.draw_game()
-
-    def on_click_waste(self, event):
-        self.game.draw()
         self.draw_game()
 
     def on_click_foundation(self, card_event, suit):
@@ -209,13 +213,12 @@ class SolitaireGUI:
             self.draw_game()
 
     def on_click_card(self, card_event, number_of_cards_for_transfer, pile_index):
-    # Step 1: Check if a card is already selected
-    
+        # Step 1: Check if any card has already been selected
         if self.selected_item is None:
-            # No card selected, so this is the first click.
-            # Store the card data and the widget reference for highlighting.
-            self.selected_item = (number_of_cards_for_transfer, pile_index) # Stores key information for first selected item
-            if self.game.tableau[pile_index].is_empty():
+            # Store the key information (number of cards for transfer and index) for solitaire move
+            self.selected_item = (number_of_cards_for_transfer, pile_index)
+
+            if pile_index != -1 and self.game.tableau[pile_index].is_empty():
                 print("Cannot Select an empty tableau pile in the first move")
                 self.selected_item = None
                 pass
@@ -229,6 +232,7 @@ class SolitaireGUI:
 
         else:
             # A card is already selected, so this is the second click (a move).
+            # Upack the key information from the first click 
             source_number_of_cards_for_transfer, source_pile_index = self.selected_item
             # destination_card_id = card_id
             destination_pile_index = pile_index
@@ -268,3 +272,8 @@ class SolitaireGUI:
             self.foundation_suit_in_play = None
             print(f"Currently Selected Foundation Suit {self.foundation_suit_in_play}")
             self.draw_game()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = SolitaireGUI(root)
+    root.mainloop()

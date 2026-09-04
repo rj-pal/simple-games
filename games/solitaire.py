@@ -223,11 +223,12 @@ class Solitare:
         for i in range(self.size):
             card_stack = self.card_deck.deal_cards(number_of_cards=i + 1)
             card_stack.head.next.value.flip_card()
-            # if i == 6:
-            #     cards = [Card("S", i) for i in range(1, 14)]
-            #     for card in cards:
-            #         card.flip_card()
-            #         card_stack.add_to(card)
+            if i == 6:
+                cards = [StandardCard("S", i) for i in range(1, 9)]
+                for card in cards:
+                    card.flip_card()
+                    card_stack.add_to(card)
+                card_stack = self.card_deck.get_empty_card_stack()
             tableau.append(card_stack)
             # self.draw_pile.shuffle_deck()
         return tableau
