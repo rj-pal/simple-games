@@ -19,9 +19,6 @@ class SolitaireGUI:
         self.foundation_suit_in_play = None
         self.reset = False
 
-        self.waste_lable_event = lambda card_event, number_of_cards_for_transfer=1, pile_index=-1: self.on_click_card(card_event, 
-                                                                                        number_of_cards_for_transfer, pile_index)
-        
         # Define the emoji card characters from utilities
         self.card_back_emoji = FACE_DOWN_EMOJI
         self.card_back_empty_pile = EMPTYPILEEMOJI
@@ -92,7 +89,7 @@ class SolitaireGUI:
             self.stock_label.bind("<Button-1>", self.on_click_stock)
         
         # Draw waste pile
-     
+
         if self.game.check_empty_waste_pile():     
             label_text = self.game.get_waste_pile().get_card_in_play()
             self.waste_label = tk.Label(self.waste_frame, text=label_text, font=("Arial", 48), relief="flat", bg="#006400", fg="white")
@@ -110,8 +107,7 @@ class SolitaireGUI:
     
             # Only bind click event and store reference to the last label
             if i == len(label_text) - 1:
-                label.bind("<Button-1>", lambda card_event, number_of_cards_for_transfer=1, pile_index=-1: 
-                        self.on_click_card(card_event, number_of_cards_for_transfer, pile_index))
+                label.bind("<Button-1>", lambda card_event: self.on_click_waste(card_event))
                 self.waste_label = label
 
         # Draw foundation piles3
@@ -166,7 +162,7 @@ class SolitaireGUI:
                 n = pile.size - card_number
                 # print(f"Transfer number Test {n}")
                 card_label.bind("<Button-1>", lambda card_event, number_of_cards_for_transfer=n, pile_index=i: 
-                                self.on_click_card(card_event, number_of_cards_for_transfer, pile_index))
+                                self.on_click_tableau(card_event, number_of_cards_for_transfer, pile_index))
                 card_number += 1
     
     def on_click_stock(self, event):
@@ -184,6 +180,16 @@ class SolitaireGUI:
         self.reset_label.pack_forget()
        
         self.draw_game()
+
+    def on_click_tableau(self, card_event, number_of_cards_for_transfer, pile_index):
+        if self.game.tableau[pile_index].is_empty():
+            print("Cannot Select an empty tableau pile in the first move")         
+        else:
+            self.on_click_card(card_event, number_of_cards_for_transfer, pile_index)
+
+    def on_click_waste(self, card_event):
+        # Waste pile is simpler - just call core logic
+        self.on_click_card(card_event, 1, -1)
 
     def on_click_foundation(self, card_event, suit):
         if self.selected_item is None:
@@ -225,31 +231,20 @@ class SolitaireGUI:
             # Store the key information (number of cards for transfer and index) for solitaire move
             self.selected_item = (number_of_cards_for_transfer, pile_index)
 
-            if pile_index != -1 and self.game.tableau[pile_index].is_empty():
-                print("Cannot Select an empty tableau pile in the first move")
-                self.selected_item = None
-                pass
-                
-            else:
-                self.highlighted_widget = card_event.widget
-                self.highlighted_widget.config(relief="sunken", borderwidth=2)
-                test_number=self.selected_item
-                print("HERE IN SELECT ITEM IS NONE")
-                print(test_number)
+            self.highlighted_widget = card_event.widget
+            self.highlighted_widget.config(relief="sunken", borderwidth=2)
+            test_number=self.selected_item
+            print("HERE IN SELECT ITEM IS NONE")
+            print(test_number)
 
         else:
             # A card is already selected, so this is the second click (a move).
             # Upack the key information from the first click 
             source_number_of_cards_for_transfer, source_pile_index = self.selected_item
-            # destination_card_id = card_id
             destination_pile_index = pile_index
             print(f"SECOND CLICK INDEX {destination_pile_index}")
             print(number_of_cards_for_transfer)
-            # print(source_card_id)
-            # print(destination_card_id)
-            # source_card = self.game.tableau[source_pile_index].get_card_in_play()
-            # destination_card = self.game.tableau[destination_pile_index].get_card_in_play()
-
+       
             try:
                 if self.foundation_suit_in_play is not None:
                     print("FOUNDATION MOVE")
@@ -265,12 +260,9 @@ class SolitaireGUI:
                     self.draw_game()
             except GameError as e:
                 # message = str(e)
-                messagebox.showinfo(f"NAN", f"Invalid move {e}")
+                messagebox.showinfo(f"NAN", f"Invalid move{e}")
                 pass
-                        
-            # else:
-            #     print("COULD NOT MOVE")
-                
+    
             # Regardless of whether the move was valid or not, clear the selection.
             # The old highlighted widget is about to be destroyed by draw_game()
             # so we don't need to de-highlight it explicitly.
