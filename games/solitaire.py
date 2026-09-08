@@ -1,7 +1,7 @@
 """
 solitaire.py 
 Author: Robert Pal
-Updated: 2026-08-04
+Updated: 2026-09-07
 
 This module contains foundational code for the game solitaire.
 """
@@ -26,7 +26,7 @@ class Solitare:
         return self._size
 
     @size.setter
-    def size(self, value):
+    def size(self, value: int):
         if value not in {6, 7, 8, 9, 10}: # Allow other sizes if a variation from the standard solitaire is desired; defaults to standard 7
             raise ValueError("The size must be from 6 to 10 to determine he number of columns in play on the tableau.")
         self._size = value
@@ -37,7 +37,7 @@ class Solitare:
         return self._klondike_value
 
     @klondike_value.setter
-    def klondike_value(self, value):
+    def klondike_value(self, value: int):
         if value not in {1, 3}:
             raise ValueError("Klondike value must be either 1 or 3 to determine the number of cards per draw.")
         self._klondike_value = value
@@ -48,28 +48,21 @@ class Solitare:
         raise AttributeError("Cannot delete the klondike_value attribute")
 
     def reset_pile(self):
+        """Moves all the cards from the waste pile back to the stock pile."""
         if not self.draw_pile.is_empty():
             raise InvalidMoveError("Cannot reset the stock pile when it is not empty.")
 
-        # self.draw_pile, self.waste_pile = self.waste_pile, self.draw_pile
-        # return True
-        # number_of_waste_cards = self.waste_pile.size
         while not self.waste_pile.is_empty():
-            # waste_card = self.waste_pile.remove_from(flip=True)
-            # print("HEREERERE")
             waste_card = self.waste_pile.remove_from()
             waste_card.value.flip_card()
-            # waste_card = Card(*waste_card_data)
             self.draw_pile.add_to(waste_card)
-       
         return True
 
     def check_move(self, from_card: StandardCard, to_card: StandardCard):
         """Validates building to a tabelau stack in descending order and alternatie suit colour cards."""
-        # check king move to empty stack as empty card pile returns a blank card with value 0
+        # check king move to empty stack as empty card pile returns a blank card with value 0 before validating all other moves
         if to_card.value == 0:
             return from_card.value == 13
-        # check all other possible moves
         return (to_card.is_black != from_card.is_black) and (to_card.value == from_card.value + 1)
 
     def check_foundation_move(self, card: StandardCard):
@@ -83,35 +76,29 @@ class Solitare:
     def move_card(self, from_card_stack: CardStack | CardQueue, to_card_stack: CardStack | CardQueue, flip_card: bool=False):
         """Moves a single card from one card stack to another. Valid Card Stacks: tabelau, foundation pile, draw pile, or waste pile."""
         card = from_card_stack.remove_from(flip_card)
-        print("I'm in Move Card")
-        print(card)
         to_card_stack.add_to(card)
         return True
 
     def check_win(self):
+        """Checks if all foundation piles are full to declare a winning game."""
         return all(pile.size == 13 for pile in self.foundation_piles.values())
 
     def draw(self):
         """Draw a card from the stock pile and flip it over for move."""
-        # print(self.card_deck)
         cards_drawn_for_play = 0
         for _ in range(self._klondike_value):
-            # self.card_deck.show_deck()
             try:
                 self.move_card(from_card_stack=self.draw_pile, to_card_stack=self.waste_pile, flip_card=True)
-                # card_for_play = self.draw_pile.remove_from(flip=True)         
-                # self.waste_pile.add_to(card_for_play)
                 cards_drawn_for_play += 1
-            except EmptyPileError:
+            except EmptyPileError: #check empty pile error here in the case of 3 card draw, but only 1 or 2 cards left in stock pile
                 break
-        if cards_drawn_for_play == 0:
-            # print(self.draw_pile)
+        if cards_drawn_for_play == 0: #definite empty pile with no cards for drawing. 
             raise EmptyPileError("The draw pile is empty. There are no cards to draw from.")
 
         return True
 
     def move_to_foundation(self, from_pile: str, stack_number: int=-1):
-        """Move a card from the waste pile or tableau to the foundation pile of the selected card's suit. Defaults to move from waste pile int -1."""
+        """Move a card from the waste pile or tableau to the foundation pile of the selected card's suit. Default move from waste pile int -1."""
         # Get the pile the player is trying to move from
         if from_pile == "tableau":
             if not 0 <= stack_number < self._size:
@@ -136,11 +123,12 @@ class Solitare:
         return True
 
     def move_from_foundation(self, suit: str, stack_number: int):
+        """Move a card from the foundation piles back to the tableau."""
         if suit not in self.foundation_piles.keys():
-            raise ValueError(f"Invalid suit: {suit}") # Or a custom InvalidSuitError
+            raise ValueError(f"Invalid suit: {suit}")
         if not 0 <= stack_number < self._size:
             raise InvalidStackError(f"Invalid tableau stack number: {stack_number}")
-        # No moving from an empty or full foundation pile
+        #Check that you are not moving from an empty or full foundation pile
         if self.foundation_piles[suit].is_empty():
             raise EmptyPileError(f"Cannot move from empty foundation pile.")
         from_card = self.foundation_piles[suit].get_card_in_play()
@@ -161,7 +149,7 @@ class Solitare:
            return self.tableau[stack_number].get_card_in_play()
 
     def build(self, stack_number):
-        # No building from an empty waste
+        """Moves the current card in play from the waste pile to the tableau."""
         if self.waste_pile.is_empty():
             raise EmptyPileError("Cannot build from empty waste pile.") 
         if not 0 <= stack_number < self._size:
@@ -173,6 +161,7 @@ class Solitare:
         return self.move_card(from_card_stack=self.waste_pile, to_card_stack=self.tableau[stack_number])
 
     def transfer(self, from_stack, to_stack, number_of_cards=1):
+        """Moves one or more cards from the selected tableau pile to another tabelau pile,."""
         if not 0 <= from_stack < self.size:
             raise InvalidStackError(f"Invalid tableau stack number for origin: {from_stack}")
         if not 0 <= to_stack < self.size:
@@ -199,8 +188,7 @@ class Solitare:
             raise InvalidMoveError(f"The card you selected for transfer to another stack is face down.")
 
         # Validate move before moving cards between stacks  
-        # print(from_card)
-        # print(self.tableau[to_stack].get_card_in_play())           
+            
         if not self.check_move(from_card=from_card, to_card=self.tableau[to_stack].get_card_in_play()):
             raise InvalidMoveError(f"The card or cards you wish to move from stack {from_stack + 1} cannot be placed on stack {to_stack + 1}.")
 
@@ -218,49 +206,44 @@ class Solitare:
         return True
 
     def make_tableau(self):
+        """Makes the main card tableau and stores each tableau pile in a list as a game attribute: tableau"""
         tableau = []
         self.card_deck.shuffle_deck()
         for i in range(self.size):
             card_stack = self.card_deck.deal_cards(number_of_cards=i + 1)
             card_stack.head.next.value.flip_card()
-            if i == 6:
-                cards = [StandardCard("S", i) for i in range(1, 9)]
-                for card in cards:
-                    card.flip_card()
-                    card_stack.add_to(card)
-                card_stack = self.card_deck.get_empty_card_stack()
+            # Tester Code
+            # if i == 6:
+            #     cards = [StandardCard("S", i) for i in range(1, 9)]
+            #     for card in cards:
+            #         card.flip_card()
+            #         card_stack.add_to(card)
+            #     card_stack = self.card_deck.get_empty_card_stack()
             tableau.append(card_stack)
-            # self.draw_pile.shuffle_deck()
         return tableau
 
     def make_foundation_piles(self):
-        SUITS = ("S", "H", "D", "C")
+        """Makes the foundation piles and stores each foundation pile in a dictionary (keys are the suits) attribute: foundation_piles"""
         foundation_piles = {}
-        for suit in SUITS:
+        for suit in ("S", "H", "D", "C"):
             card_stack = self.card_deck.get_empty_card_stack()
             card_stack.suit = suit
             foundation_piles[suit] = card_stack
-        #     print(card_stack.get_card_in_play().value)
-        #     print(card_stack.get_card_in_play().face)
-
-        # exit()
         return foundation_piles
 
     def make_draw_pile(self):
+        """Makes the draw or stock piles using the Cardeck 'pile' function (a CardQueue) and stores as game attribute: draw pile"""
         draw_pile = self.card_deck.pile()
         return draw_pile
 
     def make_waste_pile(self):
+        """Makes the waste using the Cardeck 'get_empty_queue' function (a CardQueue) and stores as game attribute: draw pile"""
         return self.card_deck.get_empty_card_queue() 
-
-    # def get_deck(self):
-    #     return self.card_deck
 
     def get_tableau(self):
         return self.tableau
 
     def get_tableau_for_print(self):
-
         return [card_stack.to_list()[::-1] for card_stack in self.tableau]
 
     def get_foundation_piles(self):
@@ -279,13 +262,7 @@ class Solitare:
     
     def check_empty_waste_pile(self):
         return self.waste_pile.is_empty()
-
-    # def check_tableau(self, number):
-    #     if number < 0 < self._size:
-    #         raise IndexError()
-    #     if self.tableau[number].is_empty():
-    #         raise EmptyPileError
-
+    
     def get_stock_pile(self):
         return self.draw_pile
 

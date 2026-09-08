@@ -81,15 +81,15 @@ class SolitaireGUI:
         label_text = self.game.get_stock_pile().get_card_in_play()
         if self.game.check_empty_stock_pile():
             self.stock_label.config(text=label_text, font=("Arial", 48), relief="flat")
+            self.stock_label.pack(side=tk.LEFT, padx=10, pady=(10, 0), anchor='n')
             # Stock pile button is not active when empty and reset button will appear
-            self.reset_label.pack(side=tk.LEFT, padx=10, before=self.stock_label)
+            # self.reset_label.pack(side=tk.LEFT, padx=10, before=self.stock_label)
             self.reset_label.bind("<Button-1>", self.on_click_reset)
         else:
             self.stock_label.config(text=label_text, font=("Arial", 36), relief="flat")
             self.stock_label.bind("<Button-1>", self.on_click_stock)
         
         # Draw waste pile
-
         if self.game.check_empty_waste_pile():     
             label_text = self.game.get_waste_pile().get_card_in_play()
             self.waste_label = tk.Label(self.waste_frame, text=label_text, font=("Arial", 48), relief="flat", bg="#006400", fg="white")
@@ -182,7 +182,7 @@ class SolitaireGUI:
         self.draw_game()
 
     def on_click_tableau(self, card_event, number_of_cards_for_transfer, pile_index):
-        if self.game.tableau[pile_index].is_empty():
+        if self.selected_item is None and self.game.tableau[pile_index].is_empty():
             print("Cannot Select an empty tableau pile in the first move")         
         else:
             self.on_click_card(card_event, number_of_cards_for_transfer, pile_index)
