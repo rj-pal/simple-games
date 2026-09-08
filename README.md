@@ -1,12 +1,11 @@
-# Major Update: Simple Games
+# Simple Games by Rob
 
-Three games are now included for Command Line Game Play: Tic Tac Toe, Connect 4 and Solitaire.
+🎮 Simple Games is a friendly little, easy-to-use software package featuring three timeless classics: Tic-Tac-Toe, Connect 4, and Solitaire! 🃏
+Choose your mood: play in pixel-perfect retro mode right from your Command Line, or enjoy a lightweight, bare-bones macOS app. 💻✨
 
-Tic Tac Toe and Connect 4 are operational. You can play Solitaire, but it is still in development.
+Found a bug or running into errors? Drop me a message so I can fix my glitch!🐛✉️
 
-If you encounter any errors while playing, please conntact me.
-
-### This is old documentation from when the directory only included Tic Tac Toe
+### This blurb below is a bit of info on how this software package started.
 
 ## Tic Tac Toe
 Tic-Tac-Toe Game for Command Line written in Python (requires **Python 3.9** or higher)
