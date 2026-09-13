@@ -1,5 +1,5 @@
 import unittest
-from games.game import TicTacToe
+from games.tictactoe import TicTacToe
 
 def play_game(test, x_first, move_list):
     test.reset_game_state()
