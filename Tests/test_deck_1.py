@@ -2,19 +2,22 @@
 test_deck.py
 Unit tests for the deck.py card game module.
 
-Tests cover Card, CardNode, CardQueue, CardStack, and CardDeck classes.
+Tests cover StandardCard, CardNode, CardQueue, CardStack, and CardDeck classes.
 """
 
 import pytest
-from core.deck import Card, CardNode, CardQueue, CardStack, CardDeck, SUITS, FACES
+from core.deck import SUITS
+from core.cards import StandardCard
+from core.card_structures import CardNode
+from core.deck import CardDeck, CardQueue, CardStack
 
 
-class TestCard:
-    """Test cases for the Card class."""
+class TestStandardCard:
+    """Test cases for the StandardCard class."""
 
     def test_card_creation(self):
         """Test creating a card with valid suit and value."""
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         assert card.suit == "S"
         assert card.value == 5
         assert card.visible is False
@@ -23,26 +26,26 @@ class TestCard:
         """Test creating cards with all valid suits."""
         suits = ["S", "H", "D", "C"]
         for suit in suits:
-            card = Card(suit, 1)
+            card = StandardCard(suit, 1)
             assert card.suit == suit
 
     def test_card_with_all_values(self):
         """Test creating cards with all valid values (1-13)."""
         for value in range(1, 14):
-            card = Card("S", value)
+            card = StandardCard("S", value)
             assert card.value == value
 
     def test_card_face_creation_numbered(self):
         """Test that numbered cards create proper face strings."""
-        card = Card("H", 5)
+        card = StandardCard("H", 5)
         assert "5" in card.face
         assert "❤️" in card.face
 
     def test_card_face_creation_face_cards(self):
         """Test that face cards (J, Q, K) create proper face strings."""
-        jack = Card("D", 11)
-        queen = Card("D", 12)
-        king = Card("D", 13)
+        jack = StandardCard("D", 11)
+        queen = StandardCard("D", 12)
+        king = StandardCard("D", 13)
         
         assert "J" in jack.face
         assert "Q" in queen.face
@@ -50,42 +53,42 @@ class TestCard:
 
     def test_card_face_creation_ace(self):
         """Test that aces create proper face strings."""
-        ace = Card("C", 1)
+        ace = StandardCard("C", 1)
         assert "A" in ace.face
 
     def test_card_blank_card(self):
         """Test creating a blank card (value 0)."""
-        blank = Card("B", 0)
+        blank = StandardCard("B", 0)
         assert blank.value == 0
         assert "place card" in blank.name.lower()
 
     def test_card_name_creation(self):
         """Test that card names are created correctly."""
-        card = Card("S", 12)
+        card = StandardCard("S", 12)
         assert card.name == "Queen of Spades"
         
-        card2 = Card("H", 1)
+        card2 = StandardCard("H", 1)
         assert card2.name == "Ace of Hearts"
 
     def test_card_is_black(self):
         """Test the is_black property for black cards."""
-        spades = Card("S", 5)
-        clubs = Card("C", 10)
+        spades = StandardCard("S", 5)
+        clubs = StandardCard("C", 10)
         
         assert spades.is_black is True
         assert clubs.is_black is True
 
     def test_card_is_red(self):
         """Test the is_black property returns False for red cards."""
-        hearts = Card("H", 5)
-        diamonds = Card("D", 10)
+        hearts = StandardCard("H", 5)
+        diamonds = StandardCard("D", 10)
         
         assert hearts.is_black is False
         assert diamonds.is_black is False
 
     def test_card_flip_card(self):
         """Test flipping a card changes visibility."""
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         assert card.visible is False
         card.flip_card()
         assert card.visible is True
@@ -94,13 +97,13 @@ class TestCard:
 
     def test_card_flip_blank_card(self):
         """Test that flipping a blank card (value 0) doesn't change visibility."""
-        blank = Card("B", 0)
+        blank = StandardCard("B", 0)
         blank.flip_card()
         assert blank.visible is False
 
     def test_card_visibility_setter(self):
         """Test setting visibility directly."""
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         card.visible = True
         assert card.visible is True
         card.visible = False
@@ -108,7 +111,7 @@ class TestCard:
 
     def test_card_visibility_setter_invalid(self):
         """Test that non-boolean values raise ValueError."""
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         with pytest.raises(ValueError):
             card.visible = "true"
         with pytest.raises(ValueError):
@@ -116,31 +119,31 @@ class TestCard:
 
     def test_card_is_visible_method(self):
         """Test the is_visible method."""
-        card = Card("S", 5)
-        assert card.is_visible() is False
-        card.visible = True
-        assert card.is_visible() is True
+        card = StandardCard("S", 5)
+        assert card.visible is False
+        card.flip_card()
+        assert card.visible is True
 
     def test_card_look_card(self):
         """Test the look_card method returns the face."""
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         assert card.look_card() == card.face
 
     def test_card_str_visible(self):
         """Test string representation of visible card."""
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         card.visible = True
         assert "5" in str(card)
 
     def test_card_str_hidden(self):
         """Test string representation of hidden card."""
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         assert card.visible is False
         assert str(card) == "🎴"
 
     def test_card_repr(self):
         """Test card representation includes all attributes."""
-        card = Card("H", 10)
+        card = StandardCard("H", 10)
         repr_str = repr(card)
         assert "Suit: H" in repr_str
         assert "Value: 10" in repr_str
@@ -151,15 +154,15 @@ class TestCardNode:
     """Test cases for the CardNode class."""
 
     def test_cardnode_creation(self):
-        """Test creating a CardNode with a valid Card."""
-        card = Card("S", 5)
+        """Test creating a CardNode with a valid StandardCard."""
+        card = StandardCard("S", 5)
         node = CardNode(card)
         assert node.value == card
         assert node.next is None
         assert node.previous is None
 
     def test_cardnode_invalid_value(self):
-        """Test that CardNode raises TypeError for non-Card objects."""
+        """Test that CardNode raises TypeError for non-StandardCard objects."""
         with pytest.raises(TypeError):
             CardNode("not a card, but a string")
         
@@ -171,8 +174,8 @@ class TestCardNode:
 
     def test_cardnode_linking(self):
         """Test linking nodes together."""
-        card1 = Card("S", 5)
-        card2 = Card("H", 10)
+        card1 = StandardCard("S", 5)
+        card2 = StandardCard("H", 10)
         node1 = CardNode(card1)
         node2 = CardNode(card2)
         
@@ -195,7 +198,7 @@ class TestCardQueue:
     def test_cardqueue_add_single_card(self):
         """Test adding a single card to the queue."""
         queue = CardQueue()
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         queue.add_to(card)
         assert queue.size == 1
         assert queue.is_empty() is False
@@ -204,13 +207,13 @@ class TestCardQueue:
         """Test adding multiple cards to the queue."""
         queue = CardQueue()
         for i in range(1, 6):
-            queue.add_to(Card("S", i))
+            queue.add_to(StandardCard("S", i))
         assert queue.size == 5
 
     def test_cardqueue_add_cardnode(self):
         """Test adding a CardNode directly to the queue."""
         queue = CardQueue()
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         node = CardNode(card)
         queue.add_to(node)
         assert queue.size == 1
@@ -226,8 +229,8 @@ class TestCardQueue:
     def test_cardqueue_remove_from_front(self):
         """Test removing from the front of the queue (FIFO)."""
         queue = CardQueue()
-        card1 = Card("S", 5)
-        card2 = Card("H", 10)
+        card1 = StandardCard("S", 5)
+        card2 = StandardCard("H", 10)
         queue.add_to(card1)
         queue.add_to(card2)
         
@@ -238,8 +241,8 @@ class TestCardQueue:
     def test_cardqueue_remove_from_bottom(self):
         """Test removing from the bottom of the queue."""
         queue = CardQueue()
-        card1 = Card("S", 5)
-        card2 = Card("H", 10)
+        card1 = StandardCard("S", 5)
+        card2 = StandardCard("H", 10)
         queue.add_to(card1)
         queue.add_to(card2)
         
@@ -262,7 +265,7 @@ class TestCardQueue:
     def test_cardqueue_remove_from_front_returns_node(self):
         """Test that remove_from_front returns a CardNode."""
         queue = CardQueue()
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         queue.add_to(card)
         
         removed = queue.remove_from_front()
@@ -272,7 +275,7 @@ class TestCardQueue:
     def test_cardqueue_ordering(self):
         """Test that queue maintains correct FIFO ordering."""
         queue = CardQueue()
-        cards = [Card("S", i) for i in range(1, 6)]
+        cards = [StandardCard("S", i) for i in range(1, 6)]
         for card in cards:
             queue.add_to(card)
         
@@ -284,8 +287,8 @@ class TestCardQueue:
     def test_cardqueue_get_card_in_play(self):
         """Test getting the card in play (tail of queue)."""
         queue = CardQueue()
-        card1 = Card("S", 5)
-        card2 = Card("H", 10)
+        card1 = StandardCard("S", 5)
+        card2 = StandardCard("H", 10)
         queue.add_to(card1)
         queue.add_to(card2)
         
@@ -295,7 +298,7 @@ class TestCardQueue:
     def test_cardqueue_look_at(self):
         """Test looking at a card at a specific index."""
         queue = CardQueue()
-        cards = [Card("S", i) for i in range(1, 4)]
+        cards = [StandardCard("S", i) for i in range(1, 4)]
         for card in cards:
             queue.add_to(card)
         
@@ -317,7 +320,7 @@ class TestCardStack:
     def test_cardstack_add_single_card(self):
         """Test adding a single card to the stack."""
         stack = CardStack()
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         stack.add_to(card)
         assert stack.size == 1
         assert stack.is_empty() is False
@@ -326,13 +329,13 @@ class TestCardStack:
         """Test adding multiple cards to the stack."""
         stack = CardStack()
         for i in range(1, 6):
-            stack.add_to(Card("S", i))
+            stack.add_to(StandardCard("S", i))
         assert stack.size == 5
 
     def test_cardstack_add_cardnode(self):
         """Test adding a CardNode directly to the stack."""
         stack = CardStack()
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         node = CardNode(card)
         stack.add_to(node)
         assert stack.size == 1
@@ -348,8 +351,8 @@ class TestCardStack:
     def test_cardstack_remove_from(self):
         """Test removing from the stack (LIFO)."""
         stack = CardStack()
-        card1 = Card("S", 5)
-        card2 = Card("H", 10)
+        card1 = StandardCard("S", 5)
+        card2 = StandardCard("H", 10)
         stack.add_to(card1)
         stack.add_to(card2)
         
@@ -366,7 +369,7 @@ class TestCardStack:
     def test_cardstack_remove_from_returns_node(self):
         """Test that remove_from returns a CardNode."""
         stack = CardStack()
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         stack.add_to(card)
         
         removed = stack.remove_from()
@@ -377,15 +380,15 @@ class TestCardStack:
         """Test get_card_in_play returns a blank card."""
         stack = CardStack()
         card = stack.get_card_in_play()
-        blank_card = Card("B", 0)
+        blank_card = StandardCard("B", 0)
 
         assert card.value == blank_card.value
        
     def test_cardstack_get_card_in_play_with_cards(self):
         """Test get_card_in_play returns the top card."""
         stack = CardStack()
-        card1 = Card("S", 5)
-        card2 = Card("H", 10)
+        card1 = StandardCard("S", 5)
+        card2 = StandardCard("H", 10)
         stack.add_to(card1)
         stack.add_to(card2)
         
@@ -394,7 +397,7 @@ class TestCardStack:
     def test_cardstack_lifo_order(self):
         """Test that stack maintains LIFO order."""
         stack = CardStack()
-        cards = [Card("S", i) for i in range(1, 6)]
+        cards = [StandardCard("S", i) for i in range(1, 6)]
         for card in cards:
             stack.add_to(card)
         
@@ -413,7 +416,7 @@ class TestCardStack:
     def test_cardstack_to_list(self):
         """Test converting stack to list."""
         stack = CardStack()
-        cards = [Card("S", i) for i in range(1, 4)]
+        cards = [StandardCard("S", i) for i in range(1, 4)]
         for card in cards:
             stack.add_to(card)
         
@@ -483,9 +486,9 @@ class TestCardDeck:
         # Check that cards in hand are visible
         cards = hand.to_list()
         for card_display in cards:
-            # card_display is a string (emoji or face), not a Card object
+            # card_display is a string (emoji or face), not a StandardCard object
             # A visible card will have face/number content, not just the blank emoji
-            assert card_display != SUITS["B"]["emoji"] or len(hand.to_list()) == 0
+            assert card_display != "🎴" or len(hand.to_list()) == 0
 
     def test_carddeck_deal_hands_multiple(self):
         """Test dealing multiple hands to players."""
@@ -561,7 +564,7 @@ class TestCardDeck:
         deck = CardDeck()
         initial_size = deck.size
         
-        card = Card("S", 5)
+        card = StandardCard("S", 5)
         deck.add_card(card)
         
         assert deck.size == initial_size + 1

@@ -200,13 +200,10 @@ class CardStack:
 
     # Get the top card of the card stack
     def get_card_in_play(self):
-        """Returns the top card of the card stack"""
+        """Returns the top card of the card stack. Returns Place Card if empty"""
         if self.is_empty():
-            # return None
             return self.head.value
-            # raise EmptyPileError
-            # return None #self.head.value # Value of head is string
-        
+
         return self.head.next.value
     
     def look_at(self, stack_index):
@@ -261,7 +258,6 @@ class CardStack:
         current_card = self.head.next
         card_list = []
         while current_card:
-            # card_list.append(current_card.value.face)
             if current_card.value.visible:
                 card_list.append(current_card.value.face)
             else:

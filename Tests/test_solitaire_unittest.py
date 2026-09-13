@@ -2,7 +2,7 @@
 test_solitaire_unittest.py
 Comprehensive unit tests for the Solitaire game class using unittest.
 Tests include edge cases, empty pile scenarios, invalid moves, and game logic.
-No external dependencies required beyond Python standard library.
+No external dependencies required beyond Python standard library and game related modules.
 """
 
 import unittest
@@ -446,7 +446,7 @@ class TestCustomTableau(unittest.TestCase):
         self.assertEqual(waste.size, 4)
         
         last_card = waste.remove_from()
-        self.assertEqual(last_card.value, 4)
+        self.assertEqual(last_card.value.value, 4)
         self.assertEqual(waste.size, 3)
     
     def test_empty_pile_operations(self):
@@ -491,7 +491,7 @@ class TestComplexGameScenarios(unittest.TestCase):
     def test_tableau_card_visibility(self):
         """Test that only top card in tableau is visible initially."""
         for stack in self.game.tableau:
-            visible_count = sum(1 for card in stack.to_list() if card.visible)
+            visible_count = sum(0 if card == "🎴" else 1 for card in stack.to_list())
             self.assertEqual(visible_count, 1)
     
     def test_move_card_method(self):
