@@ -1,11 +1,5 @@
-"""
-TestTicTacToe.py
-Unit tests for the tictactoe.py game module.
-
-Tests cover basic game play and set up
-"""
 import unittest
-from games.tictactoe import TicTacToe
+from games.game import TicTacToe
 
 def play_game(test, x_first, move_list):
     test.reset_game_state()
