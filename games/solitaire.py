@@ -9,7 +9,7 @@ This module contains foundational code for the game solitaire.
 from core.deck import CardDeck, CardStack, CardQueue, StandardCard
 from utils.errors import EmptyPileError, InvalidMoveError, InvalidStackError
 
-class Solitare:
+class Solitaire:
 
     def __init__(self, size: int=7, klondike_value: int=3):
         self._size = size

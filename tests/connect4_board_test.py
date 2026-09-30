@@ -1,5 +1,5 @@
 from games.connect4 import ConnectFour
-from utils.clitools import print_board
+from utils.clitools.printing import print_board
 
 test = ConnectFour()
 print("MMMM")
