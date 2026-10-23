@@ -213,12 +213,12 @@ class Solitaire:
             card_stack = self.card_deck.deal_cards(number_of_cards=i + 1)
             card_stack.head.next.value.flip_card()
             # Tester Code
-            # if i == 6:
-            #     cards = [StandardCard("S", i) for i in range(1, 9)]
-            #     for card in cards:
-            #         card.flip_card()
-            #         card_stack.add_to(card)
-            #     card_stack = self.card_deck.get_empty_card_stack()
+            if i == 6:
+                cards = [StandardCard("S", i) for i in range(1, 12)]
+                for card in cards:
+                    card.flip_card()
+                    card_stack.add_to(card)
+                # card_stack = self.card_deck.get_empty_card_stack()
             tableau.append(card_stack)
         return tableau
 
@@ -285,9 +285,8 @@ class Solitaire:
 
     def get_waste_pile_for_print(self):
         end_of_waste_pile_list = []
-        print(self.waste_pile.get_card_in_play())
         if self.waste_pile.is_empty():
-            return end_of_waste_pile_list
+            return end_of_waste_pile_list  
         number_or_cards = min(self._klondike_value, self.waste_pile.size)
         for i in range(number_or_cards - 1, -1, -1):
             temp_card = self.waste_pile.look_at(i)
@@ -297,9 +296,6 @@ class Solitaire:
             else:
                 break
         return end_of_waste_pile_list
-
-
-
 
     def show_waste_pile(self):
         waste_pile = []

@@ -7,7 +7,6 @@ This module contains all control flow logic for running the Solitaire Command Li
 
 This game is still in development.
 """
-
 from games.solitaire import Solitaire
 import utils.clitools.console as GameCLI
 from utils.clitools.printing import print_card_table, print_start_game_message
@@ -221,7 +220,6 @@ def play_game(test):
 
 
 def set_up_game():
-
     klondike_value = select_klondike_draw_number()
     game = Solitaire(klondike_value=klondike_value)
 
