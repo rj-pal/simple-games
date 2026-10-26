@@ -143,10 +143,31 @@ class Solitaire:
 
     def get_tableau_card(self, stack_number):
         """Returns the top card of the requested tableau stack or None if the stack is empty."""
-        if self.tableau[stack_number].is_empty():
-            return None
-        else:
-           return self.tableau[stack_number].get_card_in_play()
+        return self.tableau[stack_number].get_card_in_play()
+         
+        # if self.tableau[stack_number].is_empty():
+        #     return None
+    def get_stock_card(self):
+        """Returns the top card of draw pile."""
+        return self.draw_pile.get_card_in_play()
+
+    def get_waste_card(self):
+        """Returns the top card of waste pile."""
+        return self.waste_pile.get_card_in_play()
+
+    def get_waste_cards(self):
+        if self.waste_pile.is_empty():
+            return self.waste_pile.get_card_in_play()
+        number_or_cards = min(self._klondike_value, self.waste_pile.size)
+        end_of_waste_pile_list = []
+        for i in range(number_or_cards - 1, -1, -1):
+            temp_card = self.waste_pile.look_at(i)
+            if temp_card is not None:
+                end_of_waste_pile_list.append(temp_card)
+            else:
+                break
+        return end_of_waste_pile_list
+    
 
     def build(self, stack_number):
         """Moves the current card in play from the waste pile to the tableau."""
@@ -241,8 +262,8 @@ class Solitaire:
         return self.card_deck.get_empty_card_queue() 
 
     def get_tableau(self):
-        return self.tableau
-
+        return [card_stack.to_card_list()[::-1] for card_stack in self.tableau]
+    
     def get_tableau_for_print(self):
         return [card_stack.to_list()[::-1] for card_stack in self.tableau]
 
@@ -262,6 +283,15 @@ class Solitaire:
     
     def check_empty_waste_pile(self):
         return self.waste_pile.is_empty()
+
+    def check_empty_tableau(self, index):
+        return self.tableau[index].is_empty()
+    
+    def check_empty_tableau(self, index):
+        return self.tableau[index].is_empty()
+
+    def check_empty_foundation_pile(self, suit):
+        return self.foundation_piles[suit].is_empty()
     
     def get_stock_pile(self):
         return self.draw_pile
@@ -283,7 +313,7 @@ class Solitaire:
         else:
             print(self.get_stock_pile())
 
-    def get_waste_pile_for_print(self):
+    def get_waste_pile_for_print(self): # For CLI game client
         end_of_waste_pile_list = []
         if self.waste_pile.is_empty():
             return end_of_waste_pile_list  

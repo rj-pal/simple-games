@@ -91,7 +91,7 @@ class SolitaireGUI:
             widget.destroy()
  
         # Draw stock pile and reset label if stock pile is empty. Stock pile button is not active when empty and reset button will appear
-        label_text = self.game.get_stock_pile().get_card_in_play()
+        label_text = self.game.get_stock_card()
         if self.game.check_empty_stock_pile():
             self.stock_label.config(text=label_text, font=(FONT_FAMILY, FONT_SIZE_STOCK_LARGE), cursor="")
             self.stock_label.pack(side=tk.LEFT, anchor='n')
@@ -105,14 +105,15 @@ class SolitaireGUI:
             self.stock_label.bind("<Button-1>", self.on_click_stock)
         
         # Draw waste pile
+        label_text = self.game.get_waste_cards()
         if self.game.check_empty_waste_pile(): 
-            label_text = self.game.get_stock_pile().get_card_in_play()    
+            # label_text = self.game.get_waste_card()   
             self.waste_label = tk.Label(self.waste_frame, text=label_text, font=(FONT_FAMILY, FONT_SIZE_STOCK_LARGE), relief=CARD_DEFAULT_RELIEF, bg=BG_COLOR, 
                                         fg=TEXT_COLOR_DEFAULT)
             self.waste_label.pack(side="top", fill="x")
         else:  
             # Create separate labels for each text item
-            label_text = self.game.get_waste_pile_for_print() # this will return list of one or three card emojis
+            # label_text = self.game.get_waste_cards() # this will return list of one to three card emojis
             label_font_size = FONT_SIZE_TABLEAU_SMALL if self.game.klondike_value == 3 else FONT_SIZE_TABLEAU_LARGE
             for i, text in enumerate(label_text):
                 label = tk.Label(self.waste_frame, text=text, font=(FONT_FAMILY, label_font_size), relief=CARD_DEFAULT_RELIEF, bg=BG_COLOR, 
@@ -144,33 +145,31 @@ class SolitaireGUI:
         # Draw tableau piles     
         longest_tableau = max(self.game.tableau, key=lambda tab: tab.size)
         size_threshold = longest_tableau.size # for resizing of card tableau if a particular pile gets too long
+        print(f"Longest Pile {longest_tableau}")
  
-        for i, pile in enumerate(self.game.tableau):
+        for i, tableau_pile in enumerate(self.game.get_tableau()):
             # Clear existing cards in the pile throguh calling all current active children
             for widget in self.tableau_piles[i].winfo_children():
                 widget.destroy()
             
             # Draw new cards
-            card_number = 0 # For tracking the number of cards in a transfer if a middle card is selected
-            card_list = []
-            if pile.size == 0:
-                card_list.append(pile.get_card_in_play())
-            for j in range(pile.size - 1, -1, -1):
-                card_list.append(pile.look_at(j))
             label_font_size = FONT_SIZE_TABLEAU_SMALL if size_threshold > TABLEAU_SIZE_THRESHOLD else FONT_SIZE_TABLEAU_LARGE
-            for card_id in card_list:     
+            # print(tableau_pile)
+            for card_number, card_id in enumerate(tableau_pile):  # card_number for tracking the number of cards in a transfer if a middle card is selected
+                # print(tableau_pile)   
                 card_text = card_id
                 relief = CARD_DEFAULT_RELIEF
                 active_cursor = "fleur" if card_id.visible else ""
                 card_label = tk.Label(self.tableau_piles[i], text=card_text, relief=relief, font=(FONT_FAMILY, label_font_size), 
                                       bg=BG_COLOR, fg=TEXT_COLOR_DEFAULT, cursor=active_cursor)
                 card_label.pack(pady=PAD_TABLEAU_Y, anchor=PAD_TABLEAU_Y_ANCHOR)   
-                # Bind click event, passing the pile index
-                n = pile.size - card_number
+                # Bind click event, passing the pile index and the number of available cards for transfer
+          
+                n = len(tableau_pile) - card_number
                 if card_id.visible:
                     card_label.bind("<Button-1>", lambda card_event, number_of_cards_for_transfer=n, pile_index=i: 
                                     self.on_click_tableau(card_event, number_of_cards_for_transfer, pile_index))
-                card_number += 1
+                # card_number += 1
     
     def on_click_stock(self, event):
         if self.selected_item is None:
@@ -188,7 +187,7 @@ class SolitaireGUI:
         self.draw_game()
  
     def on_click_tableau(self, card_event, number_of_cards_for_transfer, pile_index):
-        if self.selected_item is None and self.game.tableau[pile_index].is_empty():
+        if self.selected_item is None and self.game.check_empty_tableau(pile_index):
             pass
         else:
             self.on_click_card(card_event, number_of_cards_for_transfer, pile_index)
@@ -200,7 +199,7 @@ class SolitaireGUI:
     def on_click_foundation(self, card_event, suit):
         if self.selected_item is None:
             # Clicking on the event listener for foundation pile does nothing if the pile is empty and first click
-            if not self.game.foundation_piles[suit].is_empty():
+            if not self.game.check_empty_foundation_pile(suit):
                 # Activate the suit of the clicked foundation pile in the game attribute and send to on_click_card action
                  self.foundation_suit_in_play = suit
                  self.on_click_card(card_event, 1, -1) #Moving from foundation pile only allow for one card, -1 is for non-tableau move
@@ -209,7 +208,7 @@ class SolitaireGUI:
             if self.foundation_suit_in_play is not None:
                 return
             if source_pile_index == -1:
-                source_card_suit = self.game.waste_pile.get_card_in_play().suit
+                source_card_suit = self.game.get_waste_card().suit
             else:
                 source_card_suit = self.game.get_tableau_card(source_pile_index).suit
  

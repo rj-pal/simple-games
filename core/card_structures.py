@@ -252,18 +252,31 @@ class CardStack:
         return remove_card
     
     def to_list(self):
-        """Returns the current state of Card Stack as a list while maintaining the state of the cards stack in CLI app."""
+        """Returns the current state of Card Stack as a string list while maintaining the state of the cards stack in CLI app."""
         if self.is_empty():
             return [" "]   
         current_card = self.head.next
         card_list = []
         while current_card:
+            # card_list.append(current_card.value)
             if current_card.value.visible:
                 card_list.append(current_card.value.face)
             else:
                 card_list.append(FACE_DOWN_EMOJI)
             current_card = current_card.next
 
+        return card_list
+    
+    def to_card_list(self):
+        """Returns the current state of Card Stack as a list of card objecdts while maintaining the state of the cards."""
+        if self.is_empty():
+            return [self.get_card_in_play()]   
+        current_card = self.head.next
+        card_list = []
+        while current_card:
+            card_list.append(current_card.value)
+            current_card = current_card.next
+            
         return card_list
 
     # String representation of the stack of cards
